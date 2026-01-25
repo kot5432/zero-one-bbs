@@ -1,6 +1,5 @@
 import { initializeApp } from 'firebase/app';
 import { getFirestore } from 'firebase/firestore';
-import { getAnalytics } from 'firebase/analytics';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -14,4 +13,13 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
-export const analytics = getAnalytics(app);
+
+// Analyticsはクライアントサイドでのみ初期化
+export const getAnalytics = () => {
+  if (typeof window !== 'undefined') {
+    return import('firebase/analytics').then(({ getAnalytics }) => {
+      return getAnalytics(app);
+    });
+  }
+  return null;
+};

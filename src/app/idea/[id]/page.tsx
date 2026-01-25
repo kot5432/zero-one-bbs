@@ -1,0 +1,224 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { getIdeas, likeIdea, addComment, getComments, Idea, Comment } from '@/lib/firestore';
+
+export default function IdeaDetailPage() {
+  const params = useParams();
+  const router = useRouter();
+  const ideaId = params.id as string;
+
+  const [idea, setIdea] = useState<Idea | null>(null);
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [commentText, setCommentText] = useState('');
+  const [submittingComment, setSubmittingComment] = useState(false);
+  const [liking, setLiking] = useState(false);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const ideasData = await getIdeas();
+        const foundIdea = ideasData.find(i => i.id === ideaId);
+        
+        if (!foundIdea) {
+          router.push('/');
+          return;
+        }
+        
+        setIdea(foundIdea);
+        
+        const commentsData = await getComments(ideaId);
+        setComments(commentsData);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        router.push('/');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [ideaId, router]);
+
+  const handleLike = async () => {
+    if (!idea || liking) return;
+    
+    setLiking(true);
+    try {
+      await likeIdea(ideaId);
+      setIdea(prev => prev ? { ...prev, likes: prev.likes + 1 } : null);
+    } catch (error) {
+      console.error('Error liking idea:', error);
+    } finally {
+      setLiking(false);
+    }
+  };
+
+  const handleCommentSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!commentText.trim() || submittingComment) return;
+    
+    setSubmittingComment(true);
+    try {
+      await addComment({
+        ideaId,
+        text: commentText.trim()
+      });
+      
+      const commentsData = await getComments(ideaId);
+      setComments(commentsData);
+      setCommentText('');
+    } catch (error) {
+      console.error('Error adding comment:', error);
+    } finally {
+      setSubmittingComment(false);
+    }
+  };
+
+  const handleRealizeClick = () => {
+    alert('実現に動きたい機能は現在準備中です。ご期待ください！');
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <p className="text-gray-600">読み込み中...</p>
+      </div>
+    );
+  }
+
+  if (!idea) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600 mb-4">アイデアが見つかりませんでした</p>
+          <Link href="/" className="text-blue-600 hover:text-blue-700 font-semibold">
+            トップページに戻る
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <header className="bg-white shadow-sm">
+        <div className="max-w-6xl mx-auto px-4 py-6">
+          <div className="flex justify-between items-center">
+            <h1 className="text-3xl font-bold text-gray-900">ZERO-ONE</h1>
+            <nav className="flex space-x-6">
+              <Link href="/" className="text-gray-700 hover:text-gray-900">
+                トップ
+              </Link>
+              <Link href="/post" className="text-gray-700 hover:text-gray-900">
+                投稿
+              </Link>
+              <Link href="/about" className="text-gray-700 hover:text-gray-900">
+                About
+              </Link>
+            </nav>
+          </div>
+        </div>
+      </header>
+
+      <main className="max-w-4xl mx-auto px-4 py-8">
+        <div className="bg-white rounded-lg shadow-md p-8 mb-6">
+          <div className="flex justify-between items-start mb-6">
+            <h2 className="text-3xl font-bold text-gray-900 flex-1">{idea.title}</h2>
+            <span
+              className={`px-3 py-1 text-sm rounded-full ml-4 ${
+                idea.status === 'idea'
+                  ? 'bg-yellow-100 text-yellow-800'
+                  : 'bg-green-100 text-green-800'
+              }`}
+            >
+              {idea.status === 'idea' ? 'アイデア' : '準備中'}
+            </span>
+          </div>
+
+          <div className="mb-6">
+            <p className="text-lg text-gray-700 whitespace-pre-wrap">{idea.description}</p>
+          </div>
+
+          <div className="flex items-center gap-6 text-gray-600 mb-8">
+            <div className="flex items-center">
+              <span className="mr-2">形式:</span>
+              <span className="font-medium">
+                {idea.mode === 'online' ? 'オンライン' : 'オフライン'}
+              </span>
+            </div>
+            <div className="flex items-center">
+              <span className="mr-2">投稿日時:</span>
+              <span className="font-medium">
+                {idea.createdAt?.toDate()?.toLocaleDateString('ja-JP')}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex gap-4">
+            <button
+              onClick={handleLike}
+              disabled={liking}
+              className="flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+            >
+              <span className="text-xl">👍</span>
+              <span>共感する ({idea.likes})</span>
+            </button>
+            
+            <button
+              onClick={handleRealizeClick}
+              className="bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors"
+            >
+              実現に動きたい
+            </button>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-lg shadow-md p-8">
+          <h3 className="text-xl font-bold text-gray-900 mb-6">コメント ({comments.length})</h3>
+          
+          <form onSubmit={handleCommentSubmit} className="mb-6">
+            <div className="flex gap-3">
+              <input
+                type="text"
+                value={commentText}
+                onChange={(e) => setCommentText(e.target.value)}
+                placeholder="コメントを入力（名前なし・短文でOK）"
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                maxLength={100}
+              />
+              <button
+                type="submit"
+                disabled={submittingComment || !commentText.trim()}
+                className="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+              >
+                {submittingComment ? '投稿中...' : '投稿'}
+              </button>
+            </div>
+          </form>
+
+          {comments.length === 0 ? (
+            <p className="text-gray-500 text-center py-8">
+              まだコメントがありません。最初のコメントを投稿しましょう！
+            </p>
+          ) : (
+            <div className="space-y-4">
+              {comments.map((comment) => (
+                <div key={comment.id} className="border-b border-gray-200 pb-4 last:border-0">
+                  <p className="text-gray-800 mb-2">{comment.text}</p>
+                  <p className="text-sm text-gray-500">
+                    {comment.createdAt?.toDate()?.toLocaleDateString('ja-JP')}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </main>
+    </div>
+  );
+}
