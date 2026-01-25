@@ -1,63 +1,124 @@
-import Image from "next/image";
+'use client';
+
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import { getIdeas, Idea } from '@/lib/firestore';
 
 export default function Home() {
+  const [ideas, setIdeas] = useState<Idea[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchIdeas = async () => {
+      try {
+        const ideasData = await getIdeas();
+        setIdeas(ideasData);
+      } catch (error) {
+        console.error('Error fetching ideas:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchIdeas();
+  }, []);
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="min-h-screen bg-gray-50">
+      <header className="bg-white shadow-sm">
+        <div className="max-w-6xl mx-auto px-4 py-6">
+          <div className="flex justify-between items-center">
+            <h1 className="text-3xl font-bold text-gray-900">ZERO-ONE</h1>
+            <nav className="flex space-x-6">
+              <Link href="/" className="text-gray-700 hover:text-gray-900">
+                トップ
+              </Link>
+              <Link href="/post" className="text-gray-700 hover:text-gray-900">
+                投稿
+              </Link>
+              <Link href="/about" className="text-gray-700 hover:text-gray-900">
+                About
+              </Link>
+            </nav>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+      </header>
+
+      <main className="max-w-6xl mx-auto px-4 py-8">
+        <div className="text-center mb-12">
+          <h2 className="text-4xl font-bold text-gray-900 mb-4">
+            学生のアイデアを形にする場所
+          </h2>
+          <p className="text-xl text-gray-600 mb-8">
+            新しい挑戦を始めたい学生のためのプラットフォーム
+          </p>
+          <Link
+            href="/post"
+            className="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            アイデアを投稿する
+          </Link>
+        </div>
+
+        <div className="mb-8">
+          <h3 className="text-2xl font-bold text-gray-900 mb-6">最新のアイデア</h3>
+          
+          {loading ? (
+            <div className="text-center py-8">
+              <p className="text-gray-600">読み込み中...</p>
+            </div>
+          ) : ideas.length === 0 ? (
+            <div className="text-center py-12 bg-white rounded-lg shadow">
+              <p className="text-gray-600 mb-4">まだアイデアがありません</p>
+              <Link
+                href="/post"
+                className="text-blue-600 hover:text-blue-700 font-semibold"
+              >
+                最初のアイデアを投稿する
+              </Link>
+            </div>
+          ) : (
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {ideas.map((idea) => (
+                <Link
+                  key={idea.id}
+                  href={`/idea/${idea.id}`}
+                  className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-6 block"
+                >
+                  <div className="flex justify-between items-start mb-3">
+                    <h4 className="text-xl font-semibold text-gray-900 line-clamp-2">
+                      {idea.title}
+                    </h4>
+                    <span
+                      className={`px-2 py-1 text-xs rounded-full ${
+                        idea.status === 'idea'
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : 'bg-green-100 text-green-800'
+                      }`}
+                    >
+                      {idea.status === 'idea' ? 'アイデア' : '準備中'}
+                    </span>
+                  </div>
+                  
+                  <p className="text-gray-600 mb-4 line-clamp-3">
+                    {idea.description}
+                  </p>
+                  
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center text-gray-500">
+                      <span className="text-lg mr-1">👍</span>
+                      <span className="font-semibold">{idea.likes}</span>
+                    </div>
+                    <div className="flex items-center text-gray-500">
+                      <span className="text-sm mr-1">
+                        {idea.mode === 'online' ? 'オンライン' : 'オフライン'}
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
       </main>
     </div>
