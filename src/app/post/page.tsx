@@ -51,8 +51,14 @@ export default function PostPage() {
         createdAt: Timestamp.now()
       };
       
-      const result = await addDoc(collection(db, 'ideas'), testData);
-      alert('書き込み成功: ' + result.id);
+      // タイムアウト付き書き込み
+      const writePromise = addDoc(collection(db, 'ideas'), testData);
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('書き込みタイムアウト（10秒）')), 10000);
+      });
+      
+      const result = await Promise.race([writePromise, timeoutPromise]);
+      alert('書き込み成功: ' + (result as any).id);
       
     } catch (error: any) {
       alert('Firebaseエラー: ' + error.message);
