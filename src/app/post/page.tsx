@@ -28,13 +28,19 @@ export default function PostPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // デバッグ：フォームの内容を確認
+    console.log('フォームデータ:', formData);
+    alert(`タイトル: "${formData.title}"\n内容: "${formData.description}"`);
+    
     if (!formData.title.trim() || !formData.description.trim()) {
       setError('タイトルと内容は必須です');
+      alert('バリデーションエラー：タイトルと内容は必須です');
       return;
     }
 
     if (formData.description.length > 200) {
       setError('内容は200文字以内で入力してください');
+      alert('バリデーションエラー：内容が200文字を超えています');
       return;
     }
 
@@ -49,10 +55,12 @@ export default function PostPage() {
         status: 'idea'
       });
       
+      alert('投稿成功！');
       router.push('/');
     } catch (error: any) {
       setError('投稿に失敗しました。再度お試しください。');
       console.error('Error adding idea:', error);
+      alert('投稿エラー: ' + error.message);
     } finally {
       setLoading(false);
     }
