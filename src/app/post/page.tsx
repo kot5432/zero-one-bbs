@@ -29,6 +29,22 @@ export default function PostPage() {
     e.preventDefault();
     alert('投稿ボタンがクリックされました！');
     
+    // Firebase設定の確認
+    console.log('Firebase Project ID:', process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID);
+    console.log('Firebase API Key:', process.env.NEXT_PUBLIC_FIREBASE_API_KEY ? '設定済み' : '未設定');
+    
+    // Firebase接続テスト
+    try {
+      alert('Firebase接続をテスト中...');
+      const { addDoc, collection } = await import('firebase/firestore');
+      const firestoreModule = await import('@/lib/firestore');
+      alert('Firebaseモジュール読み込み成功');
+    } catch (error: any) {
+      alert('Firebaseエラー: ' + error.message);
+      console.error('Firebase import error:', error);
+      return;
+    }
+    
     if (!formData.title.trim() || !formData.description.trim()) {
       setError('タイトルと内容は必須です');
       return;
