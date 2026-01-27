@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { getIdeas, likeIdea, addComment, getComments, Idea, Comment } from '@/lib/firestore';
+import { getIdeas, likeIdea, addComment, getComments, Idea, Comment, getUserIp, hasUserLiked } from '@/lib/firestore';
 
 export default function IdeaDetailPage() {
   const params = useParams();
@@ -16,6 +16,8 @@ export default function IdeaDetailPage() {
   const [commentText, setCommentText] = useState('');
   const [submittingComment, setSubmittingComment] = useState(false);
   const [liking, setLiking] = useState(false);
+  const [hasLiked, setHasLiked] = useState(false);
+  const [userIp, setUserIp] = useState('');
 
   useEffect(() => {
     const fetchData = async () => {
@@ -32,6 +34,12 @@ export default function IdeaDetailPage() {
         
         const commentsData = await getComments(ideaId);
         setComments(commentsData);
+
+        // ユーザーIPを取得して共感状態をチェック
+        const currentUserIp = getUserIp();
+        setUserIp(currentUserIp);
+        const liked = await hasUserLiked(ideaId, currentUserIp);
+        setHasLiked(liked);
       } catch (error) {
         console.error('Error fetching data:', error);
         router.push('/');
@@ -44,14 +52,16 @@ export default function IdeaDetailPage() {
   }, [ideaId, router]);
 
   const handleLike = async () => {
-    if (!idea || liking) return;
+    if (!idea || liking || hasLiked) return;
     
     setLiking(true);
     try {
-      await likeIdea(ideaId);
+      await likeIdea(ideaId, userIp);
       setIdea(prev => prev ? { ...prev, likes: prev.likes + 1 } : null);
+      setHasLiked(true);
     } catch (error) {
       console.error('Error liking idea:', error);
+      alert('すでに共感しています');
     } finally {
       setLiking(false);
     }
@@ -162,11 +172,15 @@ export default function IdeaDetailPage() {
           <div className="flex gap-4">
             <button
               onClick={handleLike}
-              disabled={liking}
-              className="flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+              disabled={liking || hasLiked}
+              className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-colors ${
+                hasLiked 
+                  ? 'bg-gray-400 text-white cursor-not-allowed' 
+                  : 'bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed'
+              }`}
             >
               <span className="text-xl">👍</span>
-              <span>共感する ({idea.likes})</span>
+              <span>{hasLiked ? '共感済み' : `共感する`} ({idea.likes})</span>
             </button>
             
             <button
