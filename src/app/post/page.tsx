@@ -99,7 +99,7 @@ export default function PostPage() {
                 name="title"
                 value={formData.title}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-500"
                 placeholder="アイデアのタイトルを入力"
                 required
               />
@@ -116,11 +116,11 @@ export default function PostPage() {
                 onChange={handleChange}
                 rows={4}
                 maxLength={200}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-500"
                 placeholder="アイデアの詳細を200文字以内で説明"
                 required
               />
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-sm text-gray-600 mt-1">
                 {formData.description.length}/200文字
               </p>
             </div>
@@ -134,7 +134,7 @@ export default function PostPage() {
                 name="mode"
                 value={formData.mode}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
               >
                 <option value="online">オンライン</option>
                 <option value="offline">オフライン</option>
@@ -151,7 +151,7 @@ export default function PostPage() {
                 name="targetPeople"
                 value={formData.targetPeople}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-500"
                 placeholder="例：一緒に企画してくれる人、初心者OKの人など"
               />
               <p className="text-sm text-gray-500 mt-1">

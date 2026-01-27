@@ -197,16 +197,16 @@ export default function AdminPage() {
                     </span>
                     
                     <div className="flex gap-2 flex-wrap">
-                      {idea.status === 'idea' && idea.id && (
+                      {idea.status === 'idea' && (
                         <>
                           <button
-                            onClick={() => updateIdeaStatusHandler(idea.id, 'preparing')}
+                            onClick={() => idea.id && updateIdeaStatusHandler(idea.id, 'preparing')}
                             className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
                           >
                             検討中にする
                           </button>
                           <button
-                            onClick={() => deleteIdeaHandler(idea.id)}
+                            onClick={() => idea.id && deleteIdeaHandler(idea.id)}
                             className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700"
                           >
                             削除
@@ -214,10 +214,10 @@ export default function AdminPage() {
                         </>
                       )}
                       
-                      {idea.status === 'preparing' && idea.id && (
+                      {idea.status === 'preparing' && (
                         <>
                           <button
-                            onClick={() => updateIdeaStatusHandler(idea.id, 'idea')}
+                            onClick={() => idea.id && updateIdeaStatusHandler(idea.id, 'idea')}
                             className="px-3 py-1 bg-gray-600 text-white text-sm rounded hover:bg-gray-700"
                           >
                             未確認に戻す
@@ -228,7 +228,7 @@ export default function AdminPage() {
                             イベント化
                           </button>
                           <button
-                            onClick={() => deleteIdeaHandler(idea.id)}
+                            onClick={() => idea.id && deleteIdeaHandler(idea.id)}
                             className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700"
                           >
                             削除
