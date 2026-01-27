@@ -56,16 +56,21 @@ export default function PostPage() {
       return;
     }
 
+    alert('バリデーション通過！Firebaseに投稿します...');
     setLoading(true);
     setError('');
 
     try {
-      await addIdea({
+      const ideaData = {
         title: formData.title,
         description: formData.description,
         mode: formData.mode,
-        status: 'idea'
-      });
+        status: 'idea' as const
+      };
+      console.log('投稿データ:', ideaData);
+      alert('投稿データ: ' + JSON.stringify(ideaData));
+      
+      await addIdea(ideaData);
       
       alert('投稿成功！');
       router.push('/');
