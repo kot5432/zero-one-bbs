@@ -36,12 +36,18 @@ export default function PostPage() {
     // Firebase接続テスト
     try {
       alert('Firebase接続をテスト中...');
-      const { addDoc, collection } = await import('firebase/firestore');
-      const firestoreModule = await import('@/lib/firestore');
-      alert('Firebaseモジュール読み込み成功');
+      // 静的インポートでテスト
+      const testResult = await addIdea({
+        title: 'テスト投稿',
+        description: 'これはテストです',
+        mode: 'online',
+        status: 'idea'
+      });
+      alert('Firebase投稿成功: ' + testResult);
+      return; // テスト成功で終了
     } catch (error: any) {
       alert('Firebaseエラー: ' + error.message);
-      console.error('Firebase import error:', error);
+      console.error('Firebase error:', error);
       return;
     }
     
