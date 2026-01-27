@@ -35,10 +35,17 @@ export default function PostPage() {
     try {
       alert('Firebaseモジュールをインポート中...');
       const { addDoc, collection } = await import('firebase/firestore');
+      const { db } = await import('@/lib/firebase'); // 直接firebase.tsからインポート
       alert('Firebaseモジュール読み込み成功');
+      
+      // Firestore接続テスト
+      alert('Firestore接続をテスト中...');
+      const testRef = collection(db, 'test');
+      alert('Firestore接続成功');
+      
     } catch (error: any) {
       alert('Firebaseエラー: ' + error.message);
-      console.error('Firebase import error:', error);
+      console.error('Firebase error:', error);
     }
     
     return;
