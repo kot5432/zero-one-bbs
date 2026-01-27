@@ -27,29 +27,6 @@ export default function PostPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert('投稿ボタンがクリックされました！');
-    
-    // Firebase設定の確認
-    console.log('Firebase Project ID:', process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID);
-    console.log('Firebase API Key:', process.env.NEXT_PUBLIC_FIREBASE_API_KEY ? '設定済み' : '未設定');
-    
-    // Firebase接続テスト
-    try {
-      alert('Firebase接続をテスト中...');
-      // 静的インポートでテスト
-      const testResult = await addIdea({
-        title: 'テスト投稿',
-        description: 'これはテストです',
-        mode: 'online',
-        status: 'idea'
-      });
-      alert('Firebase投稿成功: ' + testResult);
-      return; // テスト成功で終了
-    } catch (error: any) {
-      alert('Firebaseエラー: ' + error.message);
-      console.error('Firebase error:', error);
-      return;
-    }
     
     if (!formData.title.trim() || !formData.description.trim()) {
       setError('タイトルと内容は必須です');
@@ -73,7 +50,7 @@ export default function PostPage() {
       });
       
       router.push('/');
-    } catch (error) {
+    } catch (error: any) {
       setError('投稿に失敗しました。再度お試しください。');
       console.error('Error adding idea:', error);
     } finally {
