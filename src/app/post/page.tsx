@@ -152,8 +152,11 @@ export default function PostPage() {
                 value={formData.targetPeople}
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="どのような人を求めていますか？（任意）"
+                placeholder="例：一緒に企画してくれる人、初心者OKの人など"
               />
+              <p className="text-sm text-gray-500 mt-1">
+                どんな人を求めているか自由に記述（任意）
+              </p>
             </div>
 
             <div className="flex gap-4">

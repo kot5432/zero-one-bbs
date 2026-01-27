@@ -49,9 +49,15 @@ export default function Home() {
           <h2 className="text-4xl font-bold text-gray-900 mb-4">
             学生のアイデアを形にする場所
           </h2>
-          <p className="text-xl text-gray-600 mb-8">
-            新しい挑戦を始めたい学生のためのプラットフォーム
+          <p className="text-xl text-gray-600 mb-6">
+            学生の「やってみたい」を、仲間とイベントにする場所
           </p>
+          <div className="bg-blue-50 text-blue-700 p-4 rounded-lg mb-8 max-w-2xl mx-auto">
+            <p className="text-sm">
+              <strong>どうやってイベントになるの？</strong><br/>
+              ① アイデアを投稿 → ② 👍が集まる → ③ 管理者がイベント化検討 → ④ 正式なイベントに！
+            </p>
+          </div>
           <Link
             href="/post"
             className="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
@@ -104,10 +110,11 @@ export default function Home() {
                     {idea.description}
                   </p>
                   
-                  <div className="flex justify-between items-center">
+                  <div className="flex justify-between items-center mb-3">
                     <div className="flex items-center text-gray-500">
                       <span className="text-lg mr-1">👍</span>
                       <span className="font-semibold">{idea.likes}</span>
+                      <span className="ml-1 text-sm">人が興味あり</span>
                     </div>
                     <div className="flex items-center text-gray-500">
                       <span className="text-sm mr-1">
@@ -115,6 +122,12 @@ export default function Home() {
                       </span>
                     </div>
                   </div>
+
+                  {idea.likes >= 3 && (
+                    <div className="bg-blue-50 text-blue-700 text-xs px-2 py-1 rounded text-center">
+                      イベント化検討中
+                    </div>
+                  )}
                 </Link>
               ))}
             </div>
