@@ -28,62 +28,12 @@ export default function PostPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // デバッグ：フォームの内容を確認
-    console.log('フォームデータ:', formData);
-    alert(`タイトル: "${formData.title}"\n内容: "${formData.description}"`);
+    // 最もシンプルなテスト
+    alert('ボタンがクリックされました');
+    console.log('フォーム送信開始');
     
-    // 詳細なバリデーションチェック
-    const titleTrimmed = formData.title.trim();
-    const descriptionTrimmed = formData.description.trim();
-    
-    alert(`タイトルtrim後: "${titleTrimmed}" (長さ: ${titleTrimmed.length})\n内容trim後: "${descriptionTrimmed}" (長さ: ${descriptionTrimmed.length})`);
-    
-    if (!titleTrimmed) {
-      setError('タイトルと内容は必須です');
-      alert('バリデーションエラー：タイトルが空です');
-      return;
-    }
-    
-    if (!descriptionTrimmed) {
-      setError('タイトルと内容は必須です');
-      alert('バリデーションエラー：内容が空です');
-      return;
-    }
-
-    if (formData.description.length > 200) {
-      setError('内容は200文字以内で入力してください');
-      alert('バリデーションエラー：内容が200文字を超えています');
-      return;
-    }
-
-    alert('バリデーション通過！Firebaseに投稿します...');
-    setLoading(true);
-    setError('');
-
-    try {
-      const ideaData = {
-        title: formData.title,
-        description: formData.description,
-        mode: formData.mode,
-        status: 'idea' as const
-      };
-      console.log('投稿データ:', ideaData);
-      alert('投稿データ: ' + JSON.stringify(ideaData));
-      
-      alert('addIdea関数を呼び出します...');
-      
-      // シンプルにaddIdea関数を呼び出す
-      await addIdea(ideaData);
-      
-      alert('投稿成功！');
-      router.push('/');
-    } catch (error: any) {
-      setError('投稿に失敗しました。再度お試しください。');
-      console.error('Error adding idea:', error);
-      alert('投稿エラー: ' + error.message);
-    } finally {
-      setLoading(false);
-    }
+    // ここで終了
+    return;
   };
 
   return (
