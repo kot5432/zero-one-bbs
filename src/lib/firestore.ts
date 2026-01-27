@@ -9,6 +9,7 @@ export interface Idea {
   status: 'idea' | 'preparing';
   likes: number;
   createdAt: Timestamp;
+  updatedAt?: Timestamp;
 }
 
 export interface Comment {
