@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { getIdeas, Idea } from '@/lib/firestore';
-import { updateIdeaStatus } from '@/lib/admin';
+import { updateIdeaStatus, deleteIdea } from '@/lib/admin';
 
 export default function AdminPage() {
   const [ideas, setIdeas] = useState<Idea[]>([]);
@@ -38,6 +38,21 @@ export default function AdminPage() {
         return b.createdAt.toMillis() - a.createdAt.toMillis();
       }
     });
+
+  const deleteIdeaHandler = async (ideaId: string) => {
+    if (!confirm('本当にこのアイデアを削除しますか？この操作は元に戻せません。')) {
+      return;
+    }
+
+    try {
+      await deleteIdea(ideaId);
+      // UIから削除
+      setIdeas(prev => prev.filter(idea => idea.id !== ideaId));
+    } catch (error) {
+      console.error('Error deleting idea:', error);
+      alert('削除に失敗しました');
+    }
+  };
 
   const updateIdeaStatusHandler = async (ideaId: string, newStatus: Idea['status']) => {
     try {
@@ -181,14 +196,22 @@ export default function AdminPage() {
                       {getStatusText(idea.status)}
                     </span>
                     
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 flex-wrap">
                       {idea.status === 'idea' && idea.id && (
-                        <button
-                          onClick={() => updateIdeaStatusHandler(idea.id, 'preparing')}
-                          className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
-                        >
-                          検討中にする
-                        </button>
+                        <>
+                          <button
+                            onClick={() => updateIdeaStatusHandler(idea.id, 'preparing')}
+                            className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+                          >
+                            検討中にする
+                          </button>
+                          <button
+                            onClick={() => deleteIdeaHandler(idea.id)}
+                            className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700"
+                          >
+                            削除
+                          </button>
+                        </>
                       )}
                       
                       {idea.status === 'preparing' && idea.id && (
@@ -203,6 +226,12 @@ export default function AdminPage() {
                             className="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700"
                           >
                             イベント化
+                          </button>
+                          <button
+                            onClick={() => deleteIdeaHandler(idea.id)}
+                            className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700"
+                          >
+                            削除
                           </button>
                         </>
                       )}

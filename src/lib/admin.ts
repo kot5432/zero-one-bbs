@@ -1,4 +1,4 @@
-import { doc, updateDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, updateDoc, serverTimestamp, deleteDoc } from 'firebase/firestore';
 import { db } from './firebase';
 
 export async function updateIdeaStatus(ideaId: string, status: 'idea' | 'preparing') {
@@ -7,6 +7,11 @@ export async function updateIdeaStatus(ideaId: string, status: 'idea' | 'prepari
     status,
     updatedAt: serverTimestamp()
   });
+}
+
+export async function deleteIdea(ideaId: string) {
+  const ideaRef = doc(db, 'ideas', ideaId);
+  await deleteDoc(ideaRef);
 }
 
 export async function addAdminNote(ideaId: string, note: string) {
