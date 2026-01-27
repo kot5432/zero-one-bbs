@@ -34,14 +34,25 @@ export default function PostPage() {
     // Firebaseモジュールのテスト
     try {
       alert('Firebaseモジュールをインポート中...');
-      const { addDoc, collection } = await import('firebase/firestore');
-      const { db } = await import('@/lib/firebase'); // 直接firebase.tsからインポート
+      const { addDoc, collection, Timestamp } = await import('firebase/firestore');
+      const { db } = await import('@/lib/firebase');
       alert('Firebaseモジュール読み込み成功');
       
       // Firestore接続テスト
       alert('Firestore接続をテスト中...');
       const testRef = collection(db, 'test');
       alert('Firestore接続成功');
+      
+      // 実際の書き込みテスト
+      alert('実際の書き込みをテスト中...');
+      const testData = {
+        title: 'テスト投稿',
+        content: 'これはテストです',
+        createdAt: Timestamp.now()
+      };
+      
+      const result = await addDoc(collection(db, 'ideas'), testData);
+      alert('書き込み成功: ' + result.id);
       
     } catch (error: any) {
       alert('Firebaseエラー: ' + error.message);
