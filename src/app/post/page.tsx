@@ -70,7 +70,22 @@ export default function PostPage() {
       console.log('投稿データ:', ideaData);
       alert('投稿データ: ' + JSON.stringify(ideaData));
       
-      await addIdea(ideaData);
+      // addIdea関数を直接デバッグ
+      alert('addIdea関数を呼び出します...');
+      const { addDoc, collection, Timestamp } = await import('firebase/firestore');
+      const { db } = await import('@/lib/firestore');
+      
+      const newIdea = {
+        ...ideaData,
+        likes: 0,
+        createdAt: Timestamp.now()
+      };
+      
+      alert('Firestoreに書き込み中...');
+      const result = await addDoc(collection(db, 'ideas'), newIdea);
+      alert('Firestore書き込み成功: ' + result.id);
+      
+      // await addIdea(ideaData);
       
       alert('投稿成功！');
       router.push('/');

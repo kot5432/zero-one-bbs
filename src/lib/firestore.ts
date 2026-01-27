@@ -1,6 +1,8 @@
 import { collection, addDoc, getDocs, doc, updateDoc, increment, query, orderBy, Timestamp, where, getDoc, setDoc } from 'firebase/firestore';
 import { db } from './firebase';
 
+export { db }; // dbをエクスポート
+
 export interface Idea {
   id?: string;
   title: string;
