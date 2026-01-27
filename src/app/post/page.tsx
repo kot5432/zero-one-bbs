@@ -28,11 +28,19 @@ export default function PostPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // 最もシンプルなテスト
     alert('ボタンがクリックされました');
     console.log('フォーム送信開始');
     
-    // ここで終了
+    // Firebaseモジュールのテスト
+    try {
+      alert('Firebaseモジュールをインポート中...');
+      const { addDoc, collection } = await import('firebase/firestore');
+      alert('Firebaseモジュール読み込み成功');
+    } catch (error: any) {
+      alert('Firebaseエラー: ' + error.message);
+      console.error('Firebase import error:', error);
+    }
+    
     return;
   };
 
