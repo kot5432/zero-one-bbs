@@ -70,34 +70,10 @@ export default function PostPage() {
       console.log('投稿データ:', ideaData);
       alert('投稿データ: ' + JSON.stringify(ideaData));
       
-      // addIdea関数を直接デバッグ
       alert('addIdea関数を呼び出します...');
-      const { addDoc, collection, Timestamp } = await import('firebase/firestore');
-      const { db } = await import('@/lib/firestore');
       
-      const newIdea = {
-        ...ideaData,
-        likes: 0,
-        createdAt: Timestamp.now()
-      };
-      
-      alert('Firestoreに書き込み中...');
-      
-      // タイムアウト付きの書き込み
-      const writePromise = addDoc(collection(db, 'ideas'), newIdea);
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('書き込みタイムアウト')), 10000);
-      });
-      
-      try {
-        const result = await Promise.race([writePromise, timeoutPromise]);
-        alert('Firestore書き込み成功: ' + (result as any).id);
-      } catch (writeError: any) {
-        alert('書き込みエラー: ' + writeError.message);
-        throw writeError;
-      }
-      
-      // await addIdea(ideaData);
+      // シンプルにaddIdea関数を呼び出す
+      await addIdea(ideaData);
       
       alert('投稿成功！');
       router.push('/');
