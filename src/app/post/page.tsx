@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { addIdea } from '@/lib/firestore';
 
 export default function PostPage() {
+  
   const router = useRouter();
   const [formData, setFormData] = useState({
     title: '',
@@ -26,6 +27,7 @@ export default function PostPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+      alert('投稿ボタンがクリックされました！');
     
     if (!formData.title.trim() || !formData.description.trim()) {
       setError('タイトルと内容は必須です');
