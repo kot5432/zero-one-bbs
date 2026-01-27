@@ -82,8 +82,20 @@ export default function PostPage() {
       };
       
       alert('Firestoreに書き込み中...');
-      const result = await addDoc(collection(db, 'ideas'), newIdea);
-      alert('Firestore書き込み成功: ' + result.id);
+      
+      // タイムアウト付きの書き込み
+      const writePromise = addDoc(collection(db, 'ideas'), newIdea);
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('書き込みタイムアウト')), 10000);
+      });
+      
+      try {
+        const result = await Promise.race([writePromise, timeoutPromise]);
+        alert('Firestore書き込み成功: ' + (result as any).id);
+      } catch (writeError: any) {
+        alert('書き込みエラー: ' + writeError.message);
+        throw writeError;
+      }
       
       // await addIdea(ideaData);
       
