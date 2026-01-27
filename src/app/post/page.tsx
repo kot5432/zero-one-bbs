@@ -32,9 +32,21 @@ export default function PostPage() {
     console.log('フォームデータ:', formData);
     alert(`タイトル: "${formData.title}"\n内容: "${formData.description}"`);
     
-    if (!formData.title.trim() || !formData.description.trim()) {
+    // 詳細なバリデーションチェック
+    const titleTrimmed = formData.title.trim();
+    const descriptionTrimmed = formData.description.trim();
+    
+    alert(`タイトルtrim後: "${titleTrimmed}" (長さ: ${titleTrimmed.length})\n内容trim後: "${descriptionTrimmed}" (長さ: ${descriptionTrimmed.length})`);
+    
+    if (!titleTrimmed) {
       setError('タイトルと内容は必須です');
-      alert('バリデーションエラー：タイトルと内容は必須です');
+      alert('バリデーションエラー：タイトルが空です');
+      return;
+    }
+    
+    if (!descriptionTrimmed) {
+      setError('タイトルと内容は必須です');
+      alert('バリデーションエラー：内容が空です');
       return;
     }
 
