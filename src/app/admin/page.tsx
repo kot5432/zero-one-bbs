@@ -141,6 +141,34 @@ export default function AdminPage() {
     }
   };
 
+  // すべての投稿を一括削除
+  const deleteAllIdeas = async () => {
+    if (!confirm('本当にすべての投稿を削除しますか？この操作は元に戻せません。\n\n削除理由を入力してください。')) {
+      return;
+    }
+
+    const reason = prompt('削除理由を入力してください:');
+    if (!reason) {
+      return;
+    }
+
+    try {
+      // すべてのアイデアを削除
+      for (const idea of ideas) {
+        if (idea.id) {
+          await deleteIdea(idea.id);
+        }
+      }
+      
+      // UIを更新
+      setIdeas([]);
+      alert('すべての投稿を削除しました');
+    } catch (error) {
+      console.error('Error deleting all ideas:', error);
+      alert('削除に失敗しました');
+    }
+  };
+
   // 削除確認ダイアログ
   const showDeleteConfirm = (type: 'theme' | 'idea', id: string, title: string) => {
     setDeleteConfirm({
@@ -440,22 +468,30 @@ export default function AdminPage() {
             <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
               <div className="flex justify-between items-start mb-2">
                 <h3 className="text-lg font-semibold text-green-800">現在のテーマ</h3>
-                <button
-                  onClick={() => {
-                    setEditingThemeId(activeTheme.id!);
-                    setNewTheme({
-                      title: activeTheme.title,
-                      description: activeTheme.description,
-                      startDate: activeTheme.startDate.toDate().toISOString().split('T')[0],
-                      endDate: activeTheme.endDate.toDate().toISOString().split('T')[0],
-                      eventDate: activeTheme.eventDate ? activeTheme.eventDate.toDate().toISOString().split('T')[0] : ''
-                    });
-                    setShowThemeForm(true);
-                  }}
-                  className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
-                >
-                  編集
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => {
+                      setEditingThemeId(activeTheme.id!);
+                      setNewTheme({
+                        title: activeTheme.title,
+                        description: activeTheme.description,
+                        startDate: activeTheme.startDate.toDate().toISOString().split('T')[0],
+                        endDate: activeTheme.endDate.toDate().toISOString().split('T')[0],
+                        eventDate: activeTheme.eventDate ? activeTheme.eventDate.toDate().toISOString().split('T')[0] : ''
+                      });
+                      setShowThemeForm(true);
+                    }}
+                    className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+                  >
+                    編集
+                  </button>
+                  <button
+                    onClick={() => showDeleteConfirm('theme', activeTheme.id!, activeTheme.title)}
+                    className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700"
+                  >
+                    削除
+                  </button>
+                </div>
               </div>
               <h4 className="font-medium text-green-900">{activeTheme.title}</h4>
               <p className="text-green-700 mb-2">{activeTheme.description}</p>
@@ -583,7 +619,15 @@ export default function AdminPage() {
         </div>
         
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">アイデア管理</h2>
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold text-gray-900">アイデア管理</h2>
+            <button
+              onClick={deleteAllIdeas}
+              className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+            >
+              すべての投稿を削除
+            </button>
+          </div>
           
           {/* フィルターとソート */}
           <div className="flex flex-wrap gap-4 mb-6">
@@ -666,66 +710,33 @@ export default function AdminPage() {
           </div>
 
           {/* アイデア一覧 */}
-          <div className="space-y-2">
+          <div className="space-y-4">
             {filteredAndSortedIdeas.map((idea) => (
-              <div key={idea.id} className="border border-gray-200 rounded-lg p-3">
-                <div className="flex justify-between items-center">
+              <div key={idea.id} className="border border-gray-200 rounded-lg p-4">
+                <div className="flex justify-between items-start mb-3">
                   <div className="flex-1">
-                    {/* 現在ステータスの明示 */}
-                    <div className="mb-1">
-                      <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(idea.status)}`}>
-                        {getStatusText(idea.status)}
-                      </span>
-                    </div>
-                    
-                    <h3 
-                      className="text-lg font-bold text-gray-900 cursor-pointer hover:text-blue-600"
-                      onClick={() => toggleIdeaExpansion(idea.id!)}
-                    >
+                    <h3 className="text-lg font-bold text-gray-900">
                       {idea.title}
                     </h3>
-                    
-                    {/* 次のアクション */}
-                    {idea.nextAction && (
-                      <div className="mt-1">
-                        <span className="text-sm font-medium text-orange-700">
-                          次のアクション: {idea.nextAction}
-                        </span>
+                    {/* イベント化可能度 */}
+                    <div className="flex items-center mt-1">
+                      <span className="text-xs font-bold text-gray-700 mr-2">イベント化可能度:</span>
+                      <div className="flex">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <span key={star} className={`text-lg ${star <= calculateFeasibilityScore(idea) ? 'text-yellow-400' : 'text-gray-300'}`}>★</span>
+                        ))}
                       </div>
-                    )}
-                  </div>
-                  
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => toggleIdeaExpansion(idea.id!)}
-                      className="px-3 py-1 bg-indigo-600 text-white text-sm rounded hover:bg-indigo-700"
-                    >
-                      {expandedIdeas.has(idea.id!) ? '閉じる' : '開く'}
-                    </button>
-                  </div>
-                </div>
-                
-                {/* 詳細情報（展開時のみ表示） */}
-                {expandedIdeas.has(idea.id!) && (
-                  <div className="mt-4 pt-4 border-t border-gray-200 space-y-4">
-                    {/* 基本情報 */}
-                    <div>
-                      <p className="text-gray-800 mb-2 font-medium">{idea.description}</p>
-                      <div className="flex items-center gap-4 text-sm font-medium text-gray-700">
-                        <span>👍 {idea.likes}</span>
-                        <span>{idea.mode === 'online' ? 'オンライン' : 'オフライン'}</span>
-                        <span>{idea.createdAt.toDate().toLocaleDateString('ja-JP')}</span>
-                        {idea.updatedAt && (
-                          <span className="text-xs text-gray-600">
-                            最終更新：{idea.updatedAt.toDate().toLocaleDateString('ja-JP')}
-                          </span>
-                        )}
-                      </div>
+                    </div>
+                    <p className="text-gray-800 mb-2 font-medium">{idea.description}</p>
+                    <div className="flex items-center gap-4 text-sm font-medium text-gray-700">
+                      <span>👍 {idea.likes}</span>
+                      <span>{idea.mode === 'online' ? 'オンライン' : 'オフライン'}</span>
+                      <span>{idea.createdAt.toDate().toLocaleDateString('ja-JP')}</span>
                     </div>
                     
                     {/* アクション履歴 */}
                     {idea.actionHistory && idea.actionHistory.length > 0 && (
-                      <div className="p-2 bg-gray-50 rounded text-xs">
+                      <div className="mt-2 p-2 bg-gray-50 rounded text-xs">
                         <p className="font-bold text-gray-800 mb-1">最近の操作:</p>
                         {idea.actionHistory.slice(-2).map((action, index) => (
                           <div key={index} className="text-gray-700 font-medium">
@@ -734,76 +745,30 @@ export default function AdminPage() {
                         ))}
                       </div>
                     )}
+                  </div>
+                  
+                  <div className="flex flex-col items-end gap-2">
+                    <span className={`px-3 py-1 text-xs rounded-full ${getStatusColor(idea.status)}`}>
+                      {getStatusText(idea.status)}
+                    </span>
                     
-                    {/* 管理用チェックリスト */}
-                    <div className="p-3 bg-blue-50 rounded-lg">
-                      <p className="text-sm font-medium text-gray-700 mb-2">管理チェックリスト:</p>
-                      <div className="flex gap-4 text-sm">
-                        <label className="flex items-center gap-1">
-                          <input
-                            type="checkbox"
-                            checked={idea.adminChecklist?.safety || false}
-                            onChange={(e) => idea.id && updateAdminChecklistHandler(idea.id, {
-                              ...idea.adminChecklist,
-                              safety: e.target.checked
-                            })}
-                            className="rounded"
-                          />
-                          安全面に問題なし
-                        </label>
-                        <label className="flex items-center gap-1">
-                          <input
-                            type="checkbox"
-                            checked={idea.adminChecklist?.popularity || false}
-                            onChange={(e) => idea.id && updateAdminChecklistHandler(idea.id, {
-                              ...idea.adminChecklist,
-                              popularity: e.target.checked
-                            })}
-                            className="rounded"
-                          />
-                          人が集まりそう
-                        </label>
-                        <label className="flex items-center gap-1">
-                          <input
-                            type="checkbox"
-                            checked={idea.adminChecklist?.manageable || false}
-                            onChange={(e) => idea.id && updateAdminChecklistHandler(idea.id, {
-                              ...idea.adminChecklist,
-                              manageable: e.target.checked
-                            })}
-                            className="rounded"
-                          />
-                          管理側で対応可能
-                        </label>
+                    {/* 次のアクション */}
+                    {idea.nextAction && (
+                      <div className="bg-orange-50 border border-orange-200 rounded p-2 text-xs max-w-48">
+                        <p className="font-medium text-orange-800 mb-1">次のアクション:</p>
+                        <p className="text-orange-700">{idea.nextAction}</p>
                       </div>
-                    </div>
+                    )}
                     
-                    {/* 管理用メモ */}
-                    <div className="pt-3 border-t border-gray-200">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">管理用メモ（非公開）:</label>
-                      <textarea
-                        value={idea.adminMemo || ''}
-                        onChange={(e) => idea.id && updateAdminMemoHandler(idea.id, e.target.value)}
-                        placeholder="管理用メモを入力..."
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                        rows={2}
-                      />
-                      <div className="mt-2 flex justify-end">
-                        <button
-                          onClick={() => {
-                            if (idea.id) {
-                              alert('メモを保存しました');
-                            }
-                          }}
-                          className="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700"
-                        >
-                          保存
-                        </button>
-                      </div>
-                    </div>
+                    {/* 詳細開閉ボタン */}
+                    <button
+                      onClick={() => toggleIdeaExpansion(idea.id!)}
+                      className="px-3 py-1 bg-indigo-600 text-white text-sm rounded hover:bg-indigo-700"
+                    >
+                      {expandedIdeas.has(idea.id!) ? '詳細を閉じる' : '詳細を開く'}
+                    </button>
                     
-                    {/* アクションボタン */}
-                    <div className="flex gap-2 flex-wrap">
+                    <div className="flex gap-2 flex-wrap mt-3">
                       {idea.status === 'idea' && (
                         <>
                           <button
@@ -819,12 +784,8 @@ export default function AdminPage() {
                             見送り
                           </button>
                           <button
-                            onClick={() => {
-                              if (confirm('本当に削除しますか？この操作は元に戻せません。')) {
-                                idea.id && showDeleteConfirm('idea', idea.id, idea.title)
-                              }
-                            }}
-                            className="px-3 py-1 bg-gray-400 text-white text-sm rounded hover:bg-gray-500"
+                            onClick={() => idea.id && showDeleteConfirm('idea', idea.id, idea.title)}
+                            className="px-3 py-1 bg-gray-600 text-white text-sm rounded hover:bg-gray-700"
                           >
                             削除
                           </button>
@@ -852,12 +813,8 @@ export default function AdminPage() {
                             見送り
                           </button>
                           <button
-                            onClick={() => {
-                              if (confirm('本当に削除しますか？この操作は元に戻せません。')) {
-                                idea.id && showDeleteConfirm('idea', idea.id, idea.title)
-                              }
-                            }}
-                            className="px-3 py-1 bg-gray-400 text-white text-sm rounded hover:bg-gray-500"
+                            onClick={() => idea.id && showDeleteConfirm('idea', idea.id, idea.title)}
+                            className="px-3 py-1 bg-gray-600 text-white text-sm rounded hover:bg-gray-700"
                           >
                             削除
                           </button>
@@ -879,17 +836,193 @@ export default function AdminPage() {
                             対応済み
                           </button>
                           <button
-                            onClick={() => {
-                              if (confirm('本当に削除しますか？この操作は元に戻せません。')) {
-                                idea.id && showDeleteConfirm('idea', idea.id, idea.title)
-                              }
-                            }}
-                            className="px-3 py-1 bg-gray-400 text-white text-sm rounded hover:bg-gray-500"
+                            onClick={() => idea.id && showDeleteConfirm('idea', idea.id, idea.title)}
+                            className="px-3 py-1 bg-gray-600 text-white text-sm rounded hover:bg-gray-700"
                           >
                             削除
                           </button>
                         </>
                       )}
+                    </div>
+                  </div>
+                </div>
+                
+                {/* 管理用チェックリスト */}
+                <div className="mt-3 p-3 bg-blue-50 rounded-lg">
+                  <p className="text-sm font-medium text-gray-700 mb-2">管理チェックリスト:</p>
+                  <div className="flex gap-4 text-sm">
+                    <label className="flex items-center gap-1">
+                      <input
+                        type="checkbox"
+                        checked={idea.adminChecklist?.safety || false}
+                        onChange={(e) => idea.id && updateAdminChecklistHandler(idea.id, {
+                          ...idea.adminChecklist,
+                          safety: e.target.checked
+                        })}
+                        className="rounded"
+                      />
+                      安全面に問題なし
+                    </label>
+                    <label className="flex items-center gap-1">
+                      <input
+                        type="checkbox"
+                        checked={idea.adminChecklist?.popularity || false}
+                        onChange={(e) => idea.id && updateAdminChecklistHandler(idea.id, {
+                          ...idea.adminChecklist,
+                          popularity: e.target.checked
+                        })}
+                        className="rounded"
+                      />
+                      人が集まりそう
+                    </label>
+                    <label className="flex items-center gap-1">
+                      <input
+                        type="checkbox"
+                        checked={idea.adminChecklist?.manageable || false}
+                        onChange={(e) => idea.id && updateAdminChecklistHandler(idea.id, {
+                          ...idea.adminChecklist,
+                          manageable: e.target.checked
+                        })}
+                        className="rounded"
+                      />
+                      管理側で対応可能
+                    </label>
+                  </div>
+                </div>
+                
+                {/* 管理用メモ */}
+                <div className="mt-3 pt-3 border-t border-gray-200">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">管理用メモ（非公開）:</label>
+                  <textarea
+                    value={idea.adminMemo || ''}
+                    onChange={(e) => idea.id && updateAdminMemoHandler(idea.id, e.target.value)}
+                    placeholder="管理用メモを入力..."
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                    rows={2}
+                  />
+                </div>
+                
+                {/* 拡張情報（展開時のみ表示） */}
+                {expandedIdeas.has(idea.id!) && (
+                  <div className="mt-4 pt-4 border-t border-gray-200 space-y-4">
+                    {/* 次のアクション設定 */}
+                    <div className="bg-blue-50 rounded-lg p-4">
+                      <h4 className="font-medium text-gray-900 mb-3">次のアクション</h4>
+                      <select
+                        value={idea.nextAction || ''}
+                        onChange={(e) => updateIdeaExtendedHandler(idea.id!, { nextAction: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                      >
+                        <option value="">選択してください</option>
+                        <option value="投稿者に連絡">投稿者に連絡</option>
+                        <option value="似たアイデアと統合">似たアイデアと統合</option>
+                        <option value="今月は見送り">今月は見送り</option>
+                        <option value="次回テーマ候補に保存">次回テーマ候補に保存</option>
+                        <option value="詳細検討が必要">詳細検討が必要</option>
+                        <option value="実施計画を作成">実施計画を作成</option>
+                      </select>
+                    </div>
+                    
+                    {/* 保留理由 */}
+                    {idea.status === 'rejected' && (
+                      <div className="bg-red-50 rounded-lg p-4">
+                        <h4 className="font-medium text-gray-900 mb-3">見送り理由</h4>
+                        <select
+                          value={idea.rejectionReason || ''}
+                          onChange={(e) => updateIdeaExtendedHandler(idea.id!, { rejectionReason: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                        >
+                          <option value="">選択してください</option>
+                          <option value="時期が合わない">時期が合わない</option>
+                          <option value="リスクあり">リスクあり</option>
+                          <option value="人数不足">人数不足</option>
+                          <option value="テーマ外">テーマ外</option>
+                          <option value="実施困難">実施困難</option>
+                          <option value="類似アイデアあり">類似アイデアあり</option>
+                        </select>
+                      </div>
+                    )}
+                    
+                    {/* イベント化条件 */}
+                    <div className="bg-green-50 rounded-lg p-4">
+                      <h4 className="font-medium text-gray-900 mb-3">イベント化条件</h4>
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <label className="block text-gray-700 mb-1">👍目標数</label>
+                          <input
+                            type="number"
+                            value={idea.eventFeasibility?.likeTarget || 10}
+                            onChange={(e) => updateIdeaExtendedHandler(idea.id!, {
+                              eventFeasibility: {
+                                likeTarget: parseInt(e.target.value),
+                                interestedPeople: idea.eventFeasibility?.interestedPeople || 0,
+                                offlinePossible: idea.eventFeasibility?.offlinePossible || false,
+                                managementEffort: idea.eventFeasibility?.managementEffort || 'medium',
+                                feasibilityScore: idea.eventFeasibility?.feasibilityScore || 0
+                              }
+                            })}
+                            className="w-full px-2 py-1 border border-gray-300 rounded"
+                            min="1"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-gray-700 mb-1">興味を持っている人数</label>
+                          <input
+                            type="number"
+                            value={idea.eventFeasibility?.interestedPeople || 0}
+                            onChange={(e) => updateIdeaExtendedHandler(idea.id!, {
+                              eventFeasibility: {
+                                likeTarget: idea.eventFeasibility?.likeTarget || 10,
+                                interestedPeople: parseInt(e.target.value),
+                                offlinePossible: idea.eventFeasibility?.offlinePossible || false,
+                                managementEffort: idea.eventFeasibility?.managementEffort || 'medium',
+                                feasibilityScore: idea.eventFeasibility?.feasibilityScore || 0
+                              }
+                            })}
+                            className="w-full px-2 py-1 border border-gray-300 rounded"
+                            min="0"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-gray-700 mb-1">オフライン実施可否</label>
+                          <select
+                            value={idea.eventFeasibility?.offlinePossible ? 'true' : 'false'}
+                            onChange={(e) => updateIdeaExtendedHandler(idea.id!, {
+                              eventFeasibility: {
+                                likeTarget: idea.eventFeasibility?.likeTarget || 10,
+                                interestedPeople: idea.eventFeasibility?.interestedPeople || 0,
+                                offlinePossible: e.target.value === 'true',
+                                managementEffort: idea.eventFeasibility?.managementEffort || 'medium',
+                                feasibilityScore: idea.eventFeasibility?.feasibilityScore || 0
+                              }
+                            })}
+                            className="w-full px-2 py-1 border border-gray-300 rounded"
+                          >
+                            <option value="true">可能</option>
+                            <option value="false">不可</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-gray-700 mb-1">管理工数</label>
+                          <select
+                            value={idea.eventFeasibility?.managementEffort || 'medium'}
+                            onChange={(e) => updateIdeaExtendedHandler(idea.id!, {
+                              eventFeasibility: {
+                                likeTarget: idea.eventFeasibility?.likeTarget || 10,
+                                interestedPeople: idea.eventFeasibility?.interestedPeople || 0,
+                                offlinePossible: idea.eventFeasibility?.offlinePossible || false,
+                                managementEffort: e.target.value as 'low' | 'medium' | 'high',
+                                feasibilityScore: idea.eventFeasibility?.feasibilityScore || 0
+                              }
+                            })}
+                            className="w-full px-2 py-1 border border-gray-300 rounded"
+                          >
+                            <option value="low">低</option>
+                            <option value="medium">中</option>
+                            <option value="high">高</option>
+                          </select>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 )}

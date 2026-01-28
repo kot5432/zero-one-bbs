@@ -243,6 +243,35 @@ export async function getAllUserSettings() {
   });
 }
 
+// ユーザーを削除
+export async function deleteUser(userId: string) {
+  await deleteDoc(doc(db, 'users', userId));
+}
+
+// ユーザー設定を削除
+export async function deleteUserSettings(userId: string) {
+  await deleteDoc(doc(db, 'userSettings', userId));
+}
+
+// 削除理由を記録
+export async function logDeletion(type: 'user' | 'idea' | 'theme', itemId: string, reason: string, deletedBy: string) {
+  const deletionLog = {
+    type,
+    itemId,
+    reason,
+    deletedBy,
+    deletedAt: serverTimestamp()
+  };
+  await addDoc(collection(db, 'deletionLogs'), deletionLog);
+}
+
+// すべての削除ログを取得
+export async function getAllDeletionLogs() {
+  const q = query(collection(db, 'deletionLogs'), orderBy('deletedAt', 'desc'));
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+}
+
 export async function getIdeas() {
   const q = query(ideasCollection, orderBy('createdAt', 'desc'));
   const snapshot = await getDocs(q);
