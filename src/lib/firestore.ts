@@ -8,10 +8,21 @@ export interface Idea {
   title: string;
   description: string;
   mode: 'online' | 'offline';
-  status: 'idea' | 'preparing';
+  status: 'idea' | 'preparing' | 'event_planned' | 'rejected' | 'completed';
   likes: number;
   createdAt: Timestamp;
   updatedAt?: Timestamp;
+  adminMemo?: string;
+  adminChecklist?: {
+    safety?: boolean;
+    popularity?: boolean;
+    manageable?: boolean;
+  };
+  actionHistory?: Array<{
+    action: string;
+    timestamp: Timestamp;
+    details?: string;
+  }>;
 }
 
 export interface Comment {

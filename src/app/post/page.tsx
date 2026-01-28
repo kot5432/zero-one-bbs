@@ -28,44 +28,36 @@ export default function PostPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    alert('ボタンがクリックされました');
-    console.log('フォーム送信開始');
-    
-    // Firebaseモジュールのテスト
+    if (!formData.title.trim() || !formData.description.trim()) {
+      setError('タイトルと内容は必須です');
+      return;
+    }
+
+    if (formData.description.length > 200) {
+      setError('内容は200文字以内で入力してください');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+
     try {
-      alert('Firebaseモジュールをインポート中...');
-      const { addDoc, collection, Timestamp } = await import('firebase/firestore');
-      const { db } = await import('@/lib/firebase');
-      alert('Firebaseモジュール読み込み成功');
-      
-      // Firestore接続テスト
-      alert('Firestore接続をテスト中...');
-      const testRef = collection(db, 'test');
-      alert('Firestore接続成功');
-      
-      // 実際の書き込みテスト
-      alert('実際の書き込みをテスト中...');
-      const testData = {
-        title: 'テスト投稿',
-        content: 'これはテストです',
-        createdAt: Timestamp.now()
+      const ideaData = {
+        title: formData.title,
+        description: formData.description,
+        mode: formData.mode,
+        status: 'idea' as const
       };
       
-      // タイムアウト付き書き込み
-      const writePromise = addDoc(collection(db, 'ideas'), testData);
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('書き込みタイムアウト（10秒）')), 10000);
-      });
+      await addIdea(ideaData);
       
-      const result = await Promise.race([writePromise, timeoutPromise]);
-      alert('書き込み成功: ' + (result as any).id);
-      
+      router.push('/');
     } catch (error: any) {
-      alert('Firebaseエラー: ' + error.message);
-      console.error('Firebase error:', error);
+      setError('投稿に失敗しました。再度お試しください。');
+      console.error('Error adding idea:', error);
+    } finally {
+      setLoading(false);
     }
-    
-    return;
   };
 
   return (
