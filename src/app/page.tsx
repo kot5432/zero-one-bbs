@@ -2,25 +2,30 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { getIdeas, Idea } from '@/lib/firestore';
+import { getIdeas, Idea, getActiveTheme, Theme } from '@/lib/firestore';
 
 export default function Home() {
   const [ideas, setIdeas] = useState<Idea[]>([]);
+  const [activeTheme, setActiveTheme] = useState<Theme | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchIdeas = async () => {
+    const fetchData = async () => {
       try {
-        const ideasData = await getIdeas();
+        const [ideasData, activeThemeData] = await Promise.all([
+          getIdeas(),
+          getActiveTheme()
+        ]);
         setIdeas(ideasData);
+        setActiveTheme(activeThemeData);
       } catch (error) {
-        console.error('Error fetching ideas:', error);
+        console.error('Error fetching data:', error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchIdeas();
+    fetchData();
   }, []);
 
   return (
@@ -45,6 +50,28 @@ export default function Home() {
       </header>
 
       <main className="max-w-6xl mx-auto px-4 py-8">
+        {/* 今月のテーマ */}
+        {activeTheme && (
+          <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg p-6 mb-12">
+            <div className="text-center">
+              <p className="text-lg font-medium mb-2">今月のテーマ</p>
+              <h2 className="text-3xl font-bold mb-3">{activeTheme.title}</h2>
+              <p className="text-lg mb-4 opacity-90">{activeTheme.description}</p>
+              <div className="flex justify-center items-center gap-6 text-sm">
+                <span className="bg-white/20 px-3 py-1 rounded-full">
+                  募集期間: {activeTheme.startDate.toDate().toLocaleDateString('ja-JP')} 〜 {activeTheme.endDate.toDate().toLocaleDateString('ja-JP')}
+                </span>
+                <span className="bg-green-400 text-green-900 px-3 py-1 rounded-full font-medium">
+                  募集中
+                </span>
+              </div>
+              <p className="text-sm mt-4 opacity-80">
+                投稿されたアイデアは、管理側が整理し、イベントとして実施される場合があります。
+              </p>
+            </div>
+          </div>
+        )}
+
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold text-gray-900 mb-4">
             学生のアイデアを形にする場所

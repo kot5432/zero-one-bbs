@@ -17,6 +17,7 @@ export default function AdminPage() {
   
   // テーマ作成用
   const [showThemeForm, setShowThemeForm] = useState(false);
+  const [editingThemeId, setEditingThemeId] = useState<string | null>(null);
   const [newTheme, setNewTheme] = useState({
     title: '',
     description: '',
@@ -130,21 +131,38 @@ export default function AdminPage() {
     }
 
     try {
-      // 既存のアクティブテーマを非アクティブに
-      if (activeTheme) {
-        await updateTheme(activeTheme.id!, { isActive: false });
+      if (editingThemeId) {
+        // 編集モード
+        const updateData: any = {
+          title: newTheme.title,
+          description: newTheme.description,
+          startDate: Timestamp.fromDate(new Date(newTheme.startDate)),
+          endDate: Timestamp.fromDate(new Date(newTheme.endDate)),
+          ...(newTheme.eventDate && { eventDate: Timestamp.fromDate(new Date(newTheme.eventDate)) }),
+          updatedAt: Timestamp.now()
+        };
+
+        await updateTheme(editingThemeId, updateData);
+        alert('テーマを更新しました');
+      } else {
+        // 新規作成モード
+        // 既存のアクティブテーマを非アクティブに
+        if (activeTheme) {
+          await updateTheme(activeTheme.id!, { isActive: false });
+        }
+
+        const themeData = {
+          title: newTheme.title,
+          description: newTheme.description,
+          startDate: Timestamp.fromDate(new Date(newTheme.startDate)),
+          endDate: Timestamp.fromDate(new Date(newTheme.endDate)),
+          ...(newTheme.eventDate && { eventDate: Timestamp.fromDate(new Date(newTheme.eventDate)) }),
+          isActive: true
+        };
+
+        await createTheme(themeData);
+        alert('テーマを作成しました');
       }
-
-      const themeData = {
-        title: newTheme.title,
-        description: newTheme.description,
-        startDate: Timestamp.fromDate(new Date(newTheme.startDate)),
-        endDate: Timestamp.fromDate(new Date(newTheme.endDate)),
-        ...(newTheme.eventDate && { eventDate: Timestamp.fromDate(new Date(newTheme.eventDate)) }),
-        isActive: true
-      };
-
-      await createTheme(themeData);
       
       // データを再取得
       const [themesData, activeThemeData] = await Promise.all([
@@ -162,12 +180,46 @@ export default function AdminPage() {
         endDate: '',
         eventDate: ''
       });
+      setEditingThemeId(null);
       setShowThemeForm(false);
       
-      alert('テーマを作成しました');
     } catch (error) {
-      console.error('Error creating theme:', error);
-      alert('テーマの作成に失敗しました');
+      console.error('Error saving theme:', error);
+      alert('テーマの保存に失敗しました');
+    }
+  };
+
+  const updateThemeHandler = async (themeId: string, updates: Partial<Theme>) => {
+    try {
+      const updateData: any = {
+        ...updates,
+        updatedAt: Timestamp.now()
+      };
+
+      if (updates.startDate) {
+        updateData.startDate = Timestamp.fromDate(new Date(updates.startDate));
+      }
+      if (updates.endDate) {
+        updateData.endDate = Timestamp.fromDate(new Date(updates.endDate));
+      }
+      if (updates.eventDate) {
+        updateData.eventDate = Timestamp.fromDate(new Date(updates.eventDate));
+      }
+
+      await updateTheme(themeId, updateData);
+      
+      // データを再取得
+      const [themesData, activeThemeData] = await Promise.all([
+        getThemes(),
+        getActiveTheme()
+      ]);
+      setThemes(themesData);
+      setActiveTheme(activeThemeData);
+      
+      alert('テーマを更新しました');
+    } catch (error) {
+      console.error('Error updating theme:', error);
+      alert('テーマの更新に失敗しました');
     }
   };
 
@@ -247,7 +299,25 @@ export default function AdminPage() {
           {/* 現在のテーマ */}
           {activeTheme && (
             <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
-              <h3 className="text-lg font-semibold text-green-800 mb-2">現在のテーマ</h3>
+              <div className="flex justify-between items-start mb-2">
+                <h3 className="text-lg font-semibold text-green-800">現在のテーマ</h3>
+                <button
+                  onClick={() => {
+                    setEditingThemeId(activeTheme.id!);
+                    setNewTheme({
+                      title: activeTheme.title,
+                      description: activeTheme.description,
+                      startDate: activeTheme.startDate.toDate().toISOString().split('T')[0],
+                      endDate: activeTheme.endDate.toDate().toISOString().split('T')[0],
+                      eventDate: activeTheme.eventDate ? activeTheme.eventDate.toDate().toISOString().split('T')[0] : ''
+                    });
+                    setShowThemeForm(true);
+                  }}
+                  className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+                >
+                  編集
+                </button>
+              </div>
               <h4 className="font-medium text-green-900">{activeTheme.title}</h4>
               <p className="text-green-700 mb-2">{activeTheme.description}</p>
               <div className="text-sm text-green-600">
@@ -262,7 +332,9 @@ export default function AdminPage() {
           {/* テーマ作成フォーム */}
           {showThemeForm && (
             <div className="bg-gray-50 rounded-lg p-4 mb-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">新しいテーマを作成</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                {editingThemeId ? 'テーマを編集' : '新しいテーマを作成'}
+              </h3>
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">テーマタイトル *</label>
@@ -318,10 +390,20 @@ export default function AdminPage() {
                     onClick={createThemeHandler}
                     className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
                   >
-                    テーマを作成
+                    {editingThemeId ? 'テーマを更新' : 'テーマを作成'}
                   </button>
                   <button
-                    onClick={() => setShowThemeForm(false)}
+                    onClick={() => {
+                      setNewTheme({
+                        title: '',
+                        description: '',
+                        startDate: '',
+                        endDate: '',
+                        eventDate: ''
+                      });
+                      setEditingThemeId(null);
+                      setShowThemeForm(false);
+                    }}
                     className="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700"
                   >
                     キャンセル
