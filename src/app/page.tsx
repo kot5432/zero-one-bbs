@@ -50,6 +50,9 @@ export default function Home() {
               <Link href="/post" className="text-gray-700 hover:text-gray-900">
                 投稿
               </Link>
+              <Link href="/user/demo" className="text-gray-700 hover:text-gray-900">
+                マイページ
+              </Link>
               <Link href="/about" className="text-gray-700 hover:text-gray-900">
                 About
               </Link>

@@ -73,6 +73,9 @@ export default function FreePostPage() {
               <Link href="/post" className="text-blue-600 font-semibold">
                 投稿
               </Link>
+              <Link href="/user/demo" className="text-gray-700 hover:text-gray-900">
+                マイページ
+              </Link>
               <Link href="/about" className="text-gray-700 hover:text-gray-900">
                 About
               </Link>

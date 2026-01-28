@@ -86,7 +86,7 @@ export default function UserPage({ params }: { params: { userId: string } }) {
               <Link href="/" className="text-gray-700 hover:text-gray-900">
                 トップ
               </Link>
-              <Link href="/post" className="text-blue-600 font-semibold">
+              <Link href="/post" className="text-gray-700 hover:text-gray-900">
                 投稿
               </Link>
               <Link href={`/user/${params.userId}`} className="text-blue-600 font-semibold">
