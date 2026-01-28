@@ -194,7 +194,8 @@ export async function updateUser(userId: string, updates: Partial<User>) {
 }
 
 export async function getUserIdeas(userId: string) {
-  const q = query(ideasCollection, where('userId', '==', userId), orderBy('createdAt', 'desc'));
+  // 一時的にorderByを削除してインデックスエラーを回避
+  const q = query(ideasCollection, where('userId', '==', userId));
   const snapshot = await getDocs(q);
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Idea));
 }

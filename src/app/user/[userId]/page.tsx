@@ -1,10 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { use } from 'react';
 import Link from 'next/link';
 import { getUser, getUserIdeas, User, Idea, getThemes, Theme } from '@/lib/firestore';
 
-export default function UserPage({ params }: { params: { userId: string } }) {
+export default function UserPage({ params }: { params: Promise<{ userId: string }> }) {
+  const resolvedParams = use(params);
   const [user, setUser] = useState<User | null>(null);
   const [userIdeas, setUserIdeas] = useState<Idea[]>([]);
   const [themes, setThemes] = useState<Theme[]>([]);
@@ -14,8 +16,8 @@ export default function UserPage({ params }: { params: { userId: string } }) {
     const fetchData = async () => {
       try {
         const [userData, ideasData, themesData] = await Promise.all([
-          getUser(params.userId),
-          getUserIdeas(params.userId),
+          getUser(resolvedParams.userId),
+          getUserIdeas(resolvedParams.userId),
           getThemes()
         ]);
         
@@ -30,7 +32,7 @@ export default function UserPage({ params }: { params: { userId: string } }) {
     };
 
     fetchData();
-  }, [params.userId]);
+  }, [resolvedParams.userId]);
 
   // テーマ名を取得するヘルパー関数
   const getThemeName = (themeId: string) => {
@@ -89,7 +91,7 @@ export default function UserPage({ params }: { params: { userId: string } }) {
               <Link href="/post" className="text-gray-700 hover:text-gray-900">
                 投稿
               </Link>
-              <Link href={`/user/${params.userId}`} className="text-blue-600 font-semibold">
+              <Link href={`/user/${resolvedParams.userId}`} className="text-blue-600 font-semibold">
                 マイページ
               </Link>
               <Link href="/about" className="text-gray-700 hover:text-gray-900">
