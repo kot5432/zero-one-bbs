@@ -13,6 +13,7 @@ export default function AdminPage() {
   const [events, setEvents] = useState<Event[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [deletionLogs, setDeletionLogs] = useState<any[]>([]);
+  const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'idea' | 'preparing' | 'event_planned'>('all');
   const [sortBy, setSortBy] = useState<'createdAt' | 'likes'>('likes');
@@ -170,6 +171,58 @@ export default function AdminPage() {
       alert('ユーザーを削除しました');
     } catch (error) {
       console.error('Error deleting user:', error);
+      alert('削除に失敗しました');
+    }
+  };
+
+  // 複数選択用関数
+  const toggleUserSelection = (userId: string) => {
+    const newSelected = new Set(selectedUsers);
+    if (newSelected.has(userId)) {
+      newSelected.delete(userId);
+    } else {
+      newSelected.add(userId);
+    }
+    setSelectedUsers(newSelected);
+  };
+
+  const selectAllUsers = () => {
+    if (selectedUsers.size === users.length) {
+      setSelectedUsers(new Set());
+    } else {
+      setSelectedUsers(new Set(users.map(user => user.id!)));
+    }
+  };
+
+  const deleteSelectedUsers = async () => {
+    if (selectedUsers.size === 0) {
+      alert('削除するユーザーを選択してください');
+      return;
+    }
+
+    if (!confirm(`${selectedUsers.size}人のユーザーを削除しますか？この操作は元に戻せません。`)) {
+      return;
+    }
+
+    const reason = prompt('削除理由を入力してください:');
+    if (!reason) {
+      return;
+    }
+
+    try {
+      // 選択されたユーザーを削除
+      for (const userId of selectedUsers) {
+        await deleteUser(userId);
+        await logDeletion('user', userId, reason, 'admin');
+      }
+      
+      // UIを更新
+      setUsers(prev => prev.filter(user => !selectedUsers.has(user.id!)));
+      setSelectedUsers(new Set());
+      
+      alert(`${selectedUsers.size}人のユーザーを削除しました`);
+    } catch (error) {
+      console.error('Error deleting users:', error);
       alert('削除に失敗しました');
     }
   };
@@ -996,25 +1049,60 @@ export default function AdminPage() {
           </div>
         </div>
         
+        {/* 複数選択操作バー */}
+        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 mb-4">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-4">
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={selectedUsers.size === users.length && users.length > 0}
+                  onChange={selectAllUsers}
+                  className="rounded"
+                />
+                <span className="text-sm font-medium text-gray-700">
+                  全選択 ({selectedUsers.size}/{users.length})
+                </span>
+              </label>
+              {selectedUsers.size > 0 && (
+                <button
+                  onClick={deleteSelectedUsers}
+                  className="px-4 py-2 bg-red-600 text-white text-sm rounded hover:bg-red-700"
+                >
+                  選択した{selectedUsers.size}人を削除
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+        
         {/* ユーザーリスト */}
         <div className="space-y-4">
           {users.map((user) => (
-            <div key={user.id} className="border border-gray-200 rounded-lg p-4">
+            <div key={user.id} className={`border border-gray-200 rounded-lg p-4 ${selectedUsers.has(user.id!) ? 'bg-red-50' : ''}`}>
               <div className="flex justify-between items-start">
-                <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    {user.username}
-                  </h3>
-                  
-                  <div className="flex gap-4 text-sm text-gray-600">
-                    <span>投稿数: {user.postCount}</span>
-                    <span>テーマ参加: {user.themeCount}</span>
-                    <span>登録日: {user.createdAt.toDate().toLocaleDateString('ja-JP')}</span>
-                    {user.lastLoginAt && (
-                      <span className="text-green-600 font-medium">
-                        最終ログイン: {user.lastLoginAt.toDate().toLocaleDateString('ja-JP')}
-                      </span>
-                    )}
+                <div className="flex items-start gap-3">
+                  <input
+                    type="checkbox"
+                    checked={selectedUsers.has(user.id!)}
+                    onChange={() => toggleUserSelection(user.id!)}
+                    className="mt-1 rounded"
+                  />
+                  <div className="flex-1">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                      {user.username}
+                    </h3>
+                    
+                    <div className="flex gap-4 text-sm text-gray-600">
+                      <span>投稿数: {user.postCount}</span>
+                      <span>テーマ参加: {user.themeCount}</span>
+                      <span>登録日: {user.createdAt.toDate().toLocaleDateString('ja-JP')}</span>
+                      {user.lastLoginAt && (
+                        <span className="text-green-600 font-medium">
+                          最終ログイン: {user.lastLoginAt.toDate().toLocaleDateString('ja-JP')}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
                 
