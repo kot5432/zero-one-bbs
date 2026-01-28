@@ -3,6 +3,16 @@ import { db } from './firebase';
 
 export { db, Timestamp }; // dbとTimestampをエクスポート
 
+export interface User {
+  id?: string;
+  username: string;
+  bio?: string;
+  postCount: number;
+  themeCount: number;
+  createdAt: Timestamp;
+  lastLoginAt?: Timestamp;
+}
+
 export interface Theme {
   id?: string;
   title: string;
@@ -50,6 +60,7 @@ export interface Idea {
   themeId?: string; // テーマとの紐付け
   problem?: string; // 何を解決したいか
   successCriteria?: string; // どんな形になれば成功か
+  userId?: string; // ユーザーとの紐付け
 }
 
 export interface Comment {
@@ -71,6 +82,7 @@ export const commentsCollection = collection(db, 'comments');
 export const likesCollection = collection(db, 'likes');
 export const themesCollection = collection(db, 'themes');
 export const eventsCollection = collection(db, 'events');
+export const usersCollection = collection(db, 'users');
 
 export async function addIdea(idea: Omit<Idea, 'id' | 'likes' | 'createdAt'>) {
   const newIdea = {
@@ -78,7 +90,20 @@ export async function addIdea(idea: Omit<Idea, 'id' | 'likes' | 'createdAt'>) {
     likes: 0,
     createdAt: Timestamp.now()
   };
-  return await addDoc(ideasCollection, newIdea);
+  const result = await addDoc(ideasCollection, newIdea);
+  return result;
+}
+
+// ユーザー付きでアイデアを追加
+export async function addIdeaWithUser(idea: Omit<Idea, 'id' | 'likes' | 'createdAt'>, userId: string) {
+  const newIdea = {
+    ...idea,
+    userId,
+    likes: 0,
+    createdAt: Timestamp.now()
+  };
+  const result = await addDoc(ideasCollection, newIdea);
+  return result;
 }
 
 // テーマ管理関数
@@ -125,6 +150,31 @@ export async function createEvent(event: Omit<Event, 'id' | 'createdAt'>) {
     createdAt: Timestamp.now()
   };
   return await addDoc(eventsCollection, newEvent);
+}
+
+// User管理関数
+export async function getUser(userId: string) {
+  const userDoc = await getDoc(doc(usersCollection, userId));
+  return userDoc.exists() ? { id: userDoc.id, ...userDoc.data() } as User : null;
+}
+
+export async function createUser(userData: Omit<User, 'id' | 'createdAt'>) {
+  const newUser = {
+    ...userData,
+    createdAt: Timestamp.now()
+  };
+  return await addDoc(usersCollection, newUser);
+}
+
+export async function updateUser(userId: string, updates: Partial<User>) {
+  const userRef = doc(usersCollection, userId);
+  await updateDoc(userRef, updates);
+}
+
+export async function getUserIdeas(userId: string) {
+  const q = query(ideasCollection, where('userId', '==', userId), orderBy('createdAt', 'desc'));
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Idea));
 }
 
 export async function getIdeas() {
