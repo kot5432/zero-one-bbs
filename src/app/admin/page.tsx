@@ -12,6 +12,7 @@ export default function AdminPage() {
   const [activeTheme, setActiveTheme] = useState<Theme | null>(null);
   const [events, setEvents] = useState<Event[]>([]);
   const [users, setUsers] = useState<User[]>([]);
+  const [deletionLogs, setDeletionLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'idea' | 'preparing' | 'event_planned'>('all');
   const [sortBy, setSortBy] = useState<'createdAt' | 'likes'>('likes');
@@ -48,18 +49,20 @@ export default function AdminPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [ideasData, themesData, activeThemeData, eventsData, usersData] = await Promise.all([
+        const [ideasData, themesData, activeThemeData, eventsData, usersData, deletionLogsData] = await Promise.all([
           getIdeas(),
           getThemes(),
           getActiveTheme(),
           getEvents(),
-          getAllUsers()
+          getAllUsers(),
+          getAllDeletionLogs()
         ]);
         setIdeas(ideasData);
         setThemes(themesData);
         setActiveTheme(activeThemeData);
         setEvents(eventsData);
         setUsers(usersData);
+        setDeletionLogs(deletionLogsData);
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -1035,6 +1038,43 @@ export default function AdminPage() {
           
           {users.length === 0 && (
             <p className="text-gray-500 text-center py-8">ユーザーがまだ登録されていません</p>
+          )}
+        </div>
+      </div>
+      
+      {/* 削除ログセクション */}
+      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">削除ログ</h2>
+        
+        <div className="space-y-2">
+          {deletionLogs.map((log) => (
+            <div key={log.id} className="border border-gray-200 rounded-lg p-3">
+              <div className="flex justify-between items-start">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className={`px-2 py-1 text-xs rounded-full ${
+                      log.type === 'user' ? 'bg-red-100 text-red-800' :
+                      log.type === 'idea' ? 'bg-blue-100 text-blue-800' :
+                      'bg-purple-100 text-purple-800'
+                    }`}>
+                      {log.type === 'user' ? 'ユーザー' : log.type === 'idea' ? '投稿' : 'テーマ'}
+                    </span>
+                    <span className="text-sm font-bold text-gray-900">
+                      ID: {log.itemId}
+                    </span>
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    <p><span className="font-medium">理由:</span> {log.reason}</p>
+                    <p><span className="font-medium">削除者:</span> {log.deletedBy}</p>
+                    <p><span className="font-medium">日時:</span> {log.deletedAt.toDate().toLocaleString('ja-JP')}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+          
+          {deletionLogs.length === 0 && (
+            <p className="text-gray-500 text-center py-8">削除ログがありません</p>
           )}
         </div>
       </div>
