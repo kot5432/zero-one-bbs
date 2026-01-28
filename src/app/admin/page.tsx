@@ -3,8 +3,8 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { doc, updateDoc } from 'firebase/firestore';
-import { getIdeas, Idea, getThemes, Theme, getActiveTheme, createTheme, updateTheme, getEvents, Event, Timestamp, db } from '@/lib/firestore';
-import { updateIdeaStatus, deleteIdea, updateAdminMemo, updateAdminChecklist } from '@/lib/admin';
+import { getIdeas, Idea, getThemes, Theme, getActiveTheme, createTheme, updateTheme, getEvents, Event, Timestamp, db, deleteTheme, deleteIdea } from '@/lib/firestore';
+import { updateIdeaStatus, updateAdminMemo, updateAdminChecklist } from '@/lib/admin';
 
 export default function AdminPage() {
   const [ideas, setIdeas] = useState<Idea[]>([]);
@@ -30,6 +30,19 @@ export default function AdminPage() {
   // 拡張管理機能用
   const [expandedIdeas, setExpandedIdeas] = useState<Set<string>>(new Set());
   const [editingIdeas, setEditingIdeas] = useState<Set<string>>(new Set());
+  
+  // 削除確認用
+  const [deleteConfirm, setDeleteConfirm] = useState<{
+    type: 'theme' | 'idea' | null;
+    id: string | null;
+    title: string;
+    reason: string;
+  }>({
+    type: null,
+    id: null,
+    title: '',
+    reason: ''
+  });
 
   useEffect(() => {
     const fetchData = async () => {
@@ -125,6 +138,48 @@ export default function AdminPage() {
       );
     } catch (error) {
       console.error('Error updating admin checklist:', error);
+    }
+  };
+
+  // 削除確認ダイアログ
+  const showDeleteConfirm = (type: 'theme' | 'idea', id: string, title: string) => {
+    setDeleteConfirm({
+      type,
+      id,
+      title,
+      reason: ''
+    });
+  };
+
+  const hideDeleteConfirm = () => {
+    setDeleteConfirm({
+      type: null,
+      id: null,
+      title: '',
+      reason: ''
+    });
+  };
+
+  const executeDelete = async () => {
+    if (!deleteConfirm.id || !deleteConfirm.type) return;
+
+    try {
+      if (deleteConfirm.type === 'theme') {
+        await deleteTheme(deleteConfirm.id);
+        setThemes(prev => prev.filter(theme => theme.id !== deleteConfirm.id));
+        if (activeTheme?.id === deleteConfirm.id) {
+          setActiveTheme(null);
+        }
+      } else if (deleteConfirm.type === 'idea') {
+        await deleteIdea(deleteConfirm.id);
+        setIdeas(prev => prev.filter(idea => idea.id !== deleteConfirm.id));
+      }
+      
+      hideDeleteConfirm();
+      alert(`${deleteConfirm.type === 'theme' ? 'テーマ' : '投稿'}を削除しました`);
+    } catch (error) {
+      console.error('Error deleting:', error);
+      alert('削除に失敗しました');
     }
   };
 
@@ -484,20 +539,27 @@ export default function AdminPage() {
                   </button>
                 </div>
               </div>
-            </div>
-          )}
-
           {/* 過去のテーマ一覧 */}
           <div>
             <h3 className="text-lg font-semibold text-gray-900 mb-4">過去のテーマ</h3>
             <div className="space-y-3">
               {themes.filter(theme => !theme.isActive).map((theme) => (
                 <div key={theme.id} className="border border-gray-200 rounded-lg p-3">
-                  <h4 className="font-medium text-gray-900">{theme.title}</h4>
-                  <p className="text-sm text-gray-600 mb-1">{theme.description}</p>
-                  <p className="text-xs text-gray-500">
-                    {theme.startDate.toDate().toLocaleDateString('ja-JP')} 〜 {theme.endDate.toDate().toLocaleDateString('ja-JP')}
-                  </p>
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h4 className="font-medium text-gray-900">{theme.title}</h4>
+                      <p className="text-sm text-gray-600 mb-1">{theme.description}</p>
+                      <p className="text-xs text-gray-500">
+                        {theme.startDate.toDate().toLocaleDateString('ja-JP')} 〜 {theme.endDate.toDate().toLocaleDateString('ja-JP')}
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => showDeleteConfirm('theme', theme.id!, theme.title)}
+                      className="px-2 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700"
+                    >
+                      削除
+                    </button>
+                  </div>
                 </div>
               ))}
               {themes.filter(theme => !theme.isActive).length === 0 && (
@@ -664,7 +726,7 @@ export default function AdminPage() {
                             見送り
                           </button>
                           <button
-                            onClick={() => idea.id && deleteIdeaHandler(idea.id)}
+                            onClick={() => idea.id && showDeleteConfirm('idea', idea.id, idea.title)}
                             className="px-3 py-1 bg-gray-600 text-white text-sm rounded hover:bg-gray-700"
                           >
                             削除
@@ -693,7 +755,7 @@ export default function AdminPage() {
                             見送り
                           </button>
                           <button
-                            onClick={() => idea.id && deleteIdeaHandler(idea.id)}
+                            onClick={() => idea.id && showDeleteConfirm('idea', idea.id, idea.title)}
                             className="px-3 py-1 bg-gray-600 text-white text-sm rounded hover:bg-gray-700"
                           >
                             削除
@@ -905,6 +967,46 @@ export default function AdminPage() {
           </div>
         </div>
       </main>
+      
+      {/* 削除確認ダイアログ */}
+      {deleteConfirm.type && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              {deleteConfirm.type === 'theme' ? 'テーマの削除' : '投稿の削除'}
+            </h3>
+            <p className="text-gray-700 mb-4">
+              「{deleteConfirm.title}」を削除してもよろしいですか？
+            </p>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                削除理由（任意）
+              </label>
+              <textarea
+                value={deleteConfirm.reason}
+                onChange={(e) => setDeleteConfirm(prev => ({ ...prev, reason: e.target.value }))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                rows={3}
+                placeholder="削除理由を入力してください..."
+              />
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={executeDelete}
+                className="flex-1 bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700"
+              >
+                削除する
+              </button>
+              <button
+                onClick={hideDeleteConfirm}
+                className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-400"
+              >
+                キャンセル
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

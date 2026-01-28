@@ -1,4 +1,4 @@
-import { collection, addDoc, getDocs, doc, updateDoc, increment, query, orderBy, Timestamp, where, getDoc, setDoc } from 'firebase/firestore';
+import { collection, addDoc, getDocs, doc, updateDoc, increment, query, orderBy, Timestamp, where, getDoc, setDoc, deleteDoc } from 'firebase/firestore';
 import { db } from './firebase';
 
 export { db, Timestamp }; // dbとTimestampをエクスポート
@@ -147,6 +147,16 @@ export async function updateTheme(themeId: string, updates: Partial<Theme>) {
     ...updates,
     updatedAt: Timestamp.now()
   });
+}
+
+export async function deleteTheme(themeId: string) {
+  const themeRef = doc(db, 'themes', themeId);
+  await deleteDoc(themeRef);
+}
+
+export async function deleteIdea(ideaId: string) {
+  const ideaRef = doc(db, 'ideas', ideaId);
+  await deleteDoc(ideaRef);
 }
 
 // イベント管理関数
