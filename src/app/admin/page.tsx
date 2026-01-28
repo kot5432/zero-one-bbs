@@ -325,14 +325,24 @@ export default function AdminPage() {
         updatedAt: Timestamp.now()
       };
 
+      // 文字列の日付をTimestampに変換
       if (updates.startDate) {
-        updateData.startDate = Timestamp.fromDate(new Date(updates.startDate));
+        const startDate = updates.startDate as any;
+        updateData.startDate = typeof startDate === 'string' 
+          ? Timestamp.fromDate(new Date(startDate))
+          : startDate;
       }
       if (updates.endDate) {
-        updateData.endDate = Timestamp.fromDate(new Date(updates.endDate));
+        const endDate = updates.endDate as any;
+        updateData.endDate = typeof endDate === 'string' 
+          ? Timestamp.fromDate(new Date(endDate))
+          : endDate;
       }
       if (updates.eventDate) {
-        updateData.eventDate = Timestamp.fromDate(new Date(updates.eventDate));
+        const eventDate = updates.eventDate as any;
+        updateData.eventDate = typeof eventDate === 'string' 
+          ? Timestamp.fromDate(new Date(eventDate))
+          : eventDate;
       }
 
       await updateTheme(themeId, updateData);
@@ -539,6 +549,9 @@ export default function AdminPage() {
                   </button>
                 </div>
               </div>
+            </div>
+          )}
+          
           {/* 過去のテーマ一覧 */}
           <div>
             <h3 className="text-lg font-semibold text-gray-900 mb-4">過去のテーマ</h3>
@@ -568,6 +581,7 @@ export default function AdminPage() {
             </div>
           </div>
         </div>
+        
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">アイデア管理</h2>
           
