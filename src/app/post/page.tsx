@@ -1,21 +1,37 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { addIdea } from '@/lib/firestore';
+import { addIdea, getActiveTheme, Theme } from '@/lib/firestore';
 
 export default function PostPage() {
   
   const router = useRouter();
+  const [activeTheme, setActiveTheme] = useState<Theme | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     mode: 'online' as 'online' | 'offline',
-    targetPeople: ''
+    targetPeople: '',
+    problem: '', // 何を解決したいか
+    successCriteria: '' // どんな形になれば成功か
   });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+
+  // テーマを取得
+  useEffect(() => {
+    const fetchTheme = async () => {
+      try {
+        const theme = await getActiveTheme();
+        setActiveTheme(theme);
+      } catch (error) {
+        console.error('Error fetching theme:', error);
+      }
+    };
+    fetchTheme();
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -46,7 +62,10 @@ export default function PostPage() {
         title: formData.title,
         description: formData.description,
         mode: formData.mode,
-        status: 'idea' as const
+        status: 'idea' as const,
+        ...(activeTheme && { themeId: activeTheme.id }),
+        ...(formData.problem && { problem: formData.problem }),
+        ...(formData.successCriteria && { successCriteria: formData.successCriteria })
       };
       
       await addIdea(ideaData);
@@ -82,6 +101,23 @@ export default function PostPage() {
       </header>
 
       <main className="max-w-3xl mx-auto px-4 py-8">
+        {/* 現在のテーマ表示 */}
+        {activeTheme && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+            <div className="text-center">
+              <p className="text-sm font-medium text-blue-600 mb-1">現在のテーマ</p>
+              <h3 className="text-lg font-semibold text-blue-900 mb-2">{activeTheme.title}</h3>
+              <p className="text-sm text-blue-700 mb-2">{activeTheme.description}</p>
+              <p className="text-xs text-blue-600">
+                募集期間: {activeTheme.startDate.toDate().toLocaleDateString('ja-JP')} 〜 {activeTheme.endDate.toDate().toLocaleDateString('ja-JP')}
+              </p>
+              <p className="text-xs text-gray-600 mt-2">
+                このテーマに沿ったアイデアを投稿してください。
+              </p>
+            </div>
+          </div>
+        )}
+
         <div className="bg-white rounded-lg shadow-md p-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">アイデアを投稿する</h2>
           
@@ -127,6 +163,41 @@ export default function PostPage() {
                 {formData.description.length}/200文字
               </p>
             </div>
+
+            {/* テーマ関連項目 */}
+            {activeTheme && (
+              <>
+                <div>
+                  <label htmlFor="problem" className="block text-sm font-medium text-gray-700 mb-2">
+                    何を解決したいか
+                  </label>
+                  <textarea
+                    id="problem"
+                    name="problem"
+                    value={formData.problem}
+                    onChange={handleChange}
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-500"
+                    placeholder="このアイデアでどんな問題を解決したいですか？"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="successCriteria" className="block text-sm font-medium text-gray-700 mb-2">
+                    どんな形になれば成功か
+                  </label>
+                  <textarea
+                    id="successCriteria"
+                    name="successCriteria"
+                    value={formData.successCriteria}
+                    onChange={handleChange}
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-500"
+                    placeholder="どうなったら「成功」と言えますか？"
+                  />
+                </div>
+              </>
+            )}
 
             <div>
               <label htmlFor="mode" className="block text-sm font-medium text-gray-700 mb-2">
