@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { doc, updateDoc } from 'firebase/firestore';
-import { getIdeas, Idea, getThemes, Theme, getActiveTheme, createTheme, updateTheme, getEvents, Event, Timestamp, db, deleteTheme, deleteIdea } from '@/lib/firestore';
+import { getIdeas, Idea, getThemes, Theme, getActiveTheme, createTheme, updateTheme, getEvents, Event, Timestamp, db, deleteTheme, deleteIdea, getAllUsers, getAllUserSettings, User } from '@/lib/firestore';
+import { UserSettings } from '@/lib/auth';
 import { updateIdeaStatus, updateAdminMemo, updateAdminChecklist } from '@/lib/admin';
 
 export default function AdminPage() {
@@ -11,6 +12,8 @@ export default function AdminPage() {
   const [themes, setThemes] = useState<Theme[]>([]);
   const [activeTheme, setActiveTheme] = useState<Theme | null>(null);
   const [events, setEvents] = useState<Event[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
+  const [userSettings, setUserSettings] = useState<UserSettings[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'idea' | 'preparing' | 'event_planned'>('all');
   const [sortBy, setSortBy] = useState<'createdAt' | 'likes'>('likes');
@@ -47,16 +50,20 @@ export default function AdminPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [ideasData, themesData, activeThemeData, eventsData] = await Promise.all([
+        const [ideasData, themesData, activeThemeData, eventsData, usersData, userSettingsData] = await Promise.all([
           getIdeas(),
           getThemes(),
           getActiveTheme(),
-          getEvents()
+          getEvents(),
+          getAllUsers(),
+          getAllUserSettings()
         ]);
         setIdeas(ideasData);
         setThemes(themesData);
         setActiveTheme(activeThemeData);
         setEvents(eventsData);
+        setUsers(usersData);
+        setUserSettings(userSettingsData);
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -1018,6 +1025,88 @@ export default function AdminPage() {
                 キャンセル
               </button>
             </div>
+        </div>
+        
+        {/* ユーザー管理セクション */}
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">ユーザー管理</h2>
+          
+          {/* ユーザー統計 */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            <div className="bg-purple-50 p-4 rounded-lg">
+              <p className="text-sm text-purple-600 font-medium">総ユーザー数</p>
+              <p className="text-2xl font-bold text-purple-900">{users.length}</p>
+            </div>
+            <div className="bg-green-50 p-4 rounded-lg">
+              <p className="text-sm text-green-600 font-medium">認証済みユーザー</p>
+              <p className="text-2xl font-bold text-green-900">{userSettings.length}</p>
+            </div>
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <p className="text-sm text-blue-600 font-medium">総投稿数</p>
+              <p className="text-2xl font-bold text-blue-900">
+                {users.reduce((sum, user) => sum + user.postCount, 0)}
+              </p>
+            </div>
+            <div className="bg-orange-50 p-4 rounded-lg">
+              <p className="text-sm text-orange-600 font-medium">総テーマ参加数</p>
+              <p className="text-2xl font-bold text-orange-900">
+                {users.reduce((sum, user) => sum + user.themeCount, 0)}
+              </p>
+            </div>
+          </div>
+          
+          {/* ユーザーリスト */}
+          <div className="space-y-4">
+            {users.map((user) => {
+              const userSetting = userSettings.find(setting => setting.uid === user.id);
+              return (
+                <div key={user.id} className="border border-gray-200 rounded-lg p-4">
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <h3 className="text-lg font-semibold text-gray-900">
+                          {user.username}
+                        </h3>
+                        {userSetting && (
+                          <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                            認証済み
+                          </span>
+                        )}
+                      </div>
+                      
+                      {userSetting && (
+                        <div className="text-sm text-gray-600 mb-2">
+                          <p><span className="font-medium">メール:</span> {userSetting.email}</p>
+                          <p><span className="font-medium">表示名:</span> {userSetting.displayName}</p>
+                        </div>
+                      )}
+                      
+                      <div className="flex gap-4 text-sm text-gray-500">
+                        <span>投稿数: {user.postCount}</span>
+                        <span>テーマ参加: {user.themeCount}</span>
+                        <span>登録日: {user.createdAt.toDate().toLocaleDateString('ja-JP')}</span>
+                        {user.lastLoginAt && (
+                          <span>最終ログイン: {user.lastLoginAt.toDate().toLocaleDateString('ja-JP')}</span>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div className="flex gap-2">
+                      <Link
+                        href={`/user/${user.id}`}
+                        className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+                      >
+                        詳細を見る
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+            
+            {users.length === 0 && (
+              <p className="text-gray-500 text-center py-8">ユーザーがまだ登録されていません</p>
+            )}
           </div>
         </div>
       )}

@@ -1,8 +1,189 @@
+import { 
+  signInWithEmailAndPassword, 
+  createUserWithEmailAndPassword, 
+  signOut, 
+  onAuthStateChanged,
+  User as FirebaseUser,
+  updateProfile
+} from 'firebase/auth';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { db } from './firebase';
+import { auth as firebaseAuthInstance, db } from './firebase';
 import { getUser, createUser, User } from './firestore';
 
-// 簡易的なユーザー管理（IPベースから移行）
+// ユーザー設定のインターフェース
+export interface UserSettings {
+  uid: string;
+  email: string;
+  displayName: string;
+  createdAt: any;
+  updatedAt: any;
+}
+
+// Firebase Authentication認証クラス
+export class FirebaseAuth {
+  private static instance: FirebaseAuth;
+  private currentUser: User | null = null;
+  private firebaseUser: FirebaseUser | null = null;
+
+  static getInstance(): FirebaseAuth {
+    if (!FirebaseAuth.instance) {
+      FirebaseAuth.instance = new FirebaseAuth();
+    }
+    return FirebaseAuth.instance;
+  }
+
+  // 認証状態の監視
+  initAuthStateListener(): Promise<User | null> {
+    return new Promise((resolve) => {
+      const unsubscribe = onAuthStateChanged(firebaseAuthInstance, async (firebaseUser) => {
+        this.firebaseUser = firebaseUser;
+        
+        if (firebaseUser) {
+          // ユーザー設定を取得または作成
+          let user = await getUser(firebaseUser.uid);
+          
+          if (!user) {
+            // 新規ユーザー作成
+            const userData = {
+              username: firebaseUser.displayName || `ユーザー${firebaseUser.uid.substring(0, 6)}`,
+              email: firebaseUser.email || '',
+              postCount: 0,
+              themeCount: 0
+            };
+            
+            const docRef = await createUser(userData);
+            user = {
+              id: docRef.id,
+              ...userData,
+              createdAt: new Date() as any
+            };
+            
+            // ユーザー設定を保存
+            await this.createUserSettings(firebaseUser.uid, firebaseUser.email!, firebaseUser.displayName || userData.username);
+          }
+          
+          this.currentUser = user;
+          resolve(user);
+        } else {
+          this.currentUser = null;
+          resolve(null);
+        }
+        
+        unsubscribe();
+      });
+    });
+  }
+
+  // ユーザー設定を作成
+  private async createUserSettings(uid: string, email: string, displayName: string): Promise<void> {
+    const userSettings: UserSettings = {
+      uid,
+      email,
+      displayName,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp()
+    };
+    
+    const docRef = doc(db, 'userSettings', uid);
+    await setDoc(docRef, userSettings);
+  }
+
+  // サインイン
+  async signIn(email: string, password: string): Promise<User> {
+    try {
+      const userCredential = await signInWithEmailAndPassword(firebaseAuthInstance, email, password);
+      const user = await this.getUserFromFirebase(userCredential.user);
+      if (!user) {
+        throw new Error('ユーザーが見つかりません');
+      }
+      this.currentUser = user;
+      return user;
+    } catch (error) {
+      throw new Error('ログインに失敗しました');
+    }
+  }
+
+  // サインアップ
+  async signUp(email: string, password: string, displayName: string): Promise<User> {
+    try {
+      const userCredential = await createUserWithEmailAndPassword(firebaseAuthInstance, email, password);
+      
+      // 表示名を設定
+      await updateProfile(userCredential.user, { displayName });
+      
+      // ユーザー設定を作成
+      await this.createUserSettings(userCredential.user.uid, email, displayName);
+      
+      // ユーザーデータを作成
+      const userData = {
+        username: displayName,
+        email: email,
+        postCount: 0,
+        themeCount: 0
+      };
+      
+      const docRef = await createUser(userData);
+      const user = {
+        id: docRef.id,
+        ...userData,
+        createdAt: new Date() as any
+      };
+      
+      this.currentUser = user;
+      return user;
+    } catch (error) {
+      throw new Error('アカウント作成に失敗しました');
+    }
+  }
+
+  // サインアウト
+  async signOut(): Promise<void> {
+    await signOut(firebaseAuthInstance);
+    this.currentUser = null;
+    this.firebaseUser = null;
+  }
+
+  // Firebaseユーザーからシステムユーザーを取得
+  private async getUserFromFirebase(firebaseUser: FirebaseUser): Promise<User | null> {
+    return await getUser(firebaseUser.uid);
+  }
+
+  // 現在のユーザーを取得
+  getCurrentUser(): User | null {
+    return this.currentUser;
+  }
+
+  // 現在のFirebaseユーザーを取得
+  getFirebaseUser(): FirebaseUser | null {
+    return this.firebaseUser;
+  }
+
+  // 投稿数を増やす
+  async incrementPostCount(userId: string): Promise<void> {
+    const user = await getUser(userId);
+    if (user) {
+      const userRef = doc(db, 'users', userId);
+      await setDoc(userRef, {
+        postCount: user.postCount + 1,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+    }
+  }
+
+  // テーマ参加数を増やす
+  async incrementThemeCount(userId: string): Promise<void> {
+    const user = await getUser(userId);
+    if (user) {
+      const userRef = doc(db, 'users', userId);
+      await setDoc(userRef, {
+        themeCount: user.themeCount + 1,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+    }
+  }
+}
+
+// 後方互換性のためのSimpleAuth（非推奨）
 export class SimpleAuth {
   private static instance: SimpleAuth;
   private currentUser: User | null = null;
@@ -86,4 +267,5 @@ export class SimpleAuth {
 }
 
 // エクスポート
+export const firebaseAuth = FirebaseAuth.getInstance();
 export const auth = SimpleAuth.getInstance();

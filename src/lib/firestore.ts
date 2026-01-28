@@ -1,5 +1,6 @@
-import { collection, addDoc, getDocs, doc, updateDoc, increment, query, orderBy, Timestamp, where, getDoc, setDoc, deleteDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc, getDocs, collection, query, where, orderBy, addDoc, updateDoc, deleteDoc, Timestamp, serverTimestamp, increment } from 'firebase/firestore';
 import { db } from './firebase';
+import { UserSettings } from './auth';
 
 export { db, Timestamp }; // dbとTimestampをエクスポート
 
@@ -198,6 +199,30 @@ export async function getUserIdeas(userId: string) {
   const q = query(ideasCollection, where('userId', '==', userId));
   const snapshot = await getDocs(q);
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Idea));
+}
+
+// ユーザー設定を取得
+export async function getUserSettings(userId: string) {
+  const docRef = doc(db, 'userSettings', userId);
+  const docSnap = await getDoc(docRef);
+  if (docSnap.exists()) {
+    return { id: docSnap.id, ...docSnap.data() } as UserSettings;
+  }
+  return null;
+}
+
+// すべてのユーザーを取得
+export async function getAllUsers() {
+  const q = query(usersCollection, orderBy('createdAt', 'desc'));
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as User));
+}
+
+// すべてのユーザー設定を取得
+export async function getAllUserSettings() {
+  const q = query(collection(db, 'userSettings'), orderBy('createdAt', 'desc'));
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as UserSettings));
 }
 
 export async function getIdeas() {

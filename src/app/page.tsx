@@ -3,12 +3,14 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { getIdeas, Idea, getActiveTheme, Theme, getThemes } from '@/lib/firestore';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function Home() {
   const [ideas, setIdeas] = useState<Idea[]>([]);
   const [activeTheme, setActiveTheme] = useState<Theme | null>(null);
   const [themes, setThemes] = useState<Theme[]>([]);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -50,9 +52,25 @@ export default function Home() {
               <Link href="/post" className="text-gray-700 hover:text-gray-900">
                 投稿
               </Link>
-              <Link href="/user/demo" className="text-gray-700 hover:text-gray-900">
-                マイページ
-              </Link>
+              {user ? (
+                <>
+                  <Link href={`/user/${user.id}`} className="text-blue-600 font-semibold">
+                    マイページ
+                  </Link>
+                  <Link href="/login" className="text-gray-700 hover:text-gray-900">
+                    ログアウト
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link href="/login" className="text-gray-700 hover:text-gray-900">
+                    ログイン
+                  </Link>
+                  <Link href="/signup" className="text-gray-700 hover:text-gray-900">
+                    アカウント作成
+                  </Link>
+                </>
+              )}
               <Link href="/about" className="text-gray-700 hover:text-gray-900">
                 About
               </Link>
