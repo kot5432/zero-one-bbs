@@ -140,7 +140,7 @@ export default function AdminPage() {
         description: newTheme.description,
         startDate: Timestamp.fromDate(new Date(newTheme.startDate)),
         endDate: Timestamp.fromDate(new Date(newTheme.endDate)),
-        eventDate: newTheme.eventDate ? Timestamp.fromDate(new Date(newTheme.eventDate)) : undefined,
+        ...(newTheme.eventDate && { eventDate: Timestamp.fromDate(new Date(newTheme.eventDate)) }),
         isActive: true
       };
 
