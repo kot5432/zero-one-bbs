@@ -61,6 +61,18 @@ export interface Idea {
   problem?: string; // 何を解決したいか
   successCriteria?: string; // どんな形になれば成功か
   userId?: string; // ユーザーとの紐付け
+  
+  // 管理用拡張項目
+  nextAction?: string; // 次のアクション
+  rejectionReason?: string; // 保留・見送り理由
+  eventFeasibility?: {
+    likeTarget: number; // 👍目標数
+    interestedPeople: number; // 興味を持っている人数
+    offlinePossible: boolean; // オフライン実施可否
+    managementEffort: 'low' | 'medium' | 'high'; // 管理工数
+    feasibilityScore: number; // イベント化可能度（1-5）
+  };
+  relatedIdeas?: string[]; // 関連アイデアID
 }
 
 export interface Comment {

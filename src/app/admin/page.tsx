@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { getIdeas, Idea, getThemes, Theme, getActiveTheme, createTheme, updateTheme, getEvents, Event, Timestamp } from '@/lib/firestore';
+import { doc, updateDoc } from 'firebase/firestore';
+import { getIdeas, Idea, getThemes, Theme, getActiveTheme, createTheme, updateTheme, getEvents, Event, Timestamp, db } from '@/lib/firestore';
 import { updateIdeaStatus, deleteIdea, updateAdminMemo, updateAdminChecklist } from '@/lib/admin';
 
 export default function AdminPage() {
@@ -25,6 +26,10 @@ export default function AdminPage() {
     endDate: '',
     eventDate: ''
   });
+
+  // 拡張管理機能用
+  const [expandedIdeas, setExpandedIdeas] = useState<Set<string>>(new Set());
+  const [editingIdeas, setEditingIdeas] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     const fetchData = async () => {
@@ -121,6 +126,75 @@ export default function AdminPage() {
     } catch (error) {
       console.error('Error updating admin checklist:', error);
     }
+  };
+
+  // 拡張管理機能
+  const toggleIdeaExpansion = (ideaId: string) => {
+    const newExpanded = new Set(expandedIdeas);
+    if (newExpanded.has(ideaId)) {
+      newExpanded.delete(ideaId);
+    } else {
+      newExpanded.add(ideaId);
+    }
+    setExpandedIdeas(newExpanded);
+  };
+
+  const toggleIdeaEditing = (ideaId: string) => {
+    const newEditing = new Set(editingIdeas);
+    if (newEditing.has(ideaId)) {
+      newEditing.delete(ideaId);
+    } else {
+      newEditing.add(ideaId);
+    }
+    setEditingIdeas(newEditing);
+  };
+
+  const updateIdeaExtendedHandler = async (ideaId: string, updates: Partial<Idea>) => {
+    try {
+      // アクション履歴を追加
+      const actionHistory = {
+        action: 'extended_update',
+        timestamp: Timestamp.now(),
+        details: '拡張情報を更新'
+      };
+
+      const ideaRef = doc(db, 'ideas', ideaId);
+      await updateDoc(ideaRef, {
+        ...updates,
+        updatedAt: Timestamp.now(),
+        actionHistory: actionHistory
+      });
+
+      // UIを更新
+      setIdeas(prev => 
+        prev.map(idea => 
+          idea.id === ideaId ? { ...idea, ...updates } : idea
+        )
+      );
+    } catch (error) {
+      console.error('Error updating idea extended:', error);
+      alert('更新に失敗しました');
+    }
+  };
+
+  // イベント化可能度を計算
+  const calculateFeasibilityScore = (idea: Idea): number => {
+    let score = 0;
+    
+    // 👍数（10点満点）
+    if (idea.likes >= 10) score += 1;
+    if (idea.likes >= 20) score += 1;
+    
+    // チェックリスト（3点満点）
+    const checklist = idea.adminChecklist;
+    if (checklist?.safety) score += 1;
+    if (checklist?.popularity) score += 1;
+    if (checklist?.manageable) score += 1;
+    
+    // テーマ投稿（1点）
+    if (idea.themeId) score += 1;
+    
+    return Math.min(score, 5);
   };
 
   // テーマ管理関数
