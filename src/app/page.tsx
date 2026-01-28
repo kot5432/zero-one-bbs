@@ -2,22 +2,25 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { getIdeas, Idea, getActiveTheme, Theme } from '@/lib/firestore';
+import { getIdeas, Idea, getActiveTheme, Theme, getThemes } from '@/lib/firestore';
 
 export default function Home() {
   const [ideas, setIdeas] = useState<Idea[]>([]);
   const [activeTheme, setActiveTheme] = useState<Theme | null>(null);
+  const [themes, setThemes] = useState<Theme[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [ideasData, activeThemeData] = await Promise.all([
+        const [ideasData, activeThemeData, themesData] = await Promise.all([
           getIdeas(),
-          getActiveTheme()
+          getActiveTheme(),
+          getThemes()
         ]);
         setIdeas(ideasData);
         setActiveTheme(activeThemeData);
+        setThemes(themesData);
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -27,6 +30,12 @@ export default function Home() {
 
     fetchData();
   }, []);
+
+  // テーマ名を取得するヘルパー関数
+  const getThemeName = (themeId: string) => {
+    const theme = themes.find(t => t.id === themeId);
+    return theme ? theme.title : '不明なテーマ';
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -118,6 +127,15 @@ export default function Home() {
                   href={`/idea/${idea.id}`}
                   className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-6 block"
                 >
+                  {/* テーマタグ */}
+                  {idea.themeId && (
+                    <div className="mb-3">
+                      <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                        {getThemeName(idea.themeId)}
+                      </span>
+                    </div>
+                  )}
+                  
                   <div className="flex justify-between items-start mb-3">
                     <h4 className="text-xl font-semibold text-gray-900 line-clamp-2">
                       {idea.title}
@@ -129,7 +147,7 @@ export default function Home() {
                           : 'bg-green-100 text-green-800'
                       }`}
                     >
-                      {idea.status === 'idea' ? 'アイデア' : '準備中'}
+                      {idea.status === 'idea' ? '未確認' : '検討中'}
                     </span>
                   </div>
                   
