@@ -588,11 +588,11 @@ export default function AdminPage() {
           {/* フィルターとソート */}
           <div className="flex flex-wrap gap-4 mb-6">
             <div className="flex items-center gap-2">
-              <label className="text-sm font-medium text-gray-700">ステータス:</label>
+              <label className="text-sm font-bold text-gray-900">ステータス:</label>
               <select
                 value={filter}
                 onChange={(e) => setFilter(e.target.value as any)}
-                className="px-3 py-1 border border-gray-300 rounded-md text-sm"
+                className="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium bg-white text-gray-900"
               >
                 <option value="all">すべて</option>
                 <option value="idea">未確認</option>
@@ -602,11 +602,11 @@ export default function AdminPage() {
             </div>
             
             <div className="flex items-center gap-2">
-              <label className="text-sm font-medium text-gray-700">実施形式:</label>
+              <label className="text-sm font-bold text-gray-900">実施形式:</label>
               <select
                 value={modeFilter}
                 onChange={(e) => setModeFilter(e.target.value as any)}
-                className="px-3 py-1 border border-gray-300 rounded-md text-sm"
+                className="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium bg-white text-gray-900"
               >
                 <option value="all">すべて</option>
                 <option value="online">オンライン</option>
@@ -615,11 +615,11 @@ export default function AdminPage() {
             </div>
             
             <div className="flex items-center gap-2">
-              <label className="text-sm font-medium text-gray-700">並び替え:</label>
+              <label className="text-sm font-bold text-gray-900">並び替え:</label>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as any)}
-                className="px-3 py-1 border border-gray-300 rounded-md text-sm"
+                className="px-3 py-2 border border-gray-300 rounded-md text-sm font-medium bg-white text-gray-900"
               >
                 <option value="likes">👍が多い順</option>
                 <option value="createdAt">新しい順</option>
@@ -629,36 +629,36 @@ export default function AdminPage() {
 
           {/* 統計情報 */}
           <div className="grid grid-cols-1 md:grid-cols-6 gap-4 mb-6">
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <p className="text-sm text-blue-600 font-medium">総アイデア数</p>
+            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+              <p className="text-sm font-bold text-blue-800">総アイデア数</p>
               <p className="text-2xl font-bold text-blue-900">{ideas.length}</p>
             </div>
-            <div className="bg-yellow-50 p-4 rounded-lg">
-              <p className="text-sm text-yellow-600 font-medium">未確認</p>
+            <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+              <p className="text-sm font-bold text-yellow-800">未確認</p>
               <p className="text-2xl font-bold text-yellow-900">
                 {ideas.filter(i => i.status === 'idea').length}
               </p>
             </div>
-            <div className="bg-purple-50 p-4 rounded-lg">
-              <p className="text-sm text-purple-600 font-medium">検討中</p>
+            <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
+              <p className="text-sm font-bold text-purple-800">検討中</p>
               <p className="text-2xl font-bold text-purple-900">
                 {ideas.filter(i => i.status === 'preparing').length}
               </p>
             </div>
-            <div className="bg-green-50 p-4 rounded-lg">
-              <p className="text-sm text-green-600 font-medium">イベント化予定</p>
+            <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+              <p className="text-sm font-bold text-green-800">イベント化予定</p>
               <p className="text-2xl font-bold text-green-900">
                 {ideas.filter(i => i.status === 'event_planned').length}
               </p>
             </div>
-            <div className="bg-indigo-50 p-4 rounded-lg">
-              <p className="text-sm text-indigo-600 font-medium">今月テーマ投稿</p>
+            <div className="bg-indigo-50 p-4 rounded-lg border border-indigo-200">
+              <p className="text-sm font-bold text-indigo-800">今月テーマ投稿</p>
               <p className="text-2xl font-bold text-indigo-900">
                 {activeTheme ? ideas.filter(i => i.themeId === activeTheme.id).length : 0}
               </p>
             </div>
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <p className="text-sm text-gray-600 font-medium">総👍数</p>
+            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+              <p className="text-sm font-bold text-gray-800">総👍数</p>
               <p className="text-2xl font-bold text-gray-900">
                 {ideas.reduce((sum, idea) => sum + idea.likes, 0)}
               </p>
@@ -671,20 +671,20 @@ export default function AdminPage() {
               <div key={idea.id} className="border border-gray-200 rounded-lg p-4">
                 <div className="flex justify-between items-start mb-3">
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-900">
+                    <h3 className="text-lg font-bold text-gray-900">
                       {idea.title}
                     </h3>
                     {/* イベント化可能度 */}
                     <div className="flex items-center mt-1">
-                      <span className="text-xs text-gray-500 mr-2">イベント化可能度:</span>
+                      <span className="text-xs font-bold text-gray-700 mr-2">イベント化可能度:</span>
                       <div className="flex">
                         {[1, 2, 3, 4, 5].map((star) => (
                           <span key={star} className={`text-lg ${star <= calculateFeasibilityScore(idea) ? 'text-yellow-400' : 'text-gray-300'}`}>★</span>
                         ))}
                       </div>
                     </div>
-                    <p className="text-gray-600 mb-2">{idea.description}</p>
-                    <div className="flex items-center gap-4 text-sm text-gray-500">
+                    <p className="text-gray-800 mb-2 font-medium">{idea.description}</p>
+                    <div className="flex items-center gap-4 text-sm font-medium text-gray-700">
                       <span>👍 {idea.likes}</span>
                       <span>{idea.mode === 'online' ? 'オンライン' : 'オフライン'}</span>
                       <span>{idea.createdAt.toDate().toLocaleDateString('ja-JP')}</span>
@@ -693,9 +693,9 @@ export default function AdminPage() {
                     {/* アクション履歴 */}
                     {idea.actionHistory && idea.actionHistory.length > 0 && (
                       <div className="mt-2 p-2 bg-gray-50 rounded text-xs">
-                        <p className="font-medium text-gray-700 mb-1">最近の操作:</p>
+                        <p className="font-bold text-gray-800 mb-1">最近の操作:</p>
                         {idea.actionHistory.slice(-2).map((action, index) => (
-                          <div key={index} className="text-gray-600">
+                          <div key={index} className="text-gray-700 font-medium">
                             {action.timestamp.toDate().toLocaleDateString('ja-JP')} - {action.details}
                           </div>
                         ))}
