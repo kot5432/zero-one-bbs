@@ -206,7 +206,15 @@ export async function getUserSettings(userId: string) {
   const docRef = doc(db, 'userSettings', userId);
   const docSnap = await getDoc(docRef);
   if (docSnap.exists()) {
-    return { id: docSnap.id, ...docSnap.data() } as UserSettings;
+    const data = docSnap.data();
+    return {
+      id: docSnap.id,
+      uid: data.uid || userId,
+      email: data.email || '',
+      displayName: data.displayName || '',
+      createdAt: data.createdAt || Timestamp.now(),
+      updatedAt: data.updatedAt || Timestamp.now()
+    } as UserSettings;
   }
   return null;
 }
@@ -222,7 +230,17 @@ export async function getAllUsers() {
 export async function getAllUserSettings() {
   const q = query(collection(db, 'userSettings'), orderBy('createdAt', 'desc'));
   const snapshot = await getDocs(q);
-  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as UserSettings));
+  return snapshot.docs.map(doc => {
+    const data = doc.data();
+    return {
+      id: doc.id,
+      uid: data.uid || doc.id,
+      email: data.email || '',
+      displayName: data.displayName || '',
+      createdAt: data.createdAt || Timestamp.now(),
+      updatedAt: data.updatedAt || Timestamp.now()
+    } as UserSettings;
+  });
 }
 
 export async function getIdeas() {
