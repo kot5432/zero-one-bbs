@@ -595,9 +595,18 @@ export default function AdminPage() {
               <div key={idea.id} className="border border-gray-200 rounded-lg p-4">
                 <div className="flex justify-between items-start mb-3">
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    <h3 className="text-lg font-semibold text-gray-900">
                       {idea.title}
                     </h3>
+                    {/* イベント化可能度 */}
+                    <div className="flex items-center mt-1">
+                      <span className="text-xs text-gray-500 mr-2">イベント化可能度:</span>
+                      <div className="flex">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <span key={star} className={`text-lg ${star <= calculateFeasibilityScore(idea) ? 'text-yellow-400' : 'text-gray-300'}`}>★</span>
+                        ))}
+                      </div>
+                    </div>
                     <p className="text-gray-600 mb-2">{idea.description}</p>
                     <div className="flex items-center gap-4 text-sm text-gray-500">
                       <span>👍 {idea.likes}</span>
@@ -622,6 +631,22 @@ export default function AdminPage() {
                     <span className={`px-3 py-1 text-xs rounded-full ${getStatusColor(idea.status)}`}>
                       {getStatusText(idea.status)}
                     </span>
+                    
+                    {/* 次のアクション */}
+                    {idea.nextAction && (
+                      <div className="bg-orange-50 border border-orange-200 rounded p-2 text-xs max-w-48">
+                        <p className="font-medium text-orange-800 mb-1">次のアクション:</p>
+                        <p className="text-orange-700">{idea.nextAction}</p>
+                      </div>
+                    )}
+                    
+                    {/* 詳細開閉ボタン */}
+                    <button
+                      onClick={() => toggleIdeaExpansion(idea.id!)}
+                      className="px-3 py-1 bg-indigo-600 text-white text-sm rounded hover:bg-indigo-700"
+                    >
+                      {expandedIdeas.has(idea.id!) ? '詳細を閉じる' : '詳細を開く'}
+                    </button>
                     
                     <div className="flex gap-2 flex-wrap">
                       {idea.status === 'idea' && (
@@ -750,6 +775,131 @@ export default function AdminPage() {
                     rows={2}
                   />
                 </div>
+                
+                {/* 拡張情報（展開時のみ表示） */}
+                {expandedIdeas.has(idea.id!) && (
+                  <div className="mt-4 pt-4 border-t border-gray-200 space-y-4">
+                    {/* 次のアクション設定 */}
+                    <div className="bg-blue-50 rounded-lg p-4">
+                      <h4 className="font-medium text-gray-900 mb-3">次のアクション</h4>
+                      <select
+                        value={idea.nextAction || ''}
+                        onChange={(e) => updateIdeaExtendedHandler(idea.id!, { nextAction: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                      >
+                        <option value="">選択してください</option>
+                        <option value="投稿者に連絡">投稿者に連絡</option>
+                        <option value="似たアイデアと統合">似たアイデアと統合</option>
+                        <option value="今月は見送り">今月は見送り</option>
+                        <option value="次回テーマ候補に保存">次回テーマ候補に保存</option>
+                        <option value="詳細検討が必要">詳細検討が必要</option>
+                        <option value="実施計画を作成">実施計画を作成</option>
+                      </select>
+                    </div>
+                    
+                    {/* 保留理由 */}
+                    {idea.status === 'rejected' && (
+                      <div className="bg-red-50 rounded-lg p-4">
+                        <h4 className="font-medium text-gray-900 mb-3">見送り理由</h4>
+                        <select
+                          value={idea.rejectionReason || ''}
+                          onChange={(e) => updateIdeaExtendedHandler(idea.id!, { rejectionReason: e.target.value })}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                        >
+                          <option value="">選択してください</option>
+                          <option value="時期が合わない">時期が合わない</option>
+                          <option value="リスクあり">リスクあり</option>
+                          <option value="人数不足">人数不足</option>
+                          <option value="テーマ外">テーマ外</option>
+                          <option value="実施困難">実施困難</option>
+                          <option value="類似アイデアあり">類似アイデアあり</option>
+                        </select>
+                      </div>
+                    )}
+                    
+                    {/* イベント化条件 */}
+                    <div className="bg-green-50 rounded-lg p-4">
+                      <h4 className="font-medium text-gray-900 mb-3">イベント化条件</h4>
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div>
+                          <label className="block text-gray-700 mb-1">👍目標数</label>
+                          <input
+                            type="number"
+                            value={idea.eventFeasibility?.likeTarget || 10}
+                            onChange={(e) => updateIdeaExtendedHandler(idea.id!, {
+                              eventFeasibility: {
+                                likeTarget: parseInt(e.target.value),
+                                interestedPeople: idea.eventFeasibility?.interestedPeople || 0,
+                                offlinePossible: idea.eventFeasibility?.offlinePossible || false,
+                                managementEffort: idea.eventFeasibility?.managementEffort || 'medium',
+                                feasibilityScore: idea.eventFeasibility?.feasibilityScore || 0
+                              }
+                            })}
+                            className="w-full px-2 py-1 border border-gray-300 rounded"
+                            min="1"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-gray-700 mb-1">興味を持っている人数</label>
+                          <input
+                            type="number"
+                            value={idea.eventFeasibility?.interestedPeople || 0}
+                            onChange={(e) => updateIdeaExtendedHandler(idea.id!, {
+                              eventFeasibility: {
+                                likeTarget: idea.eventFeasibility?.likeTarget || 10,
+                                interestedPeople: parseInt(e.target.value),
+                                offlinePossible: idea.eventFeasibility?.offlinePossible || false,
+                                managementEffort: idea.eventFeasibility?.managementEffort || 'medium',
+                                feasibilityScore: idea.eventFeasibility?.feasibilityScore || 0
+                              }
+                            })}
+                            className="w-full px-2 py-1 border border-gray-300 rounded"
+                            min="0"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-gray-700 mb-1">オフライン実施可否</label>
+                          <select
+                            value={idea.eventFeasibility?.offlinePossible ? 'true' : 'false'}
+                            onChange={(e) => updateIdeaExtendedHandler(idea.id!, {
+                              eventFeasibility: {
+                                likeTarget: idea.eventFeasibility?.likeTarget || 10,
+                                interestedPeople: idea.eventFeasibility?.interestedPeople || 0,
+                                offlinePossible: e.target.value === 'true',
+                                managementEffort: idea.eventFeasibility?.managementEffort || 'medium',
+                                feasibilityScore: idea.eventFeasibility?.feasibilityScore || 0
+                              }
+                            })}
+                            className="w-full px-2 py-1 border border-gray-300 rounded"
+                          >
+                            <option value="true">可能</option>
+                            <option value="false">不可</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-gray-700 mb-1">管理工数</label>
+                          <select
+                            value={idea.eventFeasibility?.managementEffort || 'medium'}
+                            onChange={(e) => updateIdeaExtendedHandler(idea.id!, {
+                              eventFeasibility: {
+                                likeTarget: idea.eventFeasibility?.likeTarget || 10,
+                                interestedPeople: idea.eventFeasibility?.interestedPeople || 0,
+                                offlinePossible: idea.eventFeasibility?.offlinePossible || false,
+                                managementEffort: e.target.value as 'low' | 'medium' | 'high',
+                                feasibilityScore: idea.eventFeasibility?.feasibilityScore || 0
+                              }
+                            })}
+                            className="w-full px-2 py-1 border border-gray-300 rounded"
+                          >
+                            <option value="low">低</option>
+                            <option value="medium">中</option>
+                            <option value="high">高</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             ))}
           </div>
