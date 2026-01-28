@@ -141,6 +141,34 @@ export default function AdminPage() {
     }
   };
 
+  // すべての投稿を一括削除
+  const deleteAllIdeas = async () => {
+    if (!confirm('本当にすべての投稿を削除しますか？この操作は元に戻せません。\n\n削除理由を入力してください。')) {
+      return;
+    }
+
+    const reason = prompt('削除理由を入力してください:');
+    if (!reason) {
+      return;
+    }
+
+    try {
+      // すべてのアイデアを削除
+      for (const idea of ideas) {
+        if (idea.id) {
+          await deleteIdea(idea.id);
+        }
+      }
+      
+      // UIを更新
+      setIdeas([]);
+      alert('すべての投稿を削除しました');
+    } catch (error) {
+      console.error('Error deleting all ideas:', error);
+      alert('削除に失敗しました');
+    }
+  };
+
   // 削除確認ダイアログ
   const showDeleteConfirm = (type: 'theme' | 'idea', id: string, title: string) => {
     setDeleteConfirm({
@@ -440,22 +468,30 @@ export default function AdminPage() {
             <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
               <div className="flex justify-between items-start mb-2">
                 <h3 className="text-lg font-semibold text-green-800">現在のテーマ</h3>
-                <button
-                  onClick={() => {
-                    setEditingThemeId(activeTheme.id!);
-                    setNewTheme({
-                      title: activeTheme.title,
-                      description: activeTheme.description,
-                      startDate: activeTheme.startDate.toDate().toISOString().split('T')[0],
-                      endDate: activeTheme.endDate.toDate().toISOString().split('T')[0],
-                      eventDate: activeTheme.eventDate ? activeTheme.eventDate.toDate().toISOString().split('T')[0] : ''
-                    });
-                    setShowThemeForm(true);
-                  }}
-                  className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
-                >
-                  編集
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => {
+                      setEditingThemeId(activeTheme.id!);
+                      setNewTheme({
+                        title: activeTheme.title,
+                        description: activeTheme.description,
+                        startDate: activeTheme.startDate.toDate().toISOString().split('T')[0],
+                        endDate: activeTheme.endDate.toDate().toISOString().split('T')[0],
+                        eventDate: activeTheme.eventDate ? activeTheme.eventDate.toDate().toISOString().split('T')[0] : ''
+                      });
+                      setShowThemeForm(true);
+                    }}
+                    className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+                  >
+                    編集
+                  </button>
+                  <button
+                    onClick={() => showDeleteConfirm('theme', activeTheme.id!, activeTheme.title)}
+                    className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700"
+                  >
+                    削除
+                  </button>
+                </div>
               </div>
               <h4 className="font-medium text-green-900">{activeTheme.title}</h4>
               <p className="text-green-700 mb-2">{activeTheme.description}</p>
@@ -583,7 +619,15 @@ export default function AdminPage() {
         </div>
         
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">アイデア管理</h2>
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold text-gray-900">アイデア管理</h2>
+            <button
+              onClick={deleteAllIdeas}
+              className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+            >
+              すべての投稿を削除
+            </button>
+          </div>
           
           {/* フィルターとソート */}
           <div className="flex flex-wrap gap-4 mb-6">
@@ -724,7 +768,7 @@ export default function AdminPage() {
                       {expandedIdeas.has(idea.id!) ? '詳細を閉じる' : '詳細を開く'}
                     </button>
                     
-                    <div className="flex gap-2 flex-wrap">
+                    <div className="flex gap-2 flex-wrap mt-3">
                       {idea.status === 'idea' && (
                         <>
                           <button
@@ -790,6 +834,12 @@ export default function AdminPage() {
                             className="px-3 py-1 bg-purple-600 text-white text-sm rounded hover:bg-purple-700"
                           >
                             対応済み
+                          </button>
+                          <button
+                            onClick={() => idea.id && showDeleteConfirm('idea', idea.id, idea.title)}
+                            className="px-3 py-1 bg-gray-600 text-white text-sm rounded hover:bg-gray-700"
+                          >
+                            削除
                           </button>
                         </>
                       )}
