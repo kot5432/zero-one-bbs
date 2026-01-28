@@ -1,7 +1,31 @@
 import { collection, addDoc, getDocs, doc, updateDoc, increment, query, orderBy, Timestamp, where, getDoc, setDoc } from 'firebase/firestore';
 import { db } from './firebase';
 
-export { db }; // dbをエクスポート
+export { db, Timestamp }; // dbとTimestampをエクスポート
+
+export interface Theme {
+  id?: string;
+  title: string;
+  description: string;
+  startDate: Timestamp;
+  endDate: Timestamp;
+  eventDate?: Timestamp;
+  isActive: boolean;
+  createdAt: Timestamp;
+  updatedAt?: Timestamp;
+}
+
+export interface Event {
+  id?: string;
+  themeId: string;
+  title: string;
+  description: string;
+  date: Timestamp;
+  participantCount: number;
+  content: string;
+  nextActions: string[];
+  createdAt: Timestamp;
+}
 
 export interface Idea {
   id?: string;
@@ -23,6 +47,9 @@ export interface Idea {
     timestamp: Timestamp;
     details?: string;
   }>;
+  themeId?: string; // テーマとの紐付け
+  problem?: string; // 何を解決したいか
+  successCriteria?: string; // どんな形になれば成功か
 }
 
 export interface Comment {
@@ -42,6 +69,8 @@ export interface Like {
 export const ideasCollection = collection(db, 'ideas');
 export const commentsCollection = collection(db, 'comments');
 export const likesCollection = collection(db, 'likes');
+export const themesCollection = collection(db, 'themes');
+export const eventsCollection = collection(db, 'events');
 
 export async function addIdea(idea: Omit<Idea, 'id' | 'likes' | 'createdAt'>) {
   const newIdea = {
@@ -50,6 +79,52 @@ export async function addIdea(idea: Omit<Idea, 'id' | 'likes' | 'createdAt'>) {
     createdAt: Timestamp.now()
   };
   return await addDoc(ideasCollection, newIdea);
+}
+
+// テーマ管理関数
+export async function getThemes() {
+  const q = query(themesCollection, orderBy('createdAt', 'desc'));
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Theme));
+}
+
+export async function getActiveTheme() {
+  const q = query(themesCollection, where('isActive', '==', true));
+  const snapshot = await getDocs(q);
+  if (snapshot.empty) return null;
+  const theme = snapshot.docs[0];
+  return { id: theme.id, ...theme.data() } as Theme;
+}
+
+export async function createTheme(theme: Omit<Theme, 'id' | 'createdAt'>) {
+  const newTheme = {
+    ...theme,
+    createdAt: Timestamp.now()
+  };
+  return await addDoc(themesCollection, newTheme);
+}
+
+export async function updateTheme(themeId: string, updates: Partial<Theme>) {
+  const themeRef = doc(db, 'themes', themeId);
+  await updateDoc(themeRef, {
+    ...updates,
+    updatedAt: Timestamp.now()
+  });
+}
+
+// イベント管理関数
+export async function getEvents() {
+  const q = query(eventsCollection, orderBy('date', 'desc'));
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Event));
+}
+
+export async function createEvent(event: Omit<Event, 'id' | 'createdAt'>) {
+  const newEvent = {
+    ...event,
+    createdAt: Timestamp.now()
+  };
+  return await addDoc(eventsCollection, newEvent);
 }
 
 export async function getIdeas() {
