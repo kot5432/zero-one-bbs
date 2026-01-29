@@ -224,7 +224,7 @@ export default function AdminPage() {
                 <div className="bg-white rounded-lg shadow p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">登録ユーザー数</p>
+                      <p className="text-sm font-medium text-gray-600">総ユーザー数</p>
                       <p className="text-3xl font-bold text-gray-900">{users.length}</p>
                     </div>
                     <div className="text-3xl">👥</div>
@@ -234,17 +234,17 @@ export default function AdminPage() {
                 <div className="bg-white rounded-lg shadow p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">総投稿数</p>
+                      <p className="text-sm font-medium text-gray-600">今月の投稿数</p>
                       <p className="text-3xl font-bold text-gray-900">{ideas.length}</p>
                     </div>
-                    <div className="text-3xl">💡</div>
+                    <div className="text-3xl">�</div>
                   </div>
                 </div>
                 
                 <div className="bg-white rounded-lg shadow p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">未対応の投稿</p>
+                      <p className="text-sm font-medium text-gray-600">未対応アイデア</p>
                       <p className="text-3xl font-bold text-orange-600">
                         {ideas.filter(i => i.status === 'idea').length}
                       </p>
@@ -256,12 +256,12 @@ export default function AdminPage() {
                 <div className="bg-white rounded-lg shadow p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">検討中</p>
-                      <p className="text-3xl font-bold text-blue-600">
-                        {ideas.filter(i => i.status === 'preparing').length}
+                      <p className="text-sm font-medium text-gray-600">イベント化候補</p>
+                      <p className="text-3xl font-bold text-green-600">
+                        {ideas.filter(i => i.likes >= 5 && i.status !== 'rejected').length}
                       </p>
                     </div>
-                    <div className="text-3xl">🔍</div>
+                    <div className="text-3xl">🎯</div>
                   </div>
                 </div>
               </div>
@@ -281,6 +281,22 @@ export default function AdminPage() {
                     </p>
                   )}
                 </div>
+              </div>
+
+              {/* 行動につながる要素 */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <button
+                  onClick={() => setCurrentView('posts')}
+                  className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+                >
+                  未対応アイデアを見る ({ideas.filter(i => i.status === 'idea').length}件)
+                </button>
+                <Link
+                  href="/"
+                  className="bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors text-center"
+                >
+                  今月のテーマを見る
+                </Link>
               </div>
             </div>
           )}
@@ -392,9 +408,11 @@ export default function AdminPage() {
                           <div className="text-sm text-gray-500">投稿: {user.postCount}</div>
                         </td>
                         <td className="px-4 py-3">
-                          <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
-                            通常
-                          </span>
+                          <select className="px-2 py-1 text-xs rounded-full border border-gray-300">
+                            <option value="normal" className="bg-green-100 text-green-800">通常</option>
+                            <option value="warning" className="bg-yellow-100 text-yellow-800">注意</option>
+                            <option value="check" className="bg-red-100 text-red-800">要確認</option>
+                          </select>
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-500">
                           {user.lastLoginAt 
@@ -450,6 +468,12 @@ export default function AdminPage() {
                           タイトル
                         </th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          投稿者
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          テーマ
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           状態
                         </th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -462,24 +486,34 @@ export default function AdminPage() {
                         <tr key={idea.id}>
                           <td className="px-4 py-3">
                             <div className="text-sm font-medium text-gray-900">{idea.title}</div>
-                            <div className="text-sm text-gray-500">👍 {idea.likes}</div>
+                            <div className="text-sm text-gray-500">👍 {idea.likes} · 🙋 0</div>
+                          </td>
+                          <td className="px-4 py-3 text-sm text-gray-900">
+                            投稿者{idea.id?.slice(0, 8)}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-gray-900">
+                            {idea.themeId ? `テーマ${idea.themeId.slice(0, 6)}` : '自由投稿'}
                           </td>
                           <td className="px-4 py-3">
-                            <span className={`px-2 py-1 text-xs rounded-full ${
-                              idea.status === 'idea' 
-                                ? 'bg-yellow-100 text-yellow-800'
-                                : idea.status === 'preparing'
-                                ? 'bg-blue-100 text-blue-800'
-                                : 'bg-green-100 text-green-800'
-                            }`}>
-                              {idea.status === 'idea' ? '未確認' : 
-                               idea.status === 'preparing' ? '検討中' : 'イベント化'}
-                            </span>
+                            <select 
+                              value={idea.status}
+                              className="px-2 py-1 text-xs rounded-full border border-gray-300"
+                            >
+                              <option value="idea" className="bg-yellow-100 text-yellow-800">募集中</option>
+                              <option value="preparing" className="bg-blue-100 text-blue-800">検討中</option>
+                              <option value="event_planned" className="bg-green-100 text-green-800">イベント化決定</option>
+                              <option value="rejected" className="bg-red-100 text-red-800">見送り</option>
+                            </select>
                           </td>
                           <td className="px-4 py-3">
-                            <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">
-                              編集
-                            </button>
+                            <div className="flex gap-2">
+                              <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">
+                                編集
+                              </button>
+                              <button className="text-green-600 hover:text-green-700 text-sm font-medium">
+                                コメント
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -495,48 +529,58 @@ export default function AdminPage() {
             <div>
               <h2 className="text-2xl font-bold text-gray-900 mb-6">📈 データ管理</h2>
               
-              <div className="bg-white rounded-lg shadow p-6">
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          ユーザー名
-                        </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          状態
-                        </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          判定
-                        </th>
-                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          詳細
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {users.slice(0, 5).map((user) => (
-                        <tr key={user.id}>
-                          <td className="px-4 py-3 text-sm font-medium text-gray-900">{user.username}</td>
-                          <td className="px-4 py-3">
-                            <span className="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
-                              普通
-                            </span>
-                          </td>
-                          <td className="px-4 py-3">
-                            <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
-                              通常
-                            </span>
-                          </td>
-                          <td className="px-4 py-3">
-                            <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">
-                              詳細を見る
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+              {/* データ概要 */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div className="bg-white rounded-lg shadow p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">テーマ別投稿数</h3>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">自由投稿</span>
+                      <span className="font-bold">{ideas.filter(i => !i.themeId).length}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">テーマ投稿</span>
+                      <span className="font-bold">{ideas.filter(i => i.themeId).length}</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-white rounded-lg shadow p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">いいね数・参加意思数</h3>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">総いいね数</span>
+                      <span className="font-bold">{ideas.reduce((sum, i) => sum + i.likes, 0)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">平均いいね数</span>
+                      <span className="font-bold">{ideas.length > 0 ? Math.round(ideas.reduce((sum, i) => sum + i.likes, 0) / ideas.length) : 0}</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="bg-white rounded-lg shadow p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">イベント化率</h3>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">イベント化済み</span>
+                      <span className="font-bold">{ideas.filter(i => i.status === 'event_planned').length}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">イベント化率</span>
+                      <span className="font-bold">{ideas.length > 0 ? Math.round((ideas.filter(i => i.status === 'event_planned').length / ideas.length) * 100) : 0}%</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {/* 活用方法 */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                <h3 className="text-lg font-semibold text-blue-900 mb-4">活用方法</h3>
+                <div className="space-y-3 text-blue-800">
+                  <p><strong>次のテーマを決める:</strong> 投稿数とイベント化率を参考に</p>
+                  <p><strong>「この企画は需要がある」と説明する:</strong> 数字で実績を証明</p>
+                  <p><strong>協力者・支援者に見せる:</strong> 具体的な利用実績を提示</p>
                 </div>
               </div>
             </div>
@@ -547,29 +591,86 @@ export default function AdminPage() {
             <div>
               <h2 className="text-2xl font-bold text-gray-900 mb-6">⚙️ 設定</h2>
               
-              <div className="bg-white rounded-lg shadow p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">サイト基本情報</h3>
+              {/* テーマ設定 */}
+              <div className="bg-white rounded-lg shadow p-6 mb-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">テーマ設定</h3>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">サイト名</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">今月のテーマ</label>
                     <input
                       type="text"
-                      defaultValue="ZERO-ONE"
+                      placeholder="テーマ名を入力"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    />
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <label className="flex items-center">
+                      <input type="checkbox" className="rounded" defaultChecked />
+                      <span className="text-sm text-gray-700">公開</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+              
+              {/* イベント化条件 */}
+              <div className="bg-white rounded-lg shadow p-6 mb-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">イベント化条件</h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">参加意思〇人以上</label>
+                    <input
+                      type="number"
+                      placeholder="5"
                       className="w-full px-3 py-2 border border-gray-300 rounded-md"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">管理者メール</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">いいね〇以上</label>
                     <input
-                      type="email"
-                      defaultValue="admin@zero-one.com"
+                      type="number"
+                      placeholder="10"
                       className="w-full px-3 py-2 border border-gray-300 rounded-md"
                     />
                   </div>
-                  <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                    設定を変更する
-                  </button>
+                  <div className="flex items-center gap-4">
+                    <label className="flex items-center">
+                      <input type="checkbox" className="rounded" defaultChecked />
+                      <span className="text-sm text-gray-700">管理承認必須</span>
+                    </label>
+                  </div>
                 </div>
+              </div>
+              
+              {/* 表示設定 */}
+              <div className="bg-white rounded-lg shadow p-6 mb-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">表示設定</h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">投稿の表示順</label>
+                    <select className="w-full px-3 py-2 border border-gray-300 rounded-md">
+                      <option>新しい順</option>
+                      <option>いいね数順</option>
+                      <option>コメント数順</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">過去テーマの扱い</label>
+                    <select className="w-full px-3 py-2 border border-gray-300 rounded-md">
+                      <option>非表示にする</option>
+                      <option>アーカイブとして表示</option>
+                      <option>一覧に表示</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex gap-4">
+                <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                  設定を変更する
+                </button>
+                <button className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300">
+                  リセット
+                </button>
               </div>
             </div>
           )}
