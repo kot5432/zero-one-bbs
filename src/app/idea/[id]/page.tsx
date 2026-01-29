@@ -169,7 +169,7 @@ export default function IdeaDetailPage() {
             </div>
           </div>
 
-          <div className="flex gap-4">
+          <div className="flex gap-4 mb-8">
             <button
               onClick={handleLike}
               disabled={liking || hasLiked}
@@ -187,8 +187,30 @@ export default function IdeaDetailPage() {
               onClick={handleRealizeClick}
               className="bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors"
             >
-              実現に動きたい
+              🙋 参加したい
             </button>
+          </div>
+
+          {/* 状態表示 */}
+          <div className="bg-gray-50 rounded-lg p-4 mb-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">【状態】</h3>
+            <div className="flex items-center gap-4">
+              <span
+                className={`px-3 py-1 text-sm rounded-full ${
+                  idea.status === 'idea'
+                    ? 'bg-yellow-100 text-yellow-800'
+                    : idea.status === 'preparing'
+                    ? 'bg-blue-100 text-blue-800'
+                    : 'bg-green-100 text-green-800'
+                }`}
+              >
+                {idea.status === 'idea' ? '募集中' : 
+                 idea.status === 'preparing' ? '検討中（管理側）' : 'イベント化決定'}
+              </span>
+              <span className="text-sm text-gray-600">
+                管理側が「検討中」にすると自動で変わります
+              </span>
+            </div>
           </div>
         </div>
 

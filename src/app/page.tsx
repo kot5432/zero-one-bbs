@@ -90,22 +90,48 @@ export default function Home() {
         {activeTheme && (
           <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg p-8 mb-16">
             <div className="text-center">
-              <p className="text-lg font-medium mb-2">今月のテーマ</p>
+              <p className="text-lg font-medium mb-2">【今月のテーマ】</p>
               <h2 className="text-3xl font-bold mb-4">{activeTheme.title}</h2>
+              <div className="text-lg mb-6 opacity-90">
+                {activeTheme.description}
+              </div>
               <div className="flex justify-center items-center gap-6 text-sm mb-6">
                 <span className="bg-white/20 px-4 py-2 rounded-full">
                   期限: {activeTheme.endDate.toDate().toLocaleDateString('ja-JP')}
                 </span>
               </div>
               <Link
-                href="/post"
-                className="bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors inline-block"
+                href={`/theme/${activeTheme.id}`}
+                className="bg-white text-blue-600 px-8 py-4 rounded-lg font-semibold hover:bg-gray-100 transition-colors inline-block text-lg"
               >
-                このテーマに投稿する
+                このテーマで考える
               </Link>
             </div>
           </div>
         )}
+
+        {/* 過去のテーマ */}
+        <div className="bg-white rounded-lg shadow-md p-6 mb-16">
+          <h3 className="text-xl font-bold text-gray-900 mb-4">【過去のテーマ】</h3>
+          <div className="space-y-2">
+            {themes.filter(theme => !theme.isActive).map((theme) => (
+              <div key={theme.id} className="flex justify-between items-center py-2 border-b border-gray-100 last:border-0">
+                <span className="text-gray-700">
+                  {theme.startDate.toDate().toLocaleDateString('ja-JP', { month: 'long' })}：{theme.title}
+                </span>
+                <Link
+                  href={`/theme/${theme.id}`}
+                  className="text-blue-600 hover:text-blue-700 text-sm"
+                >
+                  見る
+                </Link>
+              </div>
+            ))}
+            {themes.filter(theme => !theme.isActive).length === 0 && (
+              <p className="text-gray-500 text-center py-4">過去のテーマはありません</p>
+            )}
+          </div>
+        </div>
 
         {/* メイン導線 */}
         <div className="text-center mb-16">
@@ -137,7 +163,7 @@ export default function Home() {
             <div className="text-center py-12 bg-white rounded-lg shadow">
               <p className="text-gray-600 mb-4">まだアイデアがありません</p>
               <Link
-                href="/post"
+                href="/post/select"
                 className="text-blue-600 hover:text-blue-700 font-semibold"
               >
                 最初のアイデアを投稿する

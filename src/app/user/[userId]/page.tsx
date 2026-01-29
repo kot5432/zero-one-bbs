@@ -103,128 +103,68 @@ export default function UserPage({ params }: { params: Promise<{ userId: string 
       </header>
 
       <main className="max-w-4xl mx-auto px-4 py-8">
-        {/* プロフィールセクション */}
+        {/* マイページ */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-          <div className="flex items-center mb-4">
-            <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center mr-4">
-              <span className="text-2xl">👤</span>
-            </div>
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900">{user.username}</h2>
-              <p className="text-gray-600 mt-1">登録日: {user.createdAt.toDate().toLocaleDateString('ja-JP')}</p>
-            </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">マイページ</h2>
+          
+          <div className="mb-8">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">{user.username}</h3>
+            <p className="text-gray-600">登録日: {user.createdAt.toDate().toLocaleDateString('ja-JP')}</p>
           </div>
           
-          <div className="grid grid-cols-3 gap-4 mt-6">
-            <div className="text-center p-4 bg-blue-50 rounded-lg">
-              <p className="text-2xl font-bold text-blue-900">{user.postCount}</p>
-              <p className="text-sm text-blue-600">投稿数</p>
-            </div>
-            <div className="text-center p-4 bg-green-50 rounded-lg">
-              <p className="text-2xl font-bold text-green-900">{user.themeCount}</p>
-              <p className="text-sm text-green-600">参加テーマ数</p>
-            </div>
-            <div className="text-center p-4 bg-purple-50 rounded-lg">
-              <p className="text-2xl font-bold text-purple-900">
-                {userIdeas.reduce((sum, idea) => sum + idea.likes, 0)}
-              </p>
-              <p className="text-sm text-purple-600">総👍数</p>
-            </div>
-          </div>
-        </div>
-
-        {/* 自分の投稿一覧 */}
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <h3 className="text-xl font-bold text-gray-900 mb-6">自分の投稿</h3>
-          
-          {Object.keys(ideasByTheme).length === 0 ? (
-            <div className="text-center py-8">
-              <p className="text-gray-600 mb-4">まだ投稿がありません</p>
-              <Link
-                href="/post/select"
-                className="text-blue-600 hover:text-blue-700 font-semibold"
-              >
-                最初のアイデアを投稿する
-              </Link>
-            </div>
-          ) : (
-            <div className="space-y-6">
-              {Object.entries(ideasByTheme).map(([themeName, ideas]) => (
-                <div key={themeName}>
-                  <h4 className="text-lg font-semibold text-gray-800 mb-3 flex items-center">
-                    {themeName === '自由投稿' ? (
-                      <span className="bg-gray-100 text-gray-800 px-3 py-1 rounded-full text-sm">
-                        {themeName}
-                      </span>
-                    ) : (
-                      <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">
-                        {themeName}
-                      </span>
-                    )}
-                    <span className="ml-2 text-sm text-gray-500">
-                      {ideas.length}件
+          {/* 自分の投稿 */}
+          <div className="mb-8">
+            <h4 className="text-lg font-semibold text-gray-900 mb-4">【自分の投稿】</h4>
+            <div className="space-y-3">
+              {userIdeas.map((idea) => (
+                <div key={idea.id} className="border border-gray-200 rounded-lg p-4">
+                  <div className="flex justify-between items-start mb-2">
+                    <h5 className="text-lg font-semibold text-gray-900">
+                      {idea.title}
+                    </h5>
+                    <span
+                      className={`px-2 py-1 text-xs rounded-full ${
+                        idea.status === 'idea'
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : idea.status === 'preparing'
+                          ? 'bg-blue-100 text-blue-800'
+                          : 'bg-green-100 text-green-800'
+                      }`}
+                    >
+                      {idea.status === 'idea' ? '募集中' : 
+                       idea.status === 'preparing' ? '検討中' : 'イベント化'}
                     </span>
-                  </h4>
+                  </div>
                   
-                  <div className="grid gap-4">
-                    {ideas.map((idea) => (
-                      <div key={idea.id} className="border border-gray-200 rounded-lg p-4">
-                        <div className="flex justify-between items-start mb-2">
-                          <h5 className="text-lg font-semibold text-gray-900 line-clamp-2">
-                            {idea.title}
-                          </h5>
-                          <span
-                            className={`px-2 py-1 text-xs rounded-full ${
-                              idea.status === 'idea'
-                                ? 'bg-yellow-100 text-yellow-800'
-                                : idea.status === 'preparing'
-                                ? 'bg-blue-100 text-blue-800'
-                                : idea.status === 'event_planned'
-                                ? 'bg-green-100 text-green-800'
-                                : 'bg-gray-100 text-gray-800'
-                            }`}
-                          >
-                            {idea.status === 'idea' ? '未確認' : 
-                             idea.status === 'preparing' ? '検討中' :
-                             idea.status === 'event_planned' ? 'イベント化予定' : 'その他'}
-                          </span>
-                        </div>
-                        
-                        <p className="text-gray-600 mb-3 line-clamp-2">
-                          {idea.description}
-                        </p>
-                        
-                        <div className="flex justify-between items-center text-sm text-gray-500">
-                          <div className="flex items-center gap-4">
-                            <span>👍 {idea.likes}</span>
-                            <span>{idea.mode === 'online' ? 'オンライン' : 'オフライン'}</span>
-                          </div>
-                          <span>
-                            {idea.createdAt.toDate().toLocaleDateString('ja-JP')}
-                          </span>
-                        </div>
-                        
-                        <div className="flex gap-2 mt-3">
-                          <Link
-                            href={`/idea/${idea.id}`}
-                            className="text-blue-600 hover:text-blue-700 text-sm font-medium"
-                          >
-                            詳細を見る
-                          </Link>
-                          <button className="text-gray-600 hover:text-gray-700 text-sm font-medium">
-                            編集
-                          </button>
-                          <button className="text-red-600 hover:text-red-700 text-sm font-medium">
-                            削除
-                          </button>
-                        </div>
-                      </div>
-                    ))}
+                  <p className="text-gray-600 mb-2 line-clamp-2">
+                    {idea.description}
+                  </p>
+                  
+                  <div className="flex justify-between items-center text-sm text-gray-500">
+                    <span>👍 {idea.likes}</span>
+                    <span>{idea.createdAt.toDate().toLocaleDateString('ja-JP')}</span>
                   </div>
                 </div>
               ))}
+              
+              {userIdeas.length === 0 && (
+                <p className="text-gray-500 text-center py-4">まだ投稿がありません</p>
+              )}
             </div>
-          )}
+          </div>
+          
+          {/* 参加意思 */}
+          <div>
+            <h4 className="text-lg font-semibold text-gray-900 mb-4">【参加意思】</h4>
+            <div className="bg-gray-50 rounded-lg p-4">
+              <p className="text-gray-600 text-center">
+                参加意思を示したアイデアはここに表示されます
+              </p>
+              <p className="text-gray-500 text-sm text-center mt-2">
+                （現在開発中です）
+              </p>
+            </div>
+          </div>
         </div>
       </main>
     </div>
