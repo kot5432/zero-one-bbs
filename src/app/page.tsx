@@ -49,8 +49,8 @@ export default function Home() {
               <Link href="/" className="text-gray-700 hover:text-gray-900">
                 トップ
               </Link>
-              <Link href="/post" className="text-gray-700 hover:text-gray-900">
-                投稿
+              <Link href="/ideas" className="text-gray-700 hover:text-gray-900">
+                アイデア一覧
               </Link>
               {user ? (
                 <>
@@ -79,51 +79,54 @@ export default function Home() {
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-4 py-8">
+      <main className="max-w-4xl mx-auto px-4 py-12">
+        {/* サービス説明 */}
+        <div className="text-center mb-16">
+          <h1 className="text-5xl font-bold text-gray-900 mb-4">ZERO-ONE</h1>
+          <p className="text-2xl text-gray-600 mb-8">アイデアを、0から1にする掲示板</p>
+        </div>
+
         {/* 今月のテーマ */}
         {activeTheme && (
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg p-6 mb-12">
+          <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg p-8 mb-16">
             <div className="text-center">
               <p className="text-lg font-medium mb-2">今月のテーマ</p>
-              <h2 className="text-3xl font-bold mb-3">{activeTheme.title}</h2>
-              <p className="text-lg mb-4 opacity-90">{activeTheme.description}</p>
-              <div className="flex justify-center items-center gap-6 text-sm">
-                <span className="bg-white/20 px-3 py-1 rounded-full">
-                  募集期間: {activeTheme.startDate.toDate().toLocaleDateString('ja-JP')} 〜 {activeTheme.endDate.toDate().toLocaleDateString('ja-JP')}
-                </span>
-                <span className="bg-green-400 text-green-900 px-3 py-1 rounded-full font-medium">
-                  募集中
+              <h2 className="text-3xl font-bold mb-4">{activeTheme.title}</h2>
+              <div className="flex justify-center items-center gap-6 text-sm mb-6">
+                <span className="bg-white/20 px-4 py-2 rounded-full">
+                  期限: {activeTheme.endDate.toDate().toLocaleDateString('ja-JP')}
                 </span>
               </div>
-              <p className="text-sm mt-4 opacity-80">
-                投稿されたアイデアは、管理側が整理し、イベントとして実施される場合があります。
-              </p>
+              <Link
+                href="/post"
+                className="bg-white text-blue-600 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors inline-block"
+              >
+                このテーマに投稿する
+              </Link>
             </div>
           </div>
         )}
 
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-gray-900 mb-4">
-            学生のアイデアを形にする場所
-          </h2>
-          <p className="text-xl text-gray-600 mb-6">
-            学生の「やってみたい」を、仲間とイベントにする場所
-          </p>
-          <div className="bg-blue-50 text-blue-700 p-4 rounded-lg mb-8 max-w-2xl mx-auto">
-            <p className="text-sm">
-              <strong>どうやってイベントになるの？</strong><br/>
-              ① アイデアを投稿 → ② 👍が集まる → ③ 管理者がイベント化検討 → ④ 正式なイベントに！
-            </p>
+        {/* メイン導線 */}
+        <div className="text-center mb-16">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link
+              href="/ideas"
+              className="bg-blue-600 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-blue-700 transition-colors"
+            >
+              アイデアを見る
+            </Link>
+            <Link
+              href="/post/select"
+              className="bg-green-600 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-green-700 transition-colors"
+            >
+              アイデアを投稿する
+            </Link>
           </div>
-          <Link
-            href="/post"
-            className="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
-          >
-            アイデアを投稿する
-          </Link>
         </div>
 
-        <div className="mb-8">
+        {/* 最新のアイデア（簡素表示） */}
+        <div>
           <h3 className="text-2xl font-bold text-gray-900 mb-6">最新のアイデア</h3>
           
           {loading ? (
@@ -141,59 +144,41 @@ export default function Home() {
               </Link>
             </div>
           ) : (
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {ideas.map((idea) => (
+            <div className="space-y-4">
+              {ideas.slice(0, 5).map((idea) => (
                 <Link
                   key={idea.id}
                   href={`/idea/${idea.id}`}
                   className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-6 block"
                 >
-                  {/* テーマタグ */}
-                  {idea.themeId && (
-                    <div className="mb-3">
-                      <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
-                        {getThemeName(idea.themeId)}
-                      </span>
-                    </div>
-                  )}
-                  
-                  <div className="flex justify-between items-start mb-3">
-                    <h4 className="text-xl font-semibold text-gray-900 line-clamp-2">
-                      {idea.title}
-                    </h4>
-                    <span
-                      className={`px-2 py-1 text-xs rounded-full ${
-                        idea.status === 'idea'
-                          ? 'bg-yellow-100 text-yellow-800'
-                          : 'bg-green-100 text-green-800'
-                      }`}
-                    >
-                      {idea.status === 'idea' ? '未確認' : '検討中'}
-                    </span>
-                  </div>
-                  
-                  <p className="text-gray-600 mb-4 line-clamp-3">
-                    {idea.description}
-                  </p>
-                  
-                  <div className="flex justify-between items-center mb-3">
-                    <div className="flex items-center text-gray-500">
-                      <span className="text-lg mr-1">👍</span>
-                      <span className="font-semibold">{idea.likes}</span>
-                      <span className="ml-1 text-sm">人が興味あり</span>
-                    </div>
-                    <div className="flex items-center text-gray-500">
-                      <span className="text-sm mr-1">
-                        {idea.mode === 'online' ? 'オンライン' : 'オフライン'}
-                      </span>
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1">
+                      <h4 className="text-xl font-semibold text-gray-900 mb-2">
+                        {idea.title}
+                      </h4>
+                      <div className="flex items-center gap-4 text-sm text-gray-600">
+                        <span className="flex items-center">
+                          <span className="text-lg mr-1">👍</span>
+                          <span className="font-semibold">{idea.likes}</span>
+                        </span>
+                        <span>興味あり人数: 0</span>
+                        <span
+                          className={`px-2 py-1 text-xs rounded-full ${
+                            idea.status === 'idea'
+                              ? 'bg-yellow-100 text-yellow-800'
+                              : idea.status === 'preparing'
+                              ? 'bg-blue-100 text-blue-800'
+                              : 'bg-green-100 text-green-800'
+                          }`}
+                        >
+                          {idea.status === 'idea' ? '募集中' : 
+                           idea.status === 'preparing' ? '検討中' : 'イベント化'}
+                        </span>
+                        <span>{idea.mode === 'online' ? 'オンライン' : 'オフライン'}</span>
+                        <span>{idea.createdAt.toDate().toLocaleDateString('ja-JP')}</span>
+                      </div>
                     </div>
                   </div>
-
-                  {idea.likes >= 3 && (
-                    <div className="bg-blue-50 text-blue-700 text-xs px-2 py-1 rounded text-center">
-                      イベント化検討中
-                    </div>
-                  )}
                 </Link>
               ))}
             </div>

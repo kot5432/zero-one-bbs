@@ -12,8 +12,7 @@ export default function FreePostPage() {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    mode: 'online' as 'online' | 'offline',
-    targetPeople: ''
+    mode: 'online' as 'online' | 'offline'
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -29,11 +28,6 @@ export default function FreePostPage() {
     
     if (!formData.title.trim() || !formData.description.trim()) {
       setError('タイトルと内容は必須です');
-      return;
-    }
-
-    if (formData.description.length > 200) {
-      setError('内容は200文字以内で入力してください');
       return;
     }
 
@@ -70,14 +64,11 @@ export default function FreePostPage() {
               <Link href="/" className="text-gray-700 hover:text-gray-900">
                 トップ
               </Link>
-              <Link href="/post" className="text-blue-600 font-semibold">
+              <Link href="/ideas" className="text-blue-600 font-semibold">
+                アイデア一覧
+              </Link>
+              <Link href="/post/select" className="text-gray-700 hover:text-gray-900">
                 投稿
-              </Link>
-              <Link href="/user/demo" className="text-gray-700 hover:text-gray-900">
-                マイページ
-              </Link>
-              <Link href="/about" className="text-gray-700 hover:text-gray-900">
-                About
               </Link>
             </nav>
           </div>
@@ -126,7 +117,7 @@ export default function FreePostPage() {
 
             <div>
               <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
-                内容 *（200文字以内）
+                内容 *
               </label>
               <textarea
                 id="description"
@@ -134,14 +125,10 @@ export default function FreePostPage() {
                 value={formData.description}
                 onChange={handleChange}
                 rows={4}
-                maxLength={200}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-500"
-                placeholder="アイデアの詳細を200文字以内で説明"
+                placeholder="アイデアの詳細を説明"
                 required
               />
-              <p className="text-sm text-gray-600 mt-1">
-                {formData.description.length}/200文字
-              </p>
             </div>
 
             <div>
@@ -160,35 +147,17 @@ export default function FreePostPage() {
               </select>
             </div>
 
-            <div>
-              <label htmlFor="targetPeople" className="block text-sm font-medium text-gray-700 mb-2">
-                求める人
-              </label>
-              <input
-                type="text"
-                id="targetPeople"
-                name="targetPeople"
-                value={formData.targetPeople}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-500"
-                placeholder="例：一緒に企画してくれる人、初心者OKの人など"
-              />
-              <p className="text-sm text-gray-500 mt-1">
-                どんな人を求めているか自由に記述（任意）
-              </p>
-            </div>
-
             <div className="flex gap-4">
               <button
                 type="submit"
                 disabled={loading}
-                className="flex-1 bg-gray-600 text-white py-2 px-4 rounded-md font-semibold hover:bg-gray-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                className="flex-1 bg-blue-600 text-white py-3 px-6 rounded-md font-semibold hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
               >
-                {loading ? '投稿中...' : '自由で投稿する'}
+                {loading ? '投稿中...' : '投稿する'}
               </button>
               <Link
-                href="/post/select"
-                className="flex-1 bg-gray-200 text-gray-800 py-2 px-4 rounded-md font-semibold hover:bg-gray-300 transition-colors text-center"
+                href="/ideas"
+                className="flex-1 bg-gray-200 text-gray-800 py-3 px-6 rounded-md font-semibold hover:bg-gray-300 transition-colors text-center"
               >
                 戻る
               </Link>

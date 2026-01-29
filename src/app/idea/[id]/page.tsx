@@ -124,11 +124,11 @@ export default function IdeaDetailPage() {
               <Link href="/" className="text-gray-700 hover:text-gray-900">
                 トップ
               </Link>
-              <Link href="/post" className="text-gray-700 hover:text-gray-900">
-                投稿
+              <Link href="/ideas" className="text-gray-700 hover:text-gray-900">
+                アイデア一覧
               </Link>
-              <Link href="/about" className="text-gray-700 hover:text-gray-900">
-                About
+              <Link href="/post/select" className="text-gray-700 hover:text-gray-900">
+                投稿
               </Link>
             </nav>
           </div>

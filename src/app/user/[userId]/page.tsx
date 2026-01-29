@@ -88,14 +88,14 @@ export default function UserPage({ params }: { params: Promise<{ userId: string 
               <Link href="/" className="text-gray-700 hover:text-gray-900">
                 トップ
               </Link>
-              <Link href="/post" className="text-gray-700 hover:text-gray-900">
+              <Link href="/ideas" className="text-gray-700 hover:text-gray-900">
+                アイデア一覧
+              </Link>
+              <Link href="/post/select" className="text-gray-700 hover:text-gray-900">
                 投稿
               </Link>
               <Link href={`/user/${resolvedParams.userId}`} className="text-blue-600 font-semibold">
                 マイページ
-              </Link>
-              <Link href="/about" className="text-gray-700 hover:text-gray-900">
-                About
               </Link>
             </nav>
           </div>
@@ -111,9 +111,7 @@ export default function UserPage({ params }: { params: Promise<{ userId: string 
             </div>
             <div>
               <h2 className="text-2xl font-bold text-gray-900">{user.username}</h2>
-              {user.bio && (
-                <p className="text-gray-600 mt-1">{user.bio}</p>
-              )}
+              <p className="text-gray-600 mt-1">登録日: {user.createdAt.toDate().toLocaleDateString('ja-JP')}</p>
             </div>
           </div>
           
