@@ -236,9 +236,6 @@ export default function AdminPage() {
             </div>
             <div className="flex items-center gap-4">
               <span className="text-gray-600">管理者</span>
-              <button className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors">
-                ログアウト
-              </button>
             </div>
           </div>
         </div>
@@ -851,22 +848,30 @@ export default function AdminPage() {
             <div>
               <h2 className="text-2xl font-bold text-gray-900 mb-6">⚙️ 設定</h2>
               
-              {/* テーマ設定 */}
+              {/* テーマ設定（ルール） */}
               <div className="bg-white rounded-lg shadow p-6 mb-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">テーマ設定</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">🎯 テーマ設定（ルール）</h3>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">今月のテーマ</label>
-                    <input
-                      type="text"
-                      placeholder="テーマ名を入力"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                    />
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      同時公開テーマ数
+                    </label>
+                    <select className="w-full px-3 py-2 border border-gray-300 rounded-md">
+                      <option value="1">1（推奨）</option>
+                      <option value="2">2</option>
+                      <option value="3">3</option>
+                    </select>
                   </div>
                   <div className="flex items-center gap-4">
                     <label className="flex items-center">
                       <input type="checkbox" className="rounded" defaultChecked />
-                      <span className="text-sm text-gray-700">公開</span>
+                      <span className="text-sm text-gray-700">前テーマを自動終了する</span>
+                    </label>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <label className="flex items-center">
+                      <input type="checkbox" className="rounded" />
+                      <span className="text-sm text-gray-700">自由投稿を許可する</span>
                     </label>
                   </div>
                 </div>
@@ -874,52 +879,89 @@ export default function AdminPage() {
               
               {/* イベント化条件 */}
               <div className="bg-white rounded-lg shadow p-6 mb-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">イベント化条件</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">🎯 イベント化条件</h3>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">参加意思〇人以上</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      参加意思 ◯人以上
+                    </label>
                     <input
                       type="number"
                       placeholder="5"
+                      defaultValue="5"
                       className="w-full px-3 py-2 border border-gray-300 rounded-md"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">いいね〇以上</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      いいね ◯以上
+                    </label>
                     <input
                       type="number"
                       placeholder="10"
+                      defaultValue="10"
                       className="w-full px-3 py-2 border border-gray-300 rounded-md"
                     />
                   </div>
                   <div className="flex items-center gap-4">
                     <label className="flex items-center">
-                      <input type="checkbox" className="rounded" defaultChecked />
-                      <span className="text-sm text-gray-700">管理承認必須</span>
+                      <input type="checkbox" className="rounded" defaultChecked disabled />
+                      <span className="text-sm text-gray-700">管理承認が必要（必須）</span>
                     </label>
                   </div>
                 </div>
               </div>
               
-              {/* 表示設定 */}
+              {/* 表示設定（最小） */}
               <div className="bg-white rounded-lg shadow p-6 mb-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">表示設定</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">🎯 表示設定（最小）</h3>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">投稿の表示順</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      投稿表示順
+                    </label>
                     <select className="w-full px-3 py-2 border border-gray-300 rounded-md">
-                      <option>新しい順</option>
-                      <option>いいね数順</option>
-                      <option>コメント数順</option>
+                      <option value="new">新しい順</option>
+                      <option value="reaction">反応順</option>
+                      <option value="comments">コメント数順</option>
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">過去テーマの扱い</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      終了テーマの表示
+                    </label>
                     <select className="w-full px-3 py-2 border border-gray-300 rounded-md">
-                      <option>非表示にする</option>
-                      <option>アーカイブとして表示</option>
-                      <option>一覧に表示</option>
+                      <option value="show">表示する</option>
+                      <option value="hide">非表示にする</option>
+                      <option value="archive">アーカイブとして表示</option>
                     </select>
+                  </div>
+                </div>
+              </div>
+              
+              {/* 運営メッセージ設定 */}
+              <div className="bg-white rounded-lg shadow p-6 mb-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">📢 運営メッセージ設定</h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      トップ表示メッセージ
+                    </label>
+                    <textarea
+                      placeholder="今月は〇〇を考えます"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                      rows={2}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      テーマ補足文
+                    </label>
+                    <textarea
+                      placeholder="テーマについての補足説明"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                      rows={3}
+                    />
                   </div>
                 </div>
               </div>
