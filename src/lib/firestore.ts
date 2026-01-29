@@ -201,6 +201,17 @@ export async function getUserIdeas(userId: string) {
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Idea));
 }
 
+// テーマを追加
+export async function addTheme(theme: Omit<Theme, 'id' | 'createdAt' | 'updatedAt'>) {
+  const themesCollection = collection(db, 'themes');
+  const docRef = await addDoc(themesCollection, {
+    ...theme,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp()
+  });
+  return docRef.id;
+}
+
 // アイデアを更新
 export async function updateIdea(ideaId: string, data: Partial<Idea>) {
   const ideaRef = doc(db, 'ideas', ideaId);

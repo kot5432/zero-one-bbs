@@ -2,25 +2,34 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { getIdeas, Idea, getAllUsers, User, deleteUser, logDeletion, getAllDeletionLogs, updateIdea, deleteIdea } from '@/lib/firestore';
+import { getIdeas, Idea, getAllUsers, User, deleteUser, logDeletion, getAllDeletionLogs, updateIdea, deleteIdea, getThemes, Theme, addTheme, updateTheme, Timestamp } from '@/lib/firestore';
 
 export default function AdminPage() {
   const [ideas, setIdeas] = useState<Idea[]>([]);
   const [users, setUsers] = useState<User[]>([]);
+  const [themes, setThemes] = useState<Theme[]>([]);
   const [deletionLogs, setDeletionLogs] = useState<any[]>([]);
   const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
-  const [currentView, setCurrentView] = useState<'dashboard' | 'users' | 'posts' | 'data' | 'settings'>('dashboard');
+  const [currentView, setCurrentView] = useState<'dashboard' | 'users' | 'posts' | 'themes' | 'data' | 'settings'>('dashboard');
+  const [showThemeForm, setShowThemeForm] = useState(false);
+  const [themeForm, setThemeForm] = useState({
+    title: '',
+    description: '',
+    isActive: false
+  });
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [ideasData, usersData, deletionLogsData] = await Promise.all([
+        const [ideasData, usersData, themesData, deletionLogsData] = await Promise.all([
           getIdeas(),
           getAllUsers(),
+          getThemes(),
           getAllDeletionLogs()
         ]);
         setIdeas(ideasData);
+        setThemes(themesData);
         
         // ユーザーの重複を除去（ユーザー名で最新のもののみ保持）
         const usersByName = new Map<string, User>();
@@ -149,6 +158,63 @@ export default function AdminPage() {
     }
   };
 
+  // テーマ作成
+  const createTheme = async () => {
+    if (!themeForm.title.trim() || !themeForm.description.trim()) {
+      alert('タイトルと説明は必須です');
+      return;
+    }
+
+    try {
+      const themeData = {
+        title: themeForm.title,
+        description: themeForm.description,
+        startDate: Timestamp.now(),
+        endDate: new Timestamp(Math.floor((Date.now() + 30 * 24 * 60 * 60 * 1000) / 1000), 0),
+        isActive: themeForm.isActive
+      };
+
+      await addTheme(themeData);
+      
+      // テーマを再取得
+      const themesData = await getThemes();
+      setThemes(themesData);
+      
+      // フォームをリセット
+      setThemeForm({ title: '', description: '', isActive: false });
+      setShowThemeForm(false);
+      
+      alert('テーマを作成しました');
+    } catch (error) {
+      console.error('Error creating theme:', error);
+      alert('テーマの作成に失敗しました');
+    }
+  };
+
+  // テーマ状態変更
+  const updateThemeStatus = async (themeId: string, isActive: boolean) => {
+    try {
+      await updateTheme(themeId, { isActive });
+      
+      // 他のテーマを非公開にする（同時に1つのみ公開）
+      if (isActive) {
+        const otherThemes = themes.filter(t => t.id !== themeId);
+        for (const theme of otherThemes) {
+          await updateTheme(theme.id!, { isActive: false });
+        }
+      }
+      
+      // テーマを再取得
+      const themesData = await getThemes();
+      setThemes(themesData);
+      
+      alert(isActive ? 'テーマを公開しました' : 'テーマを非公開にしました');
+    } catch (error) {
+      console.error('Error updating theme status:', error);
+      alert('テーマの更新に失敗しました');
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -217,6 +283,18 @@ export default function AdminPage() {
                   }`}
                 >
                   💬 投稿管理
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => setCurrentView('themes')}
+                  className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-colors ${
+                    currentView === 'themes' 
+                      ? 'bg-blue-600 text-white' 
+                      : 'hover:bg-gray-100 text-gray-700'
+                  }`}
+                >
+                  🎯 テーマ管理
                 </button>
               </li>
               <li>
@@ -571,6 +649,137 @@ export default function AdminPage() {
                     </tbody>
                   </table>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* テーマ管理 */}
+          {currentView === 'themes' && (
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">🎯 テーマ管理</h2>
+              
+              {/* テーマ作成フォーム */}
+              <div className="bg-white rounded-lg shadow p-6 mb-6">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">テーマ作成</h3>
+                  <button
+                    onClick={() => setShowThemeForm(!showThemeForm)}
+                    className="text-blue-600 hover:text-blue-700"
+                  >
+                    {showThemeForm ? '閉じる' : '開く'}
+                  </button>
+                </div>
+                
+                {showThemeForm && (
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        タイトル
+                      </label>
+                      <input
+                        type="text"
+                        value={themeForm.title}
+                        onChange={(e) => setThemeForm(prev => ({ ...prev, title: e.target.value }))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                        placeholder="テーマタイトルを入力"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        説明
+                      </label>
+                      <textarea
+                        value={themeForm.description}
+                        onChange={(e) => setThemeForm(prev => ({ ...prev, description: e.target.value }))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                        rows={3}
+                        placeholder="なぜこのテーマかを説明"
+                      />
+                    </div>
+                    <div className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={themeForm.isActive}
+                        onChange={(e) => setThemeForm(prev => ({ ...prev, isActive: e.target.checked }))}
+                        className="rounded"
+                      />
+                      <span className="ml-2 text-sm text-gray-700">公開する</span>
+                    </div>
+                    <button
+                      onClick={createTheme}
+                      className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                    >
+                      テーマを作成
+                    </button>
+                  </div>
+                )}
+              </div>
+              
+              {/* テーマ一覧 */}
+              <div className="bg-white rounded-lg shadow p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">テーマ一覧</h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          タイトル
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          状態
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          投稿数
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          操作
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {themes.map((theme) => (
+                        <tr key={theme.id}>
+                          <td className="px-4 py-3">
+                            <div className="text-sm font-medium text-gray-900">{theme.title}</div>
+                            <div className="text-sm text-gray-500">
+                              {theme.startDate.toDate().toLocaleDateString('ja-JP')} 〜 {theme.endDate.toDate().toLocaleDateString('ja-JP')}
+                            </div>
+                          </td>
+                          <td className="px-4 py-3">
+                            <span className={`px-2 py-1 text-xs rounded-full ${
+                              theme.isActive
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-gray-100 text-gray-800'
+                            }`}>
+                              {theme.isActive ? '公開中' : '非公開'}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-sm text-gray-900">
+                            {ideas.filter(i => i.themeId === theme.id).length}
+                          </td>
+                          <td className="px-4 py-3">
+                            <button
+                              onClick={() => updateThemeStatus(theme.id!, !theme.isActive)}
+                              className={`text-sm font-medium ${
+                                theme.isActive
+                                  ? 'text-gray-600 hover:text-gray-700'
+                                  : 'text-green-600 hover:text-green-700'
+                              }`}
+                            >
+                              {theme.isActive ? '非公開にする' : '公開する'}
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                
+                {themes.length === 0 && (
+                  <div className="text-center py-8 text-gray-500">
+                    テーマがまだありません
+                  </div>
+                )}
               </div>
             </div>
           )}
