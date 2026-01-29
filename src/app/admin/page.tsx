@@ -62,7 +62,42 @@ export default function AdminPage() {
         setThemes(themesData);
         setActiveTheme(activeThemeData);
         setEvents(eventsData);
-        setUsers(usersData);
+        
+        // デバッグ情報：取得したユーザーデータを確認
+        console.log('取得したユーザーデータ（重複除去前）:', usersData);
+        console.log('ユーザーID一覧:', usersData.map(user => ({ 
+          id: user.id, 
+          username: user.username,
+          createdAt: user.createdAt.toDate().toLocaleString('ja-JP')
+        })));
+        
+        // ユーザーの重複を除去（ユーザー名で最新のもののみ保持）
+        const usersByName = new Map<string, User>();
+        usersData.forEach(user => {
+          const existing = usersByName.get(user.username);
+          if (!existing || user.createdAt.toMillis() > existing.createdAt.toMillis()) {
+            usersByName.set(user.username, user);
+          }
+        });
+        
+        const uniqueUsers = Array.from(usersByName.values());
+        
+        console.log('ユーザー名で重複除去後のユーザー数:', uniqueUsers.length);
+        console.log('ユーザー名で重複除去後のユーザー:', uniqueUsers.map(user => ({ 
+          id: user.id, 
+          username: user.username,
+          createdAt: user.createdAt.toDate().toLocaleString('ja-JP')
+        })));
+        
+        // 最新のユーザーを確認
+        const sortedUsers = uniqueUsers.sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis());
+        console.log('最新のユーザー（5人）:', sortedUsers.slice(0, 5).map(user => ({
+          id: user.id,
+          username: user.username,
+          createdAt: user.createdAt.toDate().toLocaleString('ja-JP')
+        })));
+        
+        setUsers(uniqueUsers);
         setDeletionLogs(deletionLogsData);
       } catch (error) {
         console.error('Error fetching data:', error);
