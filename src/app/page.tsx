@@ -3,14 +3,16 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { getIdeas, Idea, getActiveTheme, Theme, getThemes } from '@/lib/firestore';
-import { useAuth } from '@/contexts/AuthContext';
+import { useUserAuth } from '@/contexts/UserAuthContext';
+import { useRouter } from 'next/navigation';
 
 export default function Home() {
   const [ideas, setIdeas] = useState<Idea[]>([]);
   const [activeTheme, setActiveTheme] = useState<Theme | null>(null);
   const [themes, setThemes] = useState<Theme[]>([]);
   const [loading, setLoading] = useState(true);
-  const { user } = useAuth();
+  const { user, signOut } = useUserAuth();
+  const router = useRouter();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -33,6 +35,18 @@ export default function Home() {
     fetchData();
   }, []);
 
+  const handleSignOut = async () => {
+    if (confirm('本当にログアウトしますか？')) {
+      try {
+        await signOut();
+        // トップページにいるのでリロードして状態を更新
+        window.location.reload();
+      } catch (error) {
+        console.error('Sign out error:', error);
+      }
+    }
+  };
+
   // テーマ名を取得するヘルパー関数
   const getThemeName = (themeId: string) => {
     const theme = themes.find(t => t.id === themeId);
@@ -54,19 +68,22 @@ export default function Home() {
               </Link>
               {user ? (
                 <>
-                  <Link href={`/user/${user.id}`} className="text-blue-600 font-semibold">
+                  <Link href="/user/mypage" className="text-blue-600 font-semibold">
                     マイページ
                   </Link>
-                  <Link href="/login" className="text-gray-700 hover:text-gray-900">
+                  <button
+                    onClick={handleSignOut}
+                    className="text-gray-700 hover:text-gray-900"
+                  >
                     ログアウト
-                  </Link>
+                  </button>
                 </>
               ) : (
                 <>
-                  <Link href="/login" className="text-gray-700 hover:text-gray-900">
+                  <Link href="/auth/login" className="text-gray-700 hover:text-gray-900">
                     ログイン
                   </Link>
-                  <Link href="/signup" className="text-gray-700 hover:text-gray-900">
+                  <Link href="/auth/signup" className="text-gray-700 hover:text-gray-900">
                     アカウント作成
                   </Link>
                 </>

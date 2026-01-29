@@ -177,8 +177,16 @@ export async function createEvent(event: Omit<Event, 'id' | 'createdAt'>) {
 
 // User管理関数
 export async function getUser(userId: string) {
-  const userDoc = await getDoc(doc(usersCollection, userId));
-  return userDoc.exists() ? { id: userDoc.id, ...userDoc.data() } as User : null;
+  try {
+    console.log('Firestore: Getting user for ID:', userId);
+    const userDoc = await getDoc(doc(usersCollection, userId));
+    const user = userDoc.exists() ? { id: userDoc.id, ...userDoc.data() } as User : null;
+    console.log('Firestore: User result:', user);
+    return user;
+  } catch (error) {
+    console.error('Firestore: Error getting user:', error);
+    return null;
+  }
 }
 
 export async function createUser(userData: Omit<User, 'id' | 'createdAt'>) {

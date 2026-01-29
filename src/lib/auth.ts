@@ -82,14 +82,25 @@ export class FirebaseAuth {
   // サインイン
   async signIn(email: string, password: string): Promise<User> {
     try {
+      console.log('FirebaseAuth: Attempting sign in for email:', email);
       const userCredential = await signInWithEmailAndPassword(firebaseAuthInstance, email, password);
+      console.log('FirebaseAuth: Firebase sign in successful, UID:', userCredential.user.uid);
+      
       const user = await this.getUserFromFirebase(userCredential.user);
+      console.log('FirebaseAuth: User from Firestore:', user);
+      
       if (!user) {
+        console.error('FirebaseAuth: User not found in Firestore for UID:', userCredential.user.uid);
         throw new Error('ユーザーが見つかりません');
       }
+      
       this.currentUser = user;
+      console.log('FirebaseAuth: Sign in completed successfully');
       return user;
     } catch (error: any) {
+      console.error('FirebaseAuth: Sign in error:', error);
+      console.error('FirebaseAuth: Error code:', error.code);
+      console.error('FirebaseAuth: Error message:', error.message);
       // Firebaseエラーをそのまま伝播させる
       throw error;
     }
@@ -98,13 +109,17 @@ export class FirebaseAuth {
   // サインアップ
   async signUp(email: string, password: string, displayName: string): Promise<User> {
     try {
+      console.log('FirebaseAuth: Attempting sign up for email:', email);
       const userCredential = await createUserWithEmailAndPassword(firebaseAuthInstance, email, password);
+      console.log('FirebaseAuth: Firebase sign up successful, UID:', userCredential.user.uid);
       
       // 表示名を設定
       await updateProfile(userCredential.user, { displayName });
+      console.log('FirebaseAuth: Profile updated with display name:', displayName);
       
       // ユーザー設定を作成
       await this.createUserSettings(userCredential.user.uid, email, displayName);
+      console.log('FirebaseAuth: User settings created');
       
       // ユーザーデータを作成
       const userData = {
@@ -114,10 +129,17 @@ export class FirebaseAuth {
         themeCount: 0
       };
       
-      const docRef = await createUser(userData);
+      // Firebase UIDをドキュメントIDとして使用
+      const userDocRef = doc(db, 'users', userCredential.user.uid);
+      await setDoc(userDocRef, {
+        ...userData,
+        createdAt: serverTimestamp()
+      });
+      console.log('FirebaseAuth: User document created with Firebase UID:', userCredential.user.uid);
       
       // 作成したユーザーデータを取得
-      const user = await getUser(docRef.id);
+      const user = await getUser(userCredential.user.uid);
+      console.log('FirebaseAuth: Retrieved user from Firestore:', user);
       
       if (!user) {
         throw new Error('ユーザーデータの作成に失敗しました');
@@ -127,9 +149,12 @@ export class FirebaseAuth {
       this.currentUser = user;
       this.firebaseUser = userCredential.user;
       
-      console.log('User created and set:', user);
+      console.log('FirebaseAuth: Sign up completed successfully');
       return user;
     } catch (error: any) {
+      console.error('FirebaseAuth: Sign up error:', error);
+      console.error('FirebaseAuth: Error code:', error.code);
+      console.error('FirebaseAuth: Error message:', error.message);
       // Firebaseエラーをそのまま伝播させる
       throw error;
     }
@@ -180,9 +205,12 @@ export class FirebaseAuth {
   // Firebaseユーザーからシステムユーザーを取得
   private async getUserFromFirebase(firebaseUser: FirebaseUser): Promise<User | null> {
     try {
-      return await getUser(firebaseUser.uid);
+      console.log('FirebaseAuth: Getting user from Firestore for UID:', firebaseUser.uid);
+      const user = await getUser(firebaseUser.uid);
+      console.log('FirebaseAuth: getUser result:', user);
+      return user;
     } catch (error) {
-      console.error('Error getting user from Firebase:', error);
+      console.error('FirebaseAuth: Error getting user from Firebase:', error);
       return null;
     }
   }
