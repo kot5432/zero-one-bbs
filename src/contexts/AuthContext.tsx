@@ -36,11 +36,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signIn = async (email: string, password: string) => {
     const user = await firebaseAuth.signIn(email, password);
     setUser(user);
+    console.log('AuthContext: User signed in:', user);
   };
 
   const signUp = async (email: string, password: string, displayName: string) => {
     const user = await firebaseAuth.signUp(email, password, displayName);
     setUser(user);
+    console.log('AuthContext: User signed up:', user);
   };
 
   const signOut = async () => {

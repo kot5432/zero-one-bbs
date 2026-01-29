@@ -40,11 +40,12 @@ export class FirebaseAuth {
         this.firebaseUser = firebaseUser;
         
         if (firebaseUser) {
-          // ユーザー設定を取得または作成
+          // ユーザー設定を取得
           let user = await getUser(firebaseUser.uid);
           
-          // ユーザーがFirestoreに存在しない場合は作成しない（削除されたユーザーの復活を防ぐ）
+          // ユーザーがFirestoreに存在しない場合は作成（新規ユーザーの場合）
           if (!user) {
+            console.log('User not found in Firestore, Firebase user:', firebaseUser.uid);
             this.currentUser = null;
             resolve(null);
             unsubscribe();
@@ -52,6 +53,7 @@ export class FirebaseAuth {
           }
           
           this.currentUser = user;
+          console.log('User found and set:', user);
           resolve(user);
         } else {
           this.currentUser = null;
@@ -87,8 +89,9 @@ export class FirebaseAuth {
       }
       this.currentUser = user;
       return user;
-    } catch (error) {
-      throw new Error('ログインに失敗しました');
+    } catch (error: any) {
+      // Firebaseエラーをそのまま伝播させる
+      throw error;
     }
   }
 
@@ -112,13 +115,19 @@ export class FirebaseAuth {
       };
       
       const docRef = await createUser(userData);
-      const user = {
-        id: docRef.id,
-        ...userData,
-        createdAt: new Date() as any
-      };
       
+      // 作成したユーザーデータを取得
+      const user = await getUser(docRef.id);
+      
+      if (!user) {
+        throw new Error('ユーザーデータの作成に失敗しました');
+      }
+      
+      // 現在のユーザーを設定
       this.currentUser = user;
+      this.firebaseUser = userCredential.user;
+      
+      console.log('User created and set:', user);
       return user;
     } catch (error: any) {
       // Firebaseエラーをそのまま伝播させる
@@ -129,12 +138,24 @@ export class FirebaseAuth {
   // ユーザーを完全に削除（Firestore + Firebase Auth）
   async deleteUserCompletely(userId: string): Promise<void> {
     try {
+      console.log('Starting complete user deletion for:', userId);
+      
       // Firestoreのユーザーデータを削除
       await this.deleteUserFromFirestore(userId);
+      console.log('Firestore data deleted successfully');
       
       // 現在ログインしているユーザーの場合、Firebase Authからも削除
       if (this.firebaseUser && this.firebaseUser.uid === userId) {
+        console.log('Deleting Firebase Auth user:', this.firebaseUser.uid);
         await deleteFirebaseUser(this.firebaseUser);
+        console.log('Firebase Auth user deleted successfully');
+        
+        // 現在のユーザー状態をクリア
+        this.currentUser = null;
+        this.firebaseUser = null;
+      } else {
+        console.log('User not logged in or UID mismatch');
+        throw new Error('ログインしているユーザーと削除対象のユーザーが一致しません');
       }
     } catch (error) {
       console.error('Error deleting user completely:', error);
@@ -158,7 +179,12 @@ export class FirebaseAuth {
 
   // Firebaseユーザーからシステムユーザーを取得
   private async getUserFromFirebase(firebaseUser: FirebaseUser): Promise<User | null> {
-    return await getUser(firebaseUser.uid);
+    try {
+      return await getUser(firebaseUser.uid);
+    } catch (error) {
+      console.error('Error getting user from Firebase:', error);
+      return null;
+    }
   }
 
   // 現在のユーザーを取得

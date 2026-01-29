@@ -78,7 +78,9 @@ export default function AdminPage() {
       return;
     }
 
-    if (!confirm(`${selectedUsers.size}人のユーザーを削除しますか？この操作は元に戻せません。`)) {
+    const confirmMessage = `本当に${selectedUsers.size}人のユーザーを削除しますか？\n\n⚠️ 重要：この操作はFirestoreのユーザーデータのみ削除します。\nFirebase Authenticationのユーザーは削除されないため、同じメールアドレスでの再登録はできません。\n\nユーザー自身にアカウント削除を案内してください。`;
+    
+    if (!confirm(confirmMessage)) {
       return;
     }
 
@@ -96,7 +98,7 @@ export default function AdminPage() {
       setUsers(prev => prev.filter(user => !selectedUsers.has(user.id!)));
       setSelectedUsers(new Set());
       
-      alert(`${selectedUsers.size}人のユーザーを削除しました`);
+      alert(`${selectedUsers.size}人のユーザーを削除しました。\n\n重要：\n• Firestoreのデータは削除されました\n• Firebase Authenticationのユーザーは残っています\n• 同じメールアドレスでの再登録はできません\n• ユーザー自身にアカウント削除を案内してください`);
     } catch (error) {
       console.error('Error deleting users:', error);
       alert('削除に失敗しました');
@@ -104,7 +106,7 @@ export default function AdminPage() {
   };
 
   const deleteUserHandler = async (userId: string, username: string) => {
-    if (!confirm(`本当にユーザー「${username}」を削除しますか？この操作は元に戻せません。`)) {
+    if (!confirm(`本当にユーザー「${username}」を削除しますか？\n\n⚠️ 重要：この操作はFirestoreのユーザーデータのみ削除します。\nFirebase Authenticationのユーザーは削除されないため、同じメールアドレスでの再登録はできません。\n\nユーザー自身にアカウント削除を案内してください。`)) {
       return;
     }
 
@@ -121,7 +123,7 @@ export default function AdminPage() {
       // 状態を更新
       setUsers(prev => prev.filter(user => user.id !== userId));
       
-      alert('ユーザーを削除しました。\n注意：同じメールアドレスでの再登録には時間がかかる場合があります。');
+      alert(`ユーザー「${username}」を削除しました。\n\n重要：\n• Firestoreのデータは削除されました\n• Firebase Authenticationのユーザーは残っています\n• 同じメールアドレスでの再登録はできません\n\n【緊急対応】\nFirebaseコンソールから手動でユーザーを削除してください：\n1. Firebaseコンソールにアクセス\n2. Authentication → Users に移動\n3. 該当ユーザーのメールアドレスを検索\n4. ユーザーを選択して削除\n\nまたは、ユーザー自身にマイページからアカウント削除を案内してください。`);
     } catch (error) {
       console.error('Error deleting user:', error);
       alert('削除に失敗しました');

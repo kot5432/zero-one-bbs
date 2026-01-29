@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { firebaseAuth } from '@/lib/auth';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -11,6 +11,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
+  const { signIn } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -18,10 +19,34 @@ export default function LoginPage() {
     setError('');
 
     try {
-      await firebaseAuth.signIn(email, password);
-      router.push('/');
-    } catch (err) {
-      setError('ログインに失敗しました。メールアドレスとパスワードを確認してください。');
+      await signIn(email, password);
+      
+      // ログイン成功後、リダイレクト先を確認
+      const redirectUrl = new URLSearchParams(window.location.search).get('redirect');
+      router.push(redirectUrl || '/');
+    } catch (err: any) {
+      console.error('Login error:', err);
+      console.error('Error code:', err.code);
+      console.error('Error message:', err.message);
+      
+      // Firebaseエラーコードに応じた具体的なメッセージ
+      if (err.code === 'auth/user-not-found') {
+        setError('ユーザーが見つかりません。メールアドレスを確認してください。');
+      } else if (err.code === 'auth/wrong-password') {
+        setError('パスワードが違います。もう一度確認してください。');
+      } else if (err.code === 'auth/invalid-email') {
+        setError('メールアドレスの形式が正しくありません。確認してもう一度入力してください。');
+      } else if (err.code === 'auth/user-disabled') {
+        setError('このアカウントは無効になっています。管理者にお問い合わせください。');
+      } else if (err.code === 'auth/too-many-requests') {
+        setError('リクエストが多すぎます。しばらく待ってからもう一度お試しください。');
+      } else if (err.code === 'auth/network-request-failed') {
+        setError('ネットワークエラーが発生しました。インターネット接続を確認してもう一度お試しください。');
+      } else if (err.message === 'ユーザーが見つかりません') {
+        setError('ユーザーが見つかりません。新規登録をお試しください。');
+      } else {
+        setError(`ログインに失敗しました: ${err.message || '不明なエラー'}`);
+      }
     } finally {
       setLoading(false);
     }
@@ -45,8 +70,16 @@ export default function LoginPage() {
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
           <form className="space-y-6" onSubmit={handleSubmit}>
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-                {error}
+              <div className="bg-red-100 border-2 border-red-300 text-red-800 px-4 py-3 rounded-lg shadow-sm">
+                <div className="flex items-start">
+                  <svg className="w-5 h-5 mr-2 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                  </svg>
+                  <div>
+                    <span className="font-medium">ログインエラー</span>
+                    <p className="text-sm mt-1">{error}</p>
+                  </div>
+                </div>
               </div>
             )}
 
@@ -63,7 +96,7 @@ export default function LoginPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  className="appearance-none block w-full px-4 py-3 border-2 border-gray-300 rounded-lg placeholder-gray-600 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors duration-200 autofill:bg-white autofill:text-gray-900"
                   placeholder="your@email.com"
                 />
               </div>
@@ -82,7 +115,7 @@ export default function LoginPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  className="appearance-none block w-full px-4 py-3 border-2 border-gray-300 rounded-lg placeholder-gray-600 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors duration-200 autofill:bg-white autofill:text-gray-900"
                   placeholder="••••••••"
                 />
               </div>
@@ -92,7 +125,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
               >
                 {loading ? 'ログイン中...' : 'ログイン'}
               </button>

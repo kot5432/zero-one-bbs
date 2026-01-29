@@ -30,14 +30,18 @@ export default function DeleteAccountPage() {
         throw new Error('ログインしていません');
       }
 
+      console.log('Starting account deletion for user:', currentUser.id);
+      console.log('Firebase user UID:', firebaseAuth.getFirebaseUser()?.uid);
+
       // ユーザー自身でアカウントを削除
       await firebaseAuth.deleteUserCompletely(currentUser.id!);
       
+      console.log('Account deletion completed successfully');
       alert('アカウントを削除しました。ご利用ありがとうございました。');
       router.push('/');
     } catch (error: any) {
       console.error('Error deleting account:', error);
-      setError('アカウントの削除に失敗しました。もう一度お試しください。');
+      setError(`アカウントの削除に失敗しました: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -66,7 +70,11 @@ export default function DeleteAccountPage() {
 
           <div className="space-y-6">
             <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-              <h3 className="text-lg font-medium text-red-800 mb-2">⚠️ 削除すると以下のデータが失われます</h3>
+              <input
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500" 
+                value="⚠️ 削除すると以下のデータが失われます"
+                readOnly
+              />
               <ul className="text-sm text-red-700 space-y-1">
                 <li>• 投稿したすべてのアイデア</li>
                 <li>• コメントやいいねの履歴</li>
@@ -76,10 +84,11 @@ export default function DeleteAccountPage() {
             </div>
 
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <h3 className="text-lg font-medium text-yellow-800 mb-2">💡 注意事項</h3>
+              <h3 className="text-lg font-medium text-yellow-800 mb-2">💡 重要な注意事項</h3>
               <ul className="text-sm text-yellow-700 space-y-1">
                 <li>• 削除後の復元はできません</li>
-                <li>• 同じメールアドレスでの再登録には時間がかかる場合があります</li>
+                <li>• Firebase Authenticationから完全に削除されます</li>
+                <li>• 同じメールアドレスで再登録できます</li>
                 <li>• 削除理由は記録され、運営の参考にさせていただきます</li>
               </ul>
             </div>

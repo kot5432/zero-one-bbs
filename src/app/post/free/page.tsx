@@ -124,7 +124,7 @@ export default function FreePostPage() {
                 name="title"
                 value={formData.title}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                 placeholder="アイデアのタイトルを入力"
                 required
               />
@@ -140,7 +140,7 @@ export default function FreePostPage() {
                 value={formData.description}
                 onChange={handleChange}
                 rows={6}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                 placeholder="アイデアの詳細を説明"
                 required
               />
@@ -155,7 +155,7 @@ export default function FreePostPage() {
                 name="mode"
                 value={formData.mode}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="online">オンライン</option>
                 <option value="offline">オフライン</option>
