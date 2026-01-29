@@ -337,6 +337,50 @@ export async function hasUserLiked(ideaId: string, userIp: string): Promise<bool
   return !snapshot.empty;
 }
 
+// 通知
+export interface Notification {
+  id: string;
+  userId: string;
+  title: string;
+  message: string;
+  type: 'event' | 'comment' | 'participation' | 'system';
+  isRead: boolean;
+  createdAt: any;
+  link?: string; // クリック時の遷移先
+}
+
+// 通知コレクション
+const notificationsCollection = collection(db, 'notifications');
+
+// 通知を作成
+export async function createNotification(notification: Omit<Notification, 'id' | 'createdAt'>) {
+  const newNotification = {
+    ...notification,
+    createdAt: serverTimestamp()
+  };
+  return await addDoc(notificationsCollection, newNotification);
+}
+
+// ユーザーの通知を取得
+export async function getUserNotifications(userId: string) {
+  const q = query(notificationsCollection, where('userId', '==', userId), orderBy('createdAt', 'desc'));
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Notification));
+}
+
+// 通知を既読にする
+export async function markNotificationAsRead(notificationId: string) {
+  const notificationRef = doc(db, 'notifications', notificationId);
+  await updateDoc(notificationRef, { isRead: true });
+}
+
+// 未読通知数を取得
+export async function getUnreadNotificationCount(userId: string) {
+  const q = query(notificationsCollection, where('userId', '==', userId), where('isRead', '==', false));
+  const snapshot = await getDocs(q);
+  return snapshot.size;
+}
+
 // ユーザーIPを取得するヘルパー関数
 export function getUserIp(): string {
   // クライアントサイドでのIP取得（簡易版）

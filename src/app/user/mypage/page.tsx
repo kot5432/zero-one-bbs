@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useUserAuth } from '@/contexts/UserAuthContext';
-import { getIdeas, Idea } from '@/lib/firestore';
+import { getIdeas, Idea, getUserNotifications, Notification, getUnreadNotificationCount, markNotificationAsRead } from '@/lib/firestore';
 
 export default function MyPage() {
   const { user, loading, signOut } = useUserAuth();
@@ -14,6 +14,8 @@ export default function MyPage() {
   const [newDisplayName, setNewDisplayName] = useState('');
   const [updateLoading, setUpdateLoading] = useState(false);
   const [updateError, setUpdateError] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showSearch, setShowSearch] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -103,6 +105,14 @@ export default function MyPage() {
     setUpdateError('');
   };
 
+  // 検索機能
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    if (query.trim()) {
+      router.push(`/ideas?search=${encodeURIComponent(query.trim())}`);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -173,24 +183,70 @@ export default function MyPage() {
         <div className="max-w-6xl mx-auto px-4 py-6">
           <div className="flex justify-between items-center">
             <h1 className="text-3xl font-bold text-gray-900">ZERO-ONE</h1>
-            <nav className="flex space-x-6">
-              <Link href="/" className="text-gray-700 hover:text-gray-900">
-                トップ
-              </Link>
+            <nav className="flex items-center space-x-6">
+              {/* 検索 */}
+              <div className="relative">
+                {showSearch ? (
+                  <div className="flex items-center">
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          handleSearch(searchQuery);
+                          setShowSearch(false);
+                        }
+                      }}
+                      placeholder="アイデアを検索..."
+                      className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      autoFocus
+                    />
+                    <button
+                      onClick={() => {
+                        handleSearch(searchQuery);
+                        setShowSearch(false);
+                      }}
+                      className="ml-2 px-3 py-1 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700"
+                    >
+                      検索
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowSearch(false);
+                        setSearchQuery('');
+                      }}
+                      className="ml-2 px-3 py-1 text-gray-600 hover:text-gray-800"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setShowSearch(true)}
+                    className="p-2 text-gray-600 hover:text-gray-800 transition-colors"
+                    title="検索"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                  </button>
+                )}
+              </div>
+
+              {/* 通知 */}
+              <button className="relative p-2 text-gray-600 hover:text-gray-800 transition-colors" title="通知">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                </svg>
+                <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+              </button>
+
               <Link href="/ideas" className="text-gray-700 hover:text-gray-900">
                 アイデア一覧
               </Link>
               <Link href="/user/mypage" className="text-blue-600 font-semibold">
                 マイページ
-              </Link>
-              <button
-                onClick={handleSignOut}
-                className="text-gray-700 hover:text-gray-900"
-              >
-                ログアウト
-              </button>
-              <Link href="/about" className="text-gray-700 hover:text-gray-900">
-                About
               </Link>
             </nav>
           </div>
@@ -331,6 +387,50 @@ export default function MyPage() {
           </section>
         </div>
       </main>
+
+      {/* フッター */}
+      <footer className="bg-gray-800 text-white mt-16">
+        <div className="max-w-6xl mx-auto px-4 py-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div>
+              <h3 className="text-lg font-semibold mb-4">ZERO-ONE</h3>
+              <p className="text-gray-300">
+                アイデアを、0から1にする掲示板
+              </p>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold mb-4">サービス</h3>
+              <ul className="space-y-2">
+                <li>
+                  <Link href="/ideas" className="text-gray-300 hover:text-white">
+                    アイデア一覧
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/user/mypage" className="text-gray-300 hover:text-white">
+                    マイページ
+                  </Link>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold mb-4">About</h3>
+              <ul className="space-y-2">
+                <li>
+                  <Link href="/about" className="text-gray-300 hover:text-white">
+                    ZERO-ONEについて
+                  </Link>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <div className="border-t border-gray-700 mt-8 pt-8 text-center">
+            <p className="text-gray-400">
+              © 2026 ZERO-ONE. All rights reserved.
+            </p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

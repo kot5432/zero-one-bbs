@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { getIdeas, Idea, getActiveTheme, Theme, getThemes } from '@/lib/firestore';
-import { useAuth } from '@/contexts/AuthContext';
+import { useUserAuth } from '@/contexts/UserAuthContext';
 
 export default function IdeasPage() {
   const [ideas, setIdeas] = useState<Idea[]>([]);
@@ -13,7 +14,9 @@ export default function IdeasPage() {
   const [filter, setFilter] = useState<'all' | 'idea' | 'preparing' | 'event_planned'>('all');
   const [modeFilter, setModeFilter] = useState<'all' | 'online' | 'offline'>('all');
   const [sortBy, setSortBy] = useState<'likes' | 'createdAt'>('likes');
-  const { user } = useAuth();
+  const { user } = useUserAuth();
+  const searchParams = useSearchParams();
+  const searchQuery = searchParams.get('search') || '';
 
   useEffect(() => {
     const fetchData = async () => {
@@ -23,7 +26,17 @@ export default function IdeasPage() {
           getActiveTheme(),
           getThemes()
         ]);
-        setIdeas(ideasData);
+        
+        // 検索クエリでフィルタリング
+        let filteredIdeas = ideasData;
+        if (searchQuery.trim()) {
+          filteredIdeas = ideasData.filter(idea => 
+            idea.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            idea.description.toLowerCase().includes(searchQuery.toLowerCase())
+          );
+        }
+        
+        setIdeas(filteredIdeas);
         setActiveTheme(activeThemeData);
         setThemes(themesData);
       } catch (error) {
@@ -34,7 +47,7 @@ export default function IdeasPage() {
     };
 
     fetchData();
-  }, []);
+  }, [searchQuery]);
 
   const filteredAndSortedIdeas = ideas
     .filter(idea => {
@@ -65,9 +78,6 @@ export default function IdeasPage() {
           <div className="flex justify-between items-center">
             <Link href="/" className="text-3xl font-bold text-gray-900">ZERO-ONE</Link>
             <nav className="flex space-x-6">
-              <Link href="/" className="text-gray-700 hover:text-gray-900">
-                トップ
-              </Link>
               <Link href="/ideas" className="text-blue-600 font-semibold">
                 アイデア一覧
               </Link>
@@ -75,13 +85,11 @@ export default function IdeasPage() {
                 投稿
               </Link>
               {user ? (
-                <>
-                  <Link href={`/user/${user.id}`} className="text-blue-600 font-semibold">
-                    マイページ
-                  </Link>
-                </>
+                <Link href="/user/mypage" className="text-gray-700 hover:text-gray-900">
+                  マイページ
+                </Link>
               ) : (
-                <Link href="/login" className="text-gray-700 hover:text-gray-900">
+                <Link href="/auth/login" className="text-gray-700 hover:text-gray-900">
                   ログイン
                 </Link>
               )}
@@ -92,7 +100,14 @@ export default function IdeasPage() {
 
       <main className="max-w-6xl mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-6">アイデア一覧</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-6">
+            アイデア一覧
+            {searchQuery && (
+              <span className="text-lg font-normal text-gray-600 ml-2">
+                - 「{searchQuery}」の検索結果
+              </span>
+            )}
+          </h1>
           
           {/* フィルタ */}
           <div className="bg-white rounded-lg shadow p-6 mb-6">
