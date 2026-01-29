@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { getIdeas, Idea, getAllUsers, User, deleteUser, logDeletion, getAllDeletionLogs } from '@/lib/firestore';
+import { getIdeas, Idea, getAllUsers, User, deleteUser, logDeletion, getAllDeletionLogs, updateIdea, deleteIdea } from '@/lib/firestore';
 
 export default function AdminPage() {
   const [ideas, setIdeas] = useState<Idea[]>([]);
@@ -110,6 +110,41 @@ export default function AdminPage() {
       alert('ユーザーを削除しました');
     } catch (error) {
       console.error('Error deleting user:', error);
+      alert('削除に失敗しました');
+    }
+  };
+
+  // アイデア状態変更
+  const updateIdeaStatus = async (ideaId: string, newStatus: string) => {
+    try {
+      await updateIdea(ideaId, { status: newStatus as Idea['status'] });
+      setIdeas(prev => prev.map(idea => 
+        idea.id === ideaId ? { ...idea, status: newStatus as Idea['status'] } : idea
+      ));
+    } catch (error) {
+      console.error('Error updating idea status:', error);
+      alert('状態の更新に失敗しました');
+    }
+  };
+
+  // アイデア削除
+  const deleteIdeaHandler = async (ideaId: string, ideaTitle: string) => {
+    if (!confirm(`本当にアイデア「${ideaTitle}」を削除しますか？この操作は元に戻せません。`)) {
+      return;
+    }
+
+    const reason = prompt('削除理由を入力してください:');
+    if (!reason) {
+      return;
+    }
+
+    try {
+      await deleteIdea(ideaId);
+      await logDeletion('idea', ideaId, reason, 'admin');
+      setIdeas(prev => prev.filter(idea => idea.id !== ideaId));
+      alert('アイデアを削除しました');
+    } catch (error) {
+      console.error('Error deleting idea:', error);
       alert('削除に失敗しました');
     }
   };
@@ -227,7 +262,6 @@ export default function AdminPage() {
                       <p className="text-sm font-medium text-gray-600">総ユーザー数</p>
                       <p className="text-3xl font-bold text-gray-900">{users.length}</p>
                     </div>
-                    <div className="text-3xl">👥</div>
                   </div>
                 </div>
                 
@@ -237,51 +271,64 @@ export default function AdminPage() {
                       <p className="text-sm font-medium text-gray-600">今月の投稿数</p>
                       <p className="text-3xl font-bold text-gray-900">{ideas.length}</p>
                     </div>
-                    <div className="text-3xl">�</div>
                   </div>
                 </div>
                 
                 <div className="bg-white rounded-lg shadow p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">未対応アイデア</p>
+                      <p className="text-sm font-medium text-gray-600">未確認アイデア</p>
                       <p className="text-3xl font-bold text-orange-600">
                         {ideas.filter(i => i.status === 'idea').length}
                       </p>
                     </div>
-                    <div className="text-3xl">⚠️</div>
                   </div>
                 </div>
                 
                 <div className="bg-white rounded-lg shadow p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">イベント化候補</p>
-                      <p className="text-3xl font-bold text-green-600">
-                        {ideas.filter(i => i.likes >= 5 && i.status !== 'rejected').length}
+                      <p className="text-sm font-medium text-gray-600">確認済みアイデア</p>
+                      <p className="text-3xl font-bold text-gray-600">
+                        {ideas.filter(i => i.status === 'checked').length}
                       </p>
                     </div>
-                    <div className="text-3xl">🎯</div>
+                  </div>
+                </div>
+                
+                <div className="bg-white rounded-lg shadow p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">検討候補アイデア</p>
+                      <p className="text-3xl font-bold text-blue-600">
+                        {ideas.filter(i => i.status === 'checked' && i.likes >= 5).length}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
 
               {/* 注意が必要な項目 */}
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-                <h3 className="text-lg font-semibold text-yellow-800 mb-2">⚠️ 注意が必要な項目</h3>
-                <div className="space-y-2">
-                  {ideas.filter(i => i.status === 'idea').length > 0 && (
-                    <p className="text-yellow-700">
-                      未対応の投稿が {ideas.filter(i => i.status === 'idea').length} 件あります
+              {(ideas.filter(i => i.status === 'idea').length > 0 || ideas.filter(i => i.status === 'checked' && i.likes >= 5).length > 0) && (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                  <h3 className="text-lg font-semibold text-yellow-800 mb-2">⚠️ 注意が必要な項目</h3>
+                  <div className="space-y-2">
+                    {ideas.filter(i => i.status === 'idea').length > 0 && (
+                      <p className="text-yellow-700">
+                        未確認のアイデアがあります ({ideas.filter(i => i.status === 'idea').length}件)
+                      </p>
+                    )}
+                    {ideas.filter(i => i.status === 'checked' && i.likes >= 5).length > 0 && (
+                      <p className="text-yellow-700">
+                        👍5以上の確認済みアイデアが {ideas.filter(i => i.status === 'checked' && i.likes >= 5).length} 件あります
+                      </p>
+                    )}
+                    <p className="text-yellow-600 text-sm mt-2">
+                      💡 対応方法: 未確認アイデアを「確認済み」にし、👍5以上になったら「検討中」に変更してください
                     </p>
-                  )}
-                  {ideas.filter(i => i.likes >= 5 && i.status === 'idea').length > 0 && (
-                    <p className="text-yellow-700">
-                      👍5以上の未対応投稿が {ideas.filter(i => i.likes >= 5 && i.status === 'idea').length} 件あります
-                    </p>
-                  )}
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* 行動につながる要素 */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -289,7 +336,7 @@ export default function AdminPage() {
                   onClick={() => setCurrentView('posts')}
                   className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
                 >
-                  未対応アイデアを見る ({ideas.filter(i => i.status === 'idea').length}件)
+                  未確認アイデアを見る ({ideas.filter(i => i.status === 'idea').length}件)
                 </button>
                 <Link
                   href="/"
@@ -456,10 +503,6 @@ export default function AdminPage() {
               <h2 className="text-2xl font-bold text-gray-900 mb-6">💬 投稿管理</h2>
               
               <div className="bg-white rounded-lg shadow p-6">
-                <button className="mb-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                  ＋ 新規作成
-                </button>
-                
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead className="bg-gray-50">
@@ -489,7 +532,7 @@ export default function AdminPage() {
                             <div className="text-sm text-gray-500">👍 {idea.likes} · 🙋 0</div>
                           </td>
                           <td className="px-4 py-3 text-sm text-gray-900">
-                            投稿者{idea.id?.slice(0, 8)}
+                            {users.find(u => u.id === idea.userId)?.username || '不明'}
                           </td>
                           <td className="px-4 py-3 text-sm text-gray-900">
                             {idea.themeId ? `テーマ${idea.themeId.slice(0, 6)}` : '自由投稿'}
@@ -497,9 +540,11 @@ export default function AdminPage() {
                           <td className="px-4 py-3">
                             <select 
                               value={idea.status}
+                              onChange={(e) => updateIdeaStatus(idea.id!, e.target.value)}
                               className="px-2 py-1 text-xs rounded-full border border-gray-300"
                             >
                               <option value="idea" className="bg-yellow-100 text-yellow-800">募集中</option>
+                              <option value="checked" className="bg-gray-100 text-gray-800">確認済み</option>
                               <option value="preparing" className="bg-blue-100 text-blue-800">検討中</option>
                               <option value="event_planned" className="bg-green-100 text-green-800">イベント化決定</option>
                               <option value="rejected" className="bg-red-100 text-red-800">見送り</option>
@@ -512,6 +557,12 @@ export default function AdminPage() {
                               </button>
                               <button className="text-green-600 hover:text-green-700 text-sm font-medium">
                                 コメント
+                              </button>
+                              <button 
+                                onClick={() => deleteIdeaHandler(idea.id!, idea.title)}
+                                className="text-red-600 hover:text-red-700 text-sm font-medium"
+                              >
+                                削除
                               </button>
                             </div>
                           </td>

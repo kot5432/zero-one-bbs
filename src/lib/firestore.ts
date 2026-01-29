@@ -43,7 +43,7 @@ export interface Idea {
   title: string;
   description: string;
   mode: 'online' | 'offline';
-  status: 'idea' | 'preparing' | 'event_planned' | 'rejected' | 'completed';
+  status: 'idea' | 'checked' | 'preparing' | 'event_planned' | 'rejected' | 'completed';
   likes: number;
   createdAt: Timestamp;
   updatedAt?: Timestamp;
@@ -199,6 +199,15 @@ export async function getUserIdeas(userId: string) {
   const q = query(ideasCollection, where('userId', '==', userId));
   const snapshot = await getDocs(q);
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Idea));
+}
+
+// アイデアを更新
+export async function updateIdea(ideaId: string, data: Partial<Idea>) {
+  const ideaRef = doc(db, 'ideas', ideaId);
+  await updateDoc(ideaRef, {
+    ...data,
+    updatedAt: serverTimestamp()
+  });
 }
 
 // ユーザー設定を取得
