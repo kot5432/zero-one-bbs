@@ -5,15 +5,15 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { getIdeas, Idea, getActiveTheme, Theme, getThemes } from '@/lib/firestore';
 import { useUserAuth } from '@/contexts/UserAuthContext';
+import Header from '@/components/Header';
 
 export default function IdeasPage() {
   const [ideas, setIdeas] = useState<Idea[]>([]);
   const [activeTheme, setActiveTheme] = useState<Theme | null>(null);
   const [themes, setThemes] = useState<Theme[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState<'all' | 'idea' | 'preparing' | 'event_planned'>('all');
-  const [modeFilter, setModeFilter] = useState<'all' | 'online' | 'offline'>('all');
-  const [sortBy, setSortBy] = useState<'likes' | 'createdAt'>('likes');
+  const [filter, setFilter] = useState<'all' | 'idea' | 'preparing' | 'event_planned' | 'rejected'>('all');
+  const [sortBy, setSortBy] = useState<'likes' | 'createdAt'>('createdAt');
   const { user } = useUserAuth();
   const searchParams = useSearchParams();
   const searchQuery = searchParams.get('search') || '';
@@ -54,10 +54,6 @@ export default function IdeasPage() {
       if (filter === 'all') return idea.status !== 'rejected' && idea.status !== 'completed';
       return idea.status === filter;
     })
-    .filter(idea => {
-      if (modeFilter === 'all') return true;
-      return idea.mode === modeFilter;
-    })
     .sort((a, b) => {
       if (sortBy === 'likes') {
         return b.likes - a.likes;
@@ -73,31 +69,8 @@ export default function IdeasPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm">
-        <div className="max-w-6xl mx-auto px-4 py-6">
-          <div className="flex justify-between items-center">
-            <Link href="/" className="text-3xl font-bold text-gray-900">ZERO-ONE</Link>
-            <nav className="flex space-x-6">
-              <Link href="/ideas" className="text-blue-600 font-semibold">
-                アイデア一覧
-              </Link>
-              <Link href="/post/select" className="text-gray-700 hover:text-gray-900">
-                投稿
-              </Link>
-              {user ? (
-                <Link href="/user/mypage" className="text-gray-700 hover:text-gray-900">
-                  マイページ
-                </Link>
-              ) : (
-                <Link href="/auth/login" className="text-gray-700 hover:text-gray-900">
-                  ログイン
-                </Link>
-              )}
-            </nav>
-          </div>
-        </div>
-      </header>
-
+      <Header />
+      
       <main className="max-w-6xl mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-6">
@@ -109,45 +82,33 @@ export default function IdeasPage() {
             )}
           </h1>
           
-          {/* フィルタ */}
-          <div className="bg-white rounded-lg shadow p-6 mb-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">状態</label>
+          {/* フィルター */}
+          <div className="bg-white rounded-lg shadow p-4 mb-6">
+            <div className="flex flex-wrap gap-4 items-center">
+              <div className="flex items-center gap-2">
+                <label className="text-sm font-medium text-gray-700">テーマ:</label>
                 <select
                   value={filter}
                   onChange={(e) => setFilter(e.target.value as any)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  className="px-3 py-2 border border-gray-300 rounded-md text-sm"
                 >
                   <option value="all">すべて</option>
                   <option value="idea">募集中</option>
                   <option value="preparing">検討中</option>
-                  <option value="event_planned">イベント化</option>
+                  <option value="event_planned">イベント化決定</option>
+                  <option value="rejected">見送り</option>
                 </select>
               </div>
               
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">実施形式</label>
-                <select
-                  value={modeFilter}
-                  onChange={(e) => setModeFilter(e.target.value as any)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                >
-                  <option value="all">すべて</option>
-                  <option value="online">オンライン</option>
-                  <option value="offline">オフライン</option>
-                </select>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">並び替え</label>
+              <div className="flex items-center gap-2">
+                <label className="text-sm font-medium text-gray-700">並び順:</label>
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as any)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                  className="px-3 py-2 border border-gray-300 rounded-md text-sm"
                 >
-                  <option value="likes">👍多い順</option>
                   <option value="createdAt">新着順</option>
+                  <option value="likes">👍多い順</option>
                 </select>
               </div>
             </div>
@@ -169,51 +130,63 @@ export default function IdeasPage() {
               </Link>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredAndSortedIdeas.map((idea) => (
                 <Link
                   key={idea.id}
-                  href={`/idea/${idea.id}`}
-                  className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-6 block"
+                  href={`/ideas/${idea.id}`}
+                  className="bg-white rounded-lg shadow hover:shadow-md transition-shadow p-4 block"
                 >
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        {idea.themeId && (
-                          <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
-                            {getThemeName(idea.themeId)}
-                          </span>
-                        )}
-                        <span
-                          className={`px-2 py-1 text-xs rounded-full ${
-                            idea.status === 'idea'
-                              ? 'bg-yellow-100 text-yellow-800'
-                              : idea.status === 'preparing'
-                              ? 'bg-blue-100 text-blue-800'
-                              : 'bg-green-100 text-green-800'
-                          }`}
-                        >
-                          {idea.status === 'idea' ? '募集中' : 
-                           idea.status === 'preparing' ? '検討中' : 'イベント化'}
-                        </span>
-                        <span className="text-xs text-gray-500">
-                          {idea.mode === 'online' ? 'オンライン' : 'オフライン'}
-                        </span>
-                      </div>
-                      
-                      <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                        {idea.title}
-                      </h3>
-                      
-                      <div className="flex items-center gap-6 text-sm text-gray-600">
-                        <span className="flex items-center">
-                          <span className="text-lg mr-1">👍</span>
-                          <span className="font-semibold">{idea.likes}</span>
-                        </span>
-                        <span>興味あり人数: 0</span>
-                        <span>{idea.createdAt.toDate().toLocaleDateString('ja-JP')}</span>
-                      </div>
-                    </div>
+                  {/* タイトル（最重要） */}
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
+                    {idea.title}
+                  </h3>
+                  
+                  {/* テーマタグ */}
+                  <div className="mb-2">
+                    {idea.themeId ? (
+                      <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                        {getThemeName(idea.themeId)}
+                      </span>
+                    ) : (
+                      <span className="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full">
+                        自由投稿
+                      </span>
+                    )}
+                  </div>
+                  
+                  {/* 反応（いいね・参加意思） */}
+                  <div className="flex items-center gap-4 text-sm text-gray-600 mb-2">
+                    <span className="flex items-center">
+                      <span className="text-lg mr-1">👍</span>
+                      <span className="font-semibold">{idea.likes}</span>
+                    </span>
+                    <span className="flex items-center">
+                      <span className="text-lg mr-1">👥</span>
+                      <span className="font-semibold">0</span>
+                    </span>
+                  </div>
+                  
+                  {/* 状態 */}
+                  <div className="flex justify-between items-center">
+                    <span
+                      className={`px-2 py-1 text-xs rounded-full ${
+                        idea.status === 'idea'
+                          ? 'bg-gray-100 text-gray-800'
+                          : idea.status === 'preparing'
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : idea.status === 'event_planned'
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-red-100 text-red-800'
+                      }`}
+                    >
+                      {idea.status === 'idea' ? '募集中' : 
+                       idea.status === 'preparing' ? '検討中' : 
+                       idea.status === 'event_planned' ? 'イベント化決定' : '見送り'}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      {idea.createdAt.toDate().toLocaleDateString('ja-JP')}
+                    </span>
                   </div>
                 </Link>
               ))}
