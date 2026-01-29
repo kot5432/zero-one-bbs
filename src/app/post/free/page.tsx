@@ -1,19 +1,32 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { addIdea } from '@/lib/firestore';
+import { firebaseAuth } from '@/lib/auth';
 
 export default function FreePostPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [currentUser, setCurrentUser] = useState<any>(null);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
     mode: 'online' as 'online' | 'offline'
   });
+
+  useEffect(() => {
+    // ログイン状態を確認
+    const user = firebaseAuth.getCurrentUser();
+    if (!user) {
+      // ログインしていない場合はログイン画面へリダイレクト
+      router.push('/login?redirect=' + encodeURIComponent('/post/free'));
+      return;
+    }
+    setCurrentUser(user);
+  }, [router]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -25,6 +38,11 @@ export default function FreePostPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (!currentUser) {
+      setError('ログインが必要です');
+      return;
+    }
     
     if (!formData.title.trim() || !formData.description.trim()) {
       setError('タイトルと内容は必須です');
@@ -39,58 +57,55 @@ export default function FreePostPage() {
         title: formData.title,
         description: formData.description,
         mode: formData.mode,
-        status: 'idea' as const
-        // themeIdを含めない（自由投稿）
+        status: 'idea' as const,
+        userId: currentUser.id // ユーザーIDを含める
       };
       
       await addIdea(ideaData);
       
+      alert('アイデアを投稿しました！');
       router.push('/');
     } catch (error: any) {
       setError('投稿に失敗しました。再度お試しください。');
-      console.error('Error adding idea:', error);
     } finally {
       setLoading(false);
     }
   };
+
+  // ログインしていない場合の表示
+  if (!currentUser) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600 mb-4">ログインが必要です</p>
+          <Link 
+            href="/login?redirect=/post/free"
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+          >
+            ログインする
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow-sm">
         <div className="max-w-6xl mx-auto px-4 py-6">
           <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold text-gray-900">ZERO-ONE</h1>
-            <nav className="flex space-x-6">
-              <Link href="/" className="text-gray-700 hover:text-gray-900">
-                トップ
-              </Link>
-              <Link href="/ideas" className="text-blue-600 font-semibold">
-                アイデア一覧
-              </Link>
-              <Link href="/post/select" className="text-gray-700 hover:text-gray-900">
-                投稿
-              </Link>
-            </nav>
+            <Link href="/" className="text-blue-600 hover:text-blue-700">
+              ← トップに戻る
+            </Link>
+            <h1 className="text-xl font-bold text-gray-900">自由投稿</h1>
+            <div className="w-16"></div>
           </div>
         </div>
       </header>
 
-      <main className="max-w-3xl mx-auto px-4 py-8">
-        <div className="bg-white rounded-lg shadow-md p-8">
-          <div className="flex items-center mb-6">
-            <span className="bg-gray-600 text-white px-3 py-1 rounded-full text-sm font-medium mr-3">
-              自由投稿
-            </span>
-            <h2 className="text-2xl font-bold text-gray-900">自由なアイデアを投稿する</h2>
-          </div>
-          
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-            <p className="text-sm text-blue-700">
-              <strong>自由投稿について：</strong>
-              テーマに関係ないアイデアや、今すぐ言いたいアイデアを自由に投稿できます。
-              自由投稿は別のセクションで表示されます。
-            </p>
-          </div>
+      <main className="max-w-4xl mx-auto px-4 py-8">
+        <div className="bg-white rounded-lg shadow p-6">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">アイデアを投稿する</h2>
           
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-6">
@@ -101,7 +116,7 @@ export default function FreePostPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
-                タイトル *
+                タイトル
               </label>
               <input
                 type="text"
@@ -109,7 +124,7 @@ export default function FreePostPage() {
                 name="title"
                 value={formData.title}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
                 placeholder="アイデアのタイトルを入力"
                 required
               />
@@ -117,15 +132,15 @@ export default function FreePostPage() {
 
             <div>
               <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
-                内容 *
+                内容
               </label>
               <textarea
                 id="description"
                 name="description"
                 value={formData.description}
                 onChange={handleChange}
-                rows={4}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-500"
+                rows={6}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
                 placeholder="アイデアの詳細を説明"
                 required
               />
@@ -133,14 +148,14 @@ export default function FreePostPage() {
 
             <div>
               <label htmlFor="mode" className="block text-sm font-medium text-gray-700 mb-2">
-                実施形式 *
+                実施形式
               </label>
               <select
                 id="mode"
                 name="mode"
                 value={formData.mode}
                 onChange={handleChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
               >
                 <option value="online">オンライン</option>
                 <option value="offline">オフライン</option>
@@ -151,15 +166,15 @@ export default function FreePostPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="flex-1 bg-blue-600 text-white py-3 px-6 rounded-md font-semibold hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
+                className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50"
               >
                 {loading ? '投稿中...' : '投稿する'}
               </button>
               <Link
-                href="/ideas"
-                className="flex-1 bg-gray-200 text-gray-800 py-3 px-6 rounded-md font-semibold hover:bg-gray-300 transition-colors text-center"
+                href="/"
+                className="flex-1 bg-gray-200 text-gray-800 py-2 px-4 rounded-md hover:bg-gray-300 text-center"
               >
-                戻る
+                キャンセル
               </Link>
             </div>
           </form>

@@ -34,28 +34,29 @@ export default function UserPage({ params }: { params: Promise<{ userId: string 
     fetchData();
   }, [resolvedParams.userId]);
 
-  // テーマ名を取得するヘルパー関数
-  const getThemeName = (themeId: string) => {
-    const theme = themes.find(t => t.id === themeId);
-    return theme ? theme.title : '不明なテーマ';
+  // 状態に応じた色を返す
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'idea': return 'bg-yellow-100 text-yellow-800';
+      case 'checked': return 'bg-gray-100 text-gray-800';
+      case 'preparing': return 'bg-blue-100 text-blue-800';
+      case 'event_planned': return 'bg-green-100 text-green-800';
+      case 'rejected': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
   };
 
-  // テーマ別に投稿をグループ化
-  const ideasByTheme = userIdeas.reduce((acc, idea) => {
-    if (idea.themeId) {
-      const themeName = getThemeName(idea.themeId);
-      if (!acc[themeName]) {
-        acc[themeName] = [];
-      }
-      acc[themeName].push(idea);
-    } else {
-      if (!acc['自由投稿']) {
-        acc['自由投稿'] = [];
-      }
-      acc['自由投稿'].push(idea);
+  // 状態の日本語表示
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'idea': return '募集中';
+      case 'checked': return '確認済み';
+      case 'preparing': return '検討中';
+      case 'event_planned': return 'イベント化';
+      case 'rejected': return '見送り';
+      default: return '不明';
     }
-    return acc;
-  }, {} as Record<string, Idea[]>);
+  };
 
   if (loading) {
     return (
@@ -68,104 +69,117 @@ export default function UserPage({ params }: { params: Promise<{ userId: string 
   if (!user) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-gray-600 mb-4">ユーザーが見つかりません</p>
-          <Link href="/" className="text-blue-600 hover:text-blue-700">
-            トップページに戻る
-          </Link>
-        </div>
+        <p className="text-gray-600">ユーザーが見つかりません</p>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm">
-        <div className="max-w-6xl mx-auto px-4 py-6">
+      {/* ヘッダー */}
+      <header className="bg-white shadow-sm border-b border-gray-200">
+        <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold text-gray-900">ZERO-ONE</h1>
-            <nav className="flex space-x-6">
-              <Link href="/" className="text-gray-700 hover:text-gray-900">
-                トップ
-              </Link>
-              <Link href="/ideas" className="text-gray-700 hover:text-gray-900">
-                アイデア一覧
-              </Link>
-              <Link href="/post/select" className="text-gray-700 hover:text-gray-900">
-                投稿
-              </Link>
-              <Link href={`/user/${resolvedParams.userId}`} className="text-blue-600 font-semibold">
-                マイページ
-              </Link>
-            </nav>
+            <Link href="/" className="text-blue-600 hover:text-blue-700">
+              ← トップに戻る
+            </Link>
+            <h1 className="text-xl font-bold text-gray-900">マイページ</h1>
+            <div className="w-16"></div>
           </div>
         </div>
       </header>
 
       <main className="max-w-4xl mx-auto px-4 py-8">
-        {/* マイページ */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">マイページ</h2>
-          
-          <div className="mb-8">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">{user.username}</h3>
-            <p className="text-gray-600">登録日: {user.createdAt.toDate().toLocaleDateString('ja-JP')}</p>
+        {/* プロフィール */}
+        <section className="bg-white rounded-lg shadow p-6 mb-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">👤 プロフィール</h2>
+          <div className="space-y-2">
+            <p className="text-gray-700">
+              <span className="font-medium">名前：</span>
+              {user.username}
+            </p>
+            <p className="text-gray-700">
+              <span className="font-medium">登録日：</span>
+              {user.createdAt.toDate().toLocaleDateString('ja-JP')}
+            </p>
+            <p className="text-gray-700">
+              <span className="font-medium">投稿数：</span>
+              {userIdeas.length}
+            </p>
           </div>
-          
-          {/* 自分の投稿 */}
-          <div className="mb-8">
-            <h4 className="text-lg font-semibold text-gray-900 mb-4">【自分の投稿】</h4>
+        </section>
+
+        {/* 自分のアイデア */}
+        <section className="bg-white rounded-lg shadow p-6 mb-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">💡 自分のアイデア</h2>
+          {userIdeas.length > 0 ? (
             <div className="space-y-3">
               {userIdeas.map((idea) => (
-                <div key={idea.id} className="border border-gray-200 rounded-lg p-4">
-                  <div className="flex justify-between items-start mb-2">
-                    <h5 className="text-lg font-semibold text-gray-900">
-                      {idea.title}
-                    </h5>
-                    <span
-                      className={`px-2 py-1 text-xs rounded-full ${
-                        idea.status === 'idea'
-                          ? 'bg-yellow-100 text-yellow-800'
-                          : idea.status === 'preparing'
-                          ? 'bg-blue-100 text-blue-800'
-                          : 'bg-green-100 text-green-800'
-                      }`}
+                <div key={idea.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div>
+                    <Link 
+                      href={`/idea/${idea.id}`}
+                      className="text-blue-600 hover:text-blue-700 font-medium"
                     >
-                      {idea.status === 'idea' ? '募集中' : 
-                       idea.status === 'preparing' ? '検討中' : 'イベント化'}
-                    </span>
+                      {idea.title}
+                    </Link>
+                    <div className="text-sm text-gray-500 mt-1">
+                      👍 {idea.likes} · {idea.createdAt.toDate().toLocaleDateString('ja-JP')}
+                    </div>
                   </div>
-                  
-                  <p className="text-gray-600 mb-2 line-clamp-2">
-                    {idea.description}
-                  </p>
-                  
-                  <div className="flex justify-between items-center text-sm text-gray-500">
-                    <span>👍 {idea.likes}</span>
-                    <span>{idea.createdAt.toDate().toLocaleDateString('ja-JP')}</span>
-                  </div>
+                  <span className={`px-2 py-1 text-xs rounded-full ${getStatusColor(idea.status)}`}>
+                    {getStatusText(idea.status)}
+                  </span>
                 </div>
               ))}
-              
-              {userIdeas.length === 0 && (
-                <p className="text-gray-500 text-center py-4">まだ投稿がありません</p>
-              )}
             </div>
-          </div>
-          
-          {/* 参加意思 */}
-          <div>
-            <h4 className="text-lg font-semibold text-gray-900 mb-4">【参加意思】</h4>
-            <div className="bg-gray-50 rounded-lg p-4">
-              <p className="text-gray-600 text-center">
-                参加意思を示したアイデアはここに表示されます
+          ) : (
+            <p className="text-gray-500">まだアイデアを投稿していません</p>
+          )}
+        </section>
+
+        {/* 参加イベント */}
+        <section className="bg-white rounded-lg shadow p-6 mb-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">📅 参加イベント</h2>
+          <p className="text-gray-500">現在参加中のイベントはありません</p>
+        </section>
+
+        {/* お知らせ */}
+        <section className="bg-white rounded-lg shadow p-6 mb-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">🔔 お知らせ</h2>
+          <div className="space-y-2">
+            {userIdeas.filter(idea => idea.status === 'preparing').length > 0 && (
+              <p className="text-blue-600">
+                あなたのアイデアが検討中になりました
               </p>
-              <p className="text-gray-500 text-sm text-center mt-2">
-                （現在開発中です）
+            )}
+            {userIdeas.filter(idea => idea.status === 'event_planned').length > 0 && (
+              <p className="text-green-600">
+                あなたのアイデアがイベント化されました
               </p>
-            </div>
+            )}
+            {userIdeas.filter(idea => idea.status === 'preparing').length === 0 && 
+             userIdeas.filter(idea => idea.status === 'event_planned').length === 0 && (
+              <p className="text-gray-500">新しいお知らせはありません</p>
+            )}
           </div>
-        </div>
+        </section>
+
+        {/* 設定 */}
+        <section className="bg-white rounded-lg shadow p-6">
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">⚙️ 設定</h2>
+          <div className="space-y-3">
+            <button className="w-full text-left px-4 py-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+              <span className="text-gray-700">名前変更</span>
+            </button>
+            <Link 
+              href="/settings/delete-account"
+              className="w-full text-left px-4 py-3 bg-red-50 rounded-lg hover:bg-red-100 transition-colors block text-red-600"
+            >
+              アカウントを削除する
+            </Link>
+          </div>
+        </section>
       </main>
     </div>
   );

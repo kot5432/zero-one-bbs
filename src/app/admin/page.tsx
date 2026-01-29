@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { getIdeas, Idea, getAllUsers, User, deleteUser, logDeletion, getAllDeletionLogs, updateIdea, deleteIdea, getThemes, Theme, addTheme, updateTheme, Timestamp } from '@/lib/firestore';
+import { firebaseAuth } from '@/lib/auth';
 
 export default function AdminPage() {
   const [ideas, setIdeas] = useState<Idea[]>([]);
@@ -113,10 +114,14 @@ export default function AdminPage() {
     }
 
     try {
+      // Firestoreからユーザーを削除
       await deleteUser(userId);
       await logDeletion('user', userId, reason, 'admin');
+      
+      // 状態を更新
       setUsers(prev => prev.filter(user => user.id !== userId));
-      alert('ユーザーを削除しました');
+      
+      alert('ユーザーを削除しました。\n注意：同じメールアドレスでの再登録には時間がかかる場合があります。');
     } catch (error) {
       console.error('Error deleting user:', error);
       alert('削除に失敗しました');

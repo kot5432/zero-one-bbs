@@ -4,7 +4,8 @@ import {
   signOut, 
   onAuthStateChanged,
   User as FirebaseUser,
-  updateProfile
+  updateProfile,
+  deleteUser as deleteFirebaseUser
 } from 'firebase/auth';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { auth as firebaseAuthInstance, db } from './firebase';
@@ -42,24 +43,12 @@ export class FirebaseAuth {
           // ユーザー設定を取得または作成
           let user = await getUser(firebaseUser.uid);
           
+          // ユーザーがFirestoreに存在しない場合は作成しない（削除されたユーザーの復活を防ぐ）
           if (!user) {
-            // 新規ユーザー作成
-            const userData = {
-              username: firebaseUser.displayName || `ユーザー${firebaseUser.uid.substring(0, 6)}`,
-              email: firebaseUser.email || '',
-              postCount: 0,
-              themeCount: 0
-            };
-            
-            const docRef = await createUser(userData);
-            user = {
-              id: docRef.id,
-              ...userData,
-              createdAt: new Date() as any
-            };
-            
-            // ユーザー設定を保存
-            await this.createUserSettings(firebaseUser.uid, firebaseUser.email!, firebaseUser.displayName || userData.username);
+            this.currentUser = null;
+            resolve(null);
+            unsubscribe();
+            return;
           }
           
           this.currentUser = user;
@@ -131,9 +120,33 @@ export class FirebaseAuth {
       
       this.currentUser = user;
       return user;
-    } catch (error) {
-      throw new Error('アカウント作成に失敗しました');
+    } catch (error: any) {
+      // Firebaseエラーをそのまま伝播させる
+      throw error;
     }
+  }
+
+  // ユーザーを完全に削除（Firestore + Firebase Auth）
+  async deleteUserCompletely(userId: string): Promise<void> {
+    try {
+      // Firestoreのユーザーデータを削除
+      await this.deleteUserFromFirestore(userId);
+      
+      // 現在ログインしているユーザーの場合、Firebase Authからも削除
+      if (this.firebaseUser && this.firebaseUser.uid === userId) {
+        await deleteFirebaseUser(this.firebaseUser);
+      }
+    } catch (error) {
+      console.error('Error deleting user completely:', error);
+      throw error;
+    }
+  }
+
+  // Firestoreからユーザーを削除
+  private async deleteUserFromFirestore(userId: string): Promise<void> {
+    const { deleteUser, deleteUserSettings } = await import('./firestore');
+    await deleteUser(userId);
+    await deleteUserSettings(userId);
   }
 
   // サインアウト

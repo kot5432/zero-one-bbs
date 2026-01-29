@@ -265,7 +265,11 @@ export async function getAllUserSettings() {
 
 // ユーザーを削除
 export async function deleteUser(userId: string) {
+  // Firestoreのユーザードキュメントを削除
   await deleteDoc(doc(db, 'users', userId));
+  
+  // ユーザー設定も削除
+  await deleteUserSettings(userId);
 }
 
 // ユーザー設定を削除

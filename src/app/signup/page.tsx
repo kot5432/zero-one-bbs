@@ -34,9 +34,28 @@ export default function SignUpPage() {
 
     try {
       await firebaseAuth.signUp(email, password, displayName);
-      router.push('/');
-    } catch (err) {
-      setError('アカウント作成に失敗しました。もう一度お試しください。');
+      
+      alert('アカウントを作成しました！\n次にプロフィール設定を行います。');
+      router.push('/user/profile/setup');
+    } catch (err: any) {
+      console.error('Signup error:', err);
+      
+      // Firebaseエラーコードに応じた具体的なメッセージ
+      if (err.code === 'auth/email-already-in-use') {
+        setError('このメールアドレスは既に使用されています。ログインするか、別のメールアドレスをお試しください。');
+      } else if (err.code === 'auth/invalid-email') {
+        setError('メールアドレスの形式が正しくありません。確認してもう一度入力してください。');
+      } else if (err.code === 'auth/weak-password') {
+        setError('パスワードが弱すぎます。より強力なパスワードを設定してください。');
+      } else if (err.code === 'auth/network-request-failed') {
+        setError('ネットワークエラーが発生しました。インターネット接続を確認してもう一度お試しください。');
+      } else if (err.code === 'auth/too-many-requests') {
+        setError('リクエストが多すぎます。しばらく待ってからもう一度お試しください。');
+      } else if (err.code === 'auth/internal-error') {
+        setError('システムエラーが発生しました。時間をおいてもう一度お試しください。');
+      } else {
+        setError('アカウント作成に失敗しました。入力内容を確認してもう一度お試しください。');
+      }
     } finally {
       setLoading(false);
     }
