@@ -14,16 +14,24 @@ export interface User {
   lastLoginAt?: Timestamp;
 }
 
+// テーマ
 export interface Theme {
-  id?: string;
+  id: string;
   title: string;
   description: string;
-  startDate: Timestamp;
-  endDate: Timestamp;
-  eventDate?: Timestamp;
+  targetMonth: string; // YYYY-MM形式
+  startDate: any;
+  endDate: any;
   isActive: boolean;
-  createdAt: Timestamp;
-  updatedAt?: Timestamp;
+  isArchived: boolean; // アーカイブ状態
+  visibility: 'public' | 'private' | 'draft'; // 公開状態
+  settings: {
+    allowSubmissions: boolean; // 投稿を許可するか
+    showInList: boolean; // 一覧に表示するか
+    allowComments: boolean; // コメントを許可するか
+  };
+  createdAt: any;
+  updatedAt: any;
 }
 
 export interface Event {
@@ -379,6 +387,32 @@ export async function getUnreadNotificationCount(userId: string) {
   const q = query(notificationsCollection, where('userId', '==', userId), where('isRead', '==', false));
   const snapshot = await getDocs(q);
   return snapshot.size;
+}
+
+// 管理コメント
+export interface AdminComment {
+  id: string;
+  ideaId: string;
+  adminId: string;
+  adminName: string;
+  content: string;
+  createdAt: any;
+}
+
+// 管理コメントを作成
+export async function createAdminComment(comment: Omit<AdminComment, 'id' | 'createdAt'>) {
+  const newComment = {
+    ...comment,
+    createdAt: serverTimestamp()
+  };
+  return await addDoc(collection(db, 'adminComments'), newComment);
+}
+
+// アイデアの管理コメントを取得
+export async function getAdminComments(ideaId: string) {
+  const q = query(collection(db, 'adminComments'), where('ideaId', '==', ideaId), orderBy('createdAt', 'desc'));
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as AdminComment));
 }
 
 // ユーザーIPを取得するヘルパー関数

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { getIdeas, Idea, getAllUsers, User, deleteUser, logDeletion, getAllDeletionLogs, updateIdea, deleteIdea, getThemes, Theme, addTheme, updateTheme, Timestamp } from '@/lib/firestore';
+import { getIdeas, Idea, getAllUsers, User, deleteUser, logDeletion, getAllDeletionLogs, updateIdea, deleteIdea, getThemes, Theme, addTheme, updateTheme, deleteTheme, Timestamp, createAdminComment, getAdminComments, AdminComment } from '@/lib/firestore';
 import { firebaseAuth } from '@/lib/auth';
 
 export default function AdminPage() {
@@ -17,8 +17,40 @@ export default function AdminPage() {
   const [themeForm, setThemeForm] = useState({
     title: '',
     description: '',
-    isActive: false
+    targetMonth: new Date().toISOString().slice(0, 7), // YYYY-MM形式
   });
+
+  // 統計データの計算
+  const getStats = () => {
+    const now = new Date();
+    const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    
+    const thisMonthIdeas = ideas.filter(idea => 
+      idea.createdAt && idea.createdAt.toDate() >= thisMonth
+    );
+    
+    const unconfirmedIdeas = ideas.filter(idea => idea.status === 'idea');
+    const checkedIdeas = ideas.filter(idea => idea.status === 'checked');
+    const preparingIdeas = ideas.filter(idea => idea.status === 'preparing');
+    const eventPlannedIdeas = ideas.filter(idea => idea.status === 'event_planned');
+    const rejectedIdeas = ideas.filter(idea => idea.status === 'rejected');
+    const completedIdeas = ideas.filter(idea => idea.status === 'completed');
+    
+    const activeTheme = themes.find(theme => theme.isActive);
+    
+    return {
+      totalUsers: users.length,
+      totalPosts: ideas.length,
+      thisMonthPosts: thisMonthIdeas.length,
+      unconfirmedCount: unconfirmedIdeas.length,
+      confirmedCount: checkedIdeas.length,
+      consideringCount: preparingIdeas.length,
+      eventPlannedCount: eventPlannedIdeas.length,
+      rejectedCount: rejectedIdeas.length,
+      completedCount: completedIdeas.length,
+      activeTheme: activeTheme
+    };
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -130,19 +162,6 @@ export default function AdminPage() {
     }
   };
 
-  // アイデア状態変更
-  const updateIdeaStatus = async (ideaId: string, newStatus: string) => {
-    try {
-      await updateIdea(ideaId, { status: newStatus as Idea['status'] });
-      setIdeas(prev => prev.map(idea => 
-        idea.id === ideaId ? { ...idea, status: newStatus as Idea['status'] } : idea
-      ));
-    } catch (error) {
-      console.error('Error updating idea status:', error);
-      alert('状態の更新に失敗しました');
-    }
-  };
-
   // アイデア削除
   const deleteIdeaHandler = async (ideaId: string, ideaTitle: string) => {
     if (!confirm(`本当にアイデア「${ideaTitle}」を削除しますか？この操作は元に戻せません。`)) {
@@ -176,9 +195,17 @@ export default function AdminPage() {
       const themeData = {
         title: themeForm.title,
         description: themeForm.description,
+        targetMonth: themeForm.targetMonth,
         startDate: Timestamp.now(),
         endDate: new Timestamp(Math.floor((Date.now() + 30 * 24 * 60 * 60 * 1000) / 1000), 0),
-        isActive: themeForm.isActive
+        isActive: false,
+        isArchived: false,
+        visibility: 'draft' as 'public' | 'private' | 'draft',
+        settings: {
+          allowSubmissions: true,
+          showInList: true,
+          allowComments: true
+        }
       };
 
       await addTheme(themeData);
@@ -188,13 +215,37 @@ export default function AdminPage() {
       setThemes(themesData);
       
       // フォームをリセット
-      setThemeForm({ title: '', description: '', isActive: false });
+      setThemeForm({ 
+        title: '', 
+        description: '', 
+        targetMonth: new Date().toISOString().slice(0, 7)
+      });
       setShowThemeForm(false);
       
       alert('テーマを作成しました');
     } catch (error) {
       console.error('Error creating theme:', error);
       alert('テーマの作成に失敗しました');
+    }
+  };
+
+  // テーマ削除
+  const deleteThemeHandler = async (themeId: string, themeTitle: string) => {
+    if (!confirm(`本当にテーマ「${themeTitle}」を削除しますか？この操作は元に戻せません。`)) {
+      return;
+    }
+
+    try {
+      await deleteTheme(themeId);
+      
+      // テーマを再取得
+      const themesData = await getThemes();
+      setThemes(themesData);
+      
+      alert(`テーマ「${themeTitle}」を削除しました。`);
+    } catch (error) {
+      console.error('Error deleting theme:', error);
+      alert('テーマの削除に失敗しました');
     }
   };
 
@@ -230,6 +281,85 @@ export default function AdminPage() {
     );
   }
 
+  // ステータス変更関数
+  const updateIdeaStatus = async (ideaId: string, newStatus: string) => {
+    try {
+      await updateIdea(ideaId, { status: newStatus as Idea['status'] });
+      setIdeas(prev => 
+        prev.map(idea => 
+          idea.id === ideaId ? { ...idea, status: newStatus as Idea['status'] } : idea
+        )
+      );
+    } catch (error) {
+      console.error('Error updating idea status:', error);
+      alert('ステータスの更新に失敗しました');
+    }
+  };
+
+  // ステータス変更可能か判定
+  const canChangeStatus = (currentStatus: string) => {
+    return currentStatus === 'idea' || currentStatus === 'preparing';
+  };
+
+  // 利用可能なステータスオプション
+  const getAvailableStatusOptions = (currentStatus: string) => {
+    switch (currentStatus) {
+      case 'idea':
+        return [
+          { value: 'idea', label: '募集中', disabled: false },
+          { value: 'checked', label: '確認済み', disabled: false },
+        ];
+      case 'checked':
+        return [
+          { value: 'checked', label: '確認済み', disabled: true },
+        ];
+      case 'preparing':
+        return [
+          { value: 'preparing', label: '検討中', disabled: false },
+          { value: 'event_planned', label: 'イベント化決定', disabled: false },
+          { value: 'rejected', label: '見送り', disabled: false },
+        ];
+      case 'event_planned':
+        return [
+          { value: 'event_planned', label: 'イベント化決定', disabled: true },
+        ];
+      case 'rejected':
+        return [
+          { value: 'rejected', label: '見送り', disabled: true },
+        ];
+      case 'completed':
+        return [
+          { value: 'completed', label: '完了', disabled: true },
+        ];
+      default:
+        return [
+          { value: currentStatus, label: currentStatus, disabled: true },
+        ];
+    }
+  };
+
+  // ステータス表示関数
+  const getStatusDisplay = (status: string) => {
+    switch (status) {
+      case 'idea':
+        return { text: '募集中', color: 'bg-gray-100 text-gray-800', icon: '○' };
+      case 'checked':
+        return { text: '確認済み', color: 'bg-blue-100 text-blue-800', icon: '' };
+      case 'preparing':
+        return { text: '検討中', color: 'bg-yellow-100 text-yellow-800', icon: '△' };
+      case 'event_planned':
+        return { text: 'イベント化決定', color: 'bg-green-100 text-green-800', icon: '◉' };
+      case 'rejected':
+        return { text: '見送り', color: 'bg-red-100 text-red-800', icon: '×' };
+      case 'completed':
+        return { text: '完了', color: 'bg-purple-100 text-purple-800', icon: '●' };
+      default:
+        return { text: status, color: 'bg-gray-100 text-gray-800', icon: '?' };
+    }
+  };
+
+  const stats = getStats();
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* ヘッダー */}
@@ -242,6 +372,11 @@ export default function AdminPage() {
               <span className="text-lg text-gray-600">管理画面</span>
             </div>
             <div className="flex items-center gap-4">
+              {stats.unconfirmedCount > 0 && (
+                <div className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-medium">
+                  未確認: {stats.unconfirmedCount}件
+                </div>
+              )}
               <span className="text-gray-600">管理者</span>
             </div>
           </div>
@@ -262,7 +397,7 @@ export default function AdminPage() {
                       : 'hover:bg-gray-100 text-gray-700'
                   }`}
                 >
-                  📊 ダッシュボード
+                  ダッシュボード
                 </button>
               </li>
               <li>
@@ -274,7 +409,7 @@ export default function AdminPage() {
                       : 'hover:bg-gray-100 text-gray-700'
                   }`}
                 >
-                  👥 ユーザー管理
+                  ユーザー管理
                 </button>
               </li>
               <li>
@@ -286,7 +421,12 @@ export default function AdminPage() {
                       : 'hover:bg-gray-100 text-gray-700'
                   }`}
                 >
-                  💬 投稿管理
+                  投稿管理
+                  {stats.unconfirmedCount > 0 && (
+                    <span className="ml-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                      {stats.unconfirmedCount}
+                    </span>
+                  )}
                 </button>
               </li>
               <li>
@@ -298,7 +438,7 @@ export default function AdminPage() {
                       : 'hover:bg-gray-100 text-gray-700'
                   }`}
                 >
-                  🎯 テーマ管理
+                  テーマ管理
                 </button>
               </li>
               <li>
@@ -310,7 +450,7 @@ export default function AdminPage() {
                       : 'hover:bg-gray-100 text-gray-700'
                   }`}
                 >
-                  📈 データ管理
+                  データ管理
                 </button>
               </li>
               <li>
@@ -322,7 +462,7 @@ export default function AdminPage() {
                       : 'hover:bg-gray-100 text-gray-700'
                   }`}
                 >
-                  ⚙️ 設定
+                  設定
                 </button>
               </li>
             </ul>
@@ -334,7 +474,7 @@ export default function AdminPage() {
           {/* ダッシュボード */}
           {currentView === 'dashboard' && (
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">📊 ダッシュボード</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">ダッシュボード</h2>
               
               {/* 重要指標 */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
@@ -342,7 +482,7 @@ export default function AdminPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-gray-600">総ユーザー数</p>
-                      <p className="text-3xl font-bold text-gray-900">{users.length}</p>
+                      <p className="text-3xl font-bold text-gray-900">{stats.totalUsers}</p>
                     </div>
                   </div>
                 </div>
@@ -351,7 +491,7 @@ export default function AdminPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-gray-600">今月の投稿数</p>
-                      <p className="text-3xl font-bold text-gray-900">{ideas.length}</p>
+                      <p className="text-3xl font-bold text-gray-900">{stats.thisMonthPosts}</p>
                     </div>
                   </div>
                 </div>
@@ -360,9 +500,7 @@ export default function AdminPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-gray-600">未確認アイデア</p>
-                      <p className="text-3xl font-bold text-orange-600">
-                        {ideas.filter(i => i.status === 'idea').length}
-                      </p>
+                      <p className="text-3xl font-bold text-red-600">{stats.unconfirmedCount}</p>
                     </div>
                   </div>
                 </div>
@@ -370,22 +508,71 @@ export default function AdminPage() {
                 <div className="bg-white rounded-lg shadow p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-gray-600">確認済みアイデア</p>
-                      <p className="text-3xl font-bold text-gray-600">
-                        {ideas.filter(i => i.status === 'checked').length}
-                      </p>
+                      <p className="text-sm font-medium text-gray-600">検討候補</p>
+                      <p className="text-3xl font-bold text-yellow-600">{stats.consideringCount}</p>
                     </div>
                   </div>
                 </div>
+              </div>
+
+              {/* クイックアクション */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                {stats.unconfirmedCount > 0 && (
+                  <div className="bg-white rounded-lg shadow p-6">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">未確認アイデアを確認</h3>
+                    <p className="text-gray-600 mb-4">
+                      確認待ちのアイデアが{stats.unconfirmedCount}件あります
+                    </p>
+                    <button
+                      onClick={() => setCurrentView('posts')}
+                      className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+                    >
+                      未確認アイデアを見る
+                    </button>
+                  </div>
+                )}
                 
                 <div className="bg-white rounded-lg shadow p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">検討候補アイデア</p>
-                      <p className="text-3xl font-bold text-blue-600">
-                        {ideas.filter(i => i.status === 'checked' && i.likes >= 5).length}
-                      </p>
-                    </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">今月のテーマ</h3>
+                  <p className="text-gray-600 mb-4">
+                    {stats.activeTheme ? stats.activeTheme.title : '現在公開中のテーマはありません'}
+                  </p>
+                  <button
+                    onClick={() => setCurrentView('themes')}
+                    className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
+                  >
+                    今月のテーマを確認
+                  </button>
+                </div>
+              </div>
+
+              {/* 確認済みアイデア */}
+              <div className="bg-white rounded-lg shadow p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">管理状況</h3>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                  <div className="text-center p-4 bg-gray-50 rounded-lg">
+                    <p className="text-2xl font-bold text-gray-900">{stats.unconfirmedCount}</p>
+                    <p className="text-sm text-gray-600">未確認</p>
+                  </div>
+                  <div className="text-center p-4 bg-blue-50 rounded-lg">
+                    <p className="text-2xl font-bold text-blue-600">{stats.confirmedCount}</p>
+                    <p className="text-sm text-gray-600">確認済み</p>
+                  </div>
+                  <div className="text-center p-4 bg-yellow-50 rounded-lg">
+                    <p className="text-2xl font-bold text-yellow-600">{stats.consideringCount}</p>
+                    <p className="text-sm text-gray-600">検討中</p>
+                  </div>
+                  <div className="text-center p-4 bg-green-50 rounded-lg">
+                    <p className="text-2xl font-bold text-green-600">{stats.eventPlannedCount}</p>
+                    <p className="text-sm text-gray-600">イベント化決定</p>
+                  </div>
+                  <div className="text-center p-4 bg-red-50 rounded-lg">
+                    <p className="text-2xl font-bold text-red-600">{stats.rejectedCount}</p>
+                    <p className="text-sm text-gray-600">見送り</p>
+                  </div>
+                  <div className="text-center p-4 bg-purple-50 rounded-lg">
+                    <p className="text-2xl font-bold text-purple-600">{stats.completedCount}</p>
+                    <p className="text-sm text-gray-600">完了</p>
                   </div>
                 </div>
               </div>
@@ -393,7 +580,7 @@ export default function AdminPage() {
               {/* 注意が必要な項目 */}
               {(ideas.filter(i => i.status === 'idea').length > 0 || ideas.filter(i => i.status === 'checked' && i.likes >= 5).length > 0) && (
                 <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
-                  <h3 className="text-lg font-semibold text-yellow-800 mb-2">⚠️ 注意が必要な項目</h3>
+                  <h3 className="text-lg font-semibold text-yellow-800 mb-2">注意が必要な項目</h3>
                   <div className="space-y-2">
                     {ideas.filter(i => i.status === 'idea').length > 0 && (
                       <p className="text-yellow-700">
@@ -402,31 +589,15 @@ export default function AdminPage() {
                     )}
                     {ideas.filter(i => i.status === 'checked' && i.likes >= 5).length > 0 && (
                       <p className="text-yellow-700">
-                        👍5以上の確認済みアイデアが {ideas.filter(i => i.status === 'checked' && i.likes >= 5).length} 件あります
+                        いいね5以上の確認済みアイデアが {ideas.filter(i => i.status === 'checked' && i.likes >= 5).length} 件あります
                       </p>
                     )}
                     <p className="text-yellow-600 text-sm mt-2">
-                      💡 対応方法: 未確認アイデアを「確認済み」にし、👍5以上になったら「検討中」に変更してください
+                      対応方法: 未確認アイデアを「確認済み」にし、いいね5以上になったら「検討中」に変更してください
                     </p>
                   </div>
                 </div>
               )}
-
-              {/* 行動につながる要素 */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <button
-                  onClick={() => setCurrentView('posts')}
-                  className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
-                >
-                  未確認アイデアを見る ({ideas.filter(i => i.status === 'idea').length}件)
-                </button>
-                <Link
-                  href="/"
-                  className="bg-green-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors text-center"
-                >
-                  今月のテーマを見る
-                </Link>
-              </div>
             </div>
           )}
 
@@ -582,7 +753,7 @@ export default function AdminPage() {
           {/* 投稿管理 */}
           {currentView === 'posts' && (
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">💬 投稿管理</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">投稿管理</h2>
               
               <div className="bg-white rounded-lg shadow p-6">
                 <div className="overflow-x-auto">
@@ -611,7 +782,7 @@ export default function AdminPage() {
                         <tr key={idea.id}>
                           <td className="px-4 py-3">
                             <div className="text-sm font-medium text-gray-900">{idea.title}</div>
-                            <div className="text-sm text-gray-500">👍 {idea.likes} · 🙋 0</div>
+                            <div className="text-sm text-gray-500">いいね {idea.likes} · 興味あり 0</div>
                           </td>
                           <td className="px-4 py-3 text-sm text-gray-900">
                             {users.find(u => u.id === idea.userId)?.username || '不明'}
@@ -620,17 +791,38 @@ export default function AdminPage() {
                             {idea.themeId ? `テーマ${idea.themeId.slice(0, 6)}` : '自由投稿'}
                           </td>
                           <td className="px-4 py-3">
-                            <select 
-                              value={idea.status}
-                              onChange={(e) => updateIdeaStatus(idea.id!, e.target.value)}
-                              className="px-2 py-1 text-xs rounded-full border border-gray-300"
-                            >
-                              <option value="idea" className="bg-yellow-100 text-yellow-800">募集中</option>
-                              <option value="checked" className="bg-gray-100 text-gray-800">確認済み</option>
-                              <option value="preparing" className="bg-blue-100 text-blue-800">検討中</option>
-                              <option value="event_planned" className="bg-green-100 text-green-800">イベント化決定</option>
-                              <option value="rejected" className="bg-red-100 text-red-800">見送り</option>
-                            </select>
+                            <div className="flex items-center gap-2">
+                              {/* 確認済みチェックマーク */}
+                              {(idea.status === 'checked' || idea.status === 'preparing' || idea.status === 'event_planned' || idea.status === 'rejected') && (
+                                <span className="inline-flex items-center justify-center w-6 h-6 bg-blue-100 text-blue-600 rounded-full text-sm font-bold">
+                                  ✓
+                                </span>
+                              )}
+                              
+                              {/* 状態表示 */}
+                              {canChangeStatus(idea.status) ? (
+                                <select 
+                                  value={idea.status}
+                                  onChange={(e) => updateIdeaStatus(idea.id!, e.target.value)}
+                                  className="px-2 py-1 text-xs rounded-full border border-gray-300"
+                                >
+                                  {getAvailableStatusOptions(idea.status).map((option) => (
+                                    <option 
+                                      key={option.value} 
+                                      value={option.value}
+                                      disabled={option.disabled}
+                                    >
+                                      {option.label}
+                                    </option>
+                                  ))}
+                                </select>
+                              ) : (
+                                <span className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded-full ${getStatusDisplay(idea.status).color}`}>
+                                  <span className="mr-1">{getStatusDisplay(idea.status).icon}</span>
+                                  {getStatusDisplay(idea.status).text}
+                                </span>
+                              )}
+                            </div>
                           </td>
                           <td className="px-4 py-3">
                             <div className="flex gap-2">
@@ -700,14 +892,16 @@ export default function AdminPage() {
                         placeholder="なぜこのテーマかを説明"
                       />
                     </div>
-                    <div className="flex items-center">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        対象月
+                      </label>
                       <input
-                        type="checkbox"
-                        checked={themeForm.isActive}
-                        onChange={(e) => setThemeForm(prev => ({ ...prev, isActive: e.target.checked }))}
-                        className="rounded"
+                        type="month"
+                        value={themeForm.targetMonth}
+                        onChange={(e) => setThemeForm(prev => ({ ...prev, targetMonth: e.target.value }))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md"
                       />
-                      <span className="ml-2 text-sm text-gray-700">公開する</span>
                     </div>
                     <button
                       onClick={createTheme}
@@ -730,6 +924,12 @@ export default function AdminPage() {
                           タイトル
                         </th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          対象月
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          公開状態
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           状態
                         </th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -746,32 +946,57 @@ export default function AdminPage() {
                           <td className="px-4 py-3">
                             <div className="text-sm font-medium text-gray-900">{theme.title}</div>
                             <div className="text-sm text-gray-500">
-                              {theme.startDate.toDate().toLocaleDateString('ja-JP')} 〜 {theme.endDate.toDate().toLocaleDateString('ja-JP')}
+                              {theme.targetMonth ? `${theme.targetMonth}月` : '未設定'}
                             </div>
                           </td>
                           <td className="px-4 py-3">
                             <span className={`px-2 py-1 text-xs rounded-full ${
-                              theme.isActive
-                                ? 'bg-green-100 text-green-800'
-                                : 'bg-gray-100 text-gray-800'
+                              theme.visibility === 'public' ? 'bg-green-100 text-green-800' :
+                              theme.visibility === 'private' ? 'bg-yellow-100 text-yellow-800' :
+                              'bg-gray-100 text-gray-800'
                             }`}>
-                              {theme.isActive ? '公開中' : '非公開'}
+                              {theme.visibility === 'public' ? '公開' :
+                               theme.visibility === 'private' ? '非公開' : '下書き'}
                             </span>
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="flex gap-2">
+                              <span className={`px-2 py-1 text-xs rounded-full ${
+                                theme.isActive
+                                  ? 'bg-blue-100 text-blue-800'
+                                  : 'bg-gray-100 text-gray-800'
+                              }`}>
+                                {theme.isActive ? 'アクティブ' : '非アクティブ'}
+                              </span>
+                              {theme.isArchived && (
+                                <span className="px-2 py-1 text-xs rounded-full bg-red-100 text-red-800">
+                                  アーカイブ
+                                </span>
+                              )}
+                            </div>
                           </td>
                           <td className="px-4 py-3 text-sm text-gray-900">
                             {ideas.filter(i => i.themeId === theme.id).length}
                           </td>
                           <td className="px-4 py-3">
-                            <button
-                              onClick={() => updateThemeStatus(theme.id!, !theme.isActive)}
-                              className={`text-sm font-medium ${
-                                theme.isActive
-                                  ? 'text-gray-600 hover:text-gray-700'
-                                  : 'text-green-600 hover:text-green-700'
-                              }`}
-                            >
-                              {theme.isActive ? '非公開にする' : '公開する'}
-                            </button>
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => updateThemeStatus(theme.id!, !theme.isActive)}
+                                className={`text-sm font-medium ${
+                                  theme.isActive
+                                    ? 'text-gray-600 hover:text-gray-700'
+                                    : 'text-green-600 hover:text-green-700'
+                                }`}
+                              >
+                                {theme.isActive ? '非公開にする' : '公開する'}
+                              </button>
+                              <button
+                                onClick={() => deleteThemeHandler(theme.id!, theme.title)}
+                                className="text-sm font-medium text-red-600 hover:text-red-700"
+                              >
+                                削除
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -853,14 +1078,14 @@ export default function AdminPage() {
           {/* 設定 */}
           {currentView === 'settings' && (
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">⚙️ 設定</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">設定</h2>
               
               {/* テーマ設定（ルール） */}
               <div className="bg-white rounded-lg shadow p-6 mb-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">🎯 テーマ設定（ルール）</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">テーマ設定（ルール）</h3>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-900 mb-2">
                       同時公開テーマ数
                     </label>
                     <select className="w-full px-3 py-2 border border-gray-300 rounded-md">
@@ -872,24 +1097,69 @@ export default function AdminPage() {
                   <div className="flex items-center gap-4">
                     <label className="flex items-center">
                       <input type="checkbox" className="rounded" defaultChecked />
-                      <span className="text-sm text-gray-700">前テーマを自動終了する</span>
+                      <span className="ml-2 text-gray-900">前テーマを自動終了する</span>
                     </label>
                   </div>
                   <div className="flex items-center gap-4">
                     <label className="flex items-center">
                       <input type="checkbox" className="rounded" />
-                      <span className="text-sm text-gray-700">自由投稿を許可する</span>
+                      <span className="text-gray-900">自由投稿を許可する</span>
                     </label>
                   </div>
                 </div>
               </div>
               
-              {/* イベント化条件 */}
+              {/* テーマ管理設定 */}
               <div className="bg-white rounded-lg shadow p-6 mb-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">🎯 イベント化条件</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">テーマ管理設定</h3>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-900 mb-2">
+                      デフォルト公開状態
+                    </label>
+                    <select className="w-full px-3 py-2 border border-gray-300 rounded-md">
+                      <option value="draft">下書き</option>
+                      <option value="private">非公開</option>
+                      <option value="public">公開</option>
+                    </select>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <label className="flex items-center">
+                      <input type="checkbox" className="rounded" defaultChecked />
+                      <span className="text-gray-900">新規テーマを自動でアクティブにする</span>
+                    </label>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <label className="flex items-center">
+                      <input type="checkbox" className="rounded" defaultChecked />
+                      <span className="text-gray-900">投稿をデフォルトで許可する</span>
+                    </label>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <label className="flex items-center">
+                      <input type="checkbox" className="rounded" defaultChecked />
+                      <span className="text-gray-900">コメントをデフォルトで許可する</span>
+                    </label>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-900 mb-2">
+                      デフォルト最大投稿数
+                    </label>
+                    <input
+                      type="number"
+                      placeholder="制限なし"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* イベント化条件 */}
+              <div className="bg-white rounded-lg shadow p-6 mb-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">イベント化条件</h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-900 mb-2">
                       参加意思 ◯人以上
                     </label>
                     <input
@@ -900,7 +1170,7 @@ export default function AdminPage() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-900 mb-2">
                       いいね ◯以上
                     </label>
                     <input
@@ -913,7 +1183,7 @@ export default function AdminPage() {
                   <div className="flex items-center gap-4">
                     <label className="flex items-center">
                       <input type="checkbox" className="rounded" defaultChecked disabled />
-                      <span className="text-sm text-gray-700">管理承認が必要（必須）</span>
+                      <span className="text-gray-900">管理承認が必要（必須）</span>
                     </label>
                   </div>
                 </div>
@@ -921,10 +1191,10 @@ export default function AdminPage() {
               
               {/* 表示設定（最小） */}
               <div className="bg-white rounded-lg shadow p-6 mb-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">🎯 表示設定（最小）</h3>
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">表示設定（最小）</h3>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-900 mb-2">
                       投稿表示順
                     </label>
                     <select className="w-full px-3 py-2 border border-gray-300 rounded-md">
@@ -934,22 +1204,14 @@ export default function AdminPage() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      終了テーマの表示
+                    <label className="block text-sm font-medium text-gray-900 mb-2">
+                      終了テーマの扱い
                     </label>
                     <select className="w-full px-3 py-2 border border-gray-300 rounded-md">
                       <option value="show">表示する</option>
                       <option value="hide">非表示にする</option>
-                      <option value="archive">アーカイブとして表示</option>
                     </select>
                   </div>
-                </div>
-              </div>
-              
-              {/* 運営メッセージ設定 */}
-              <div className="bg-white rounded-lg shadow p-6 mb-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">📢 運営メッセージ設定</h3>
-                <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       トップ表示メッセージ
