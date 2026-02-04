@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/contexts/AuthContext';
+import { useUserAuth } from '@/contexts/UserAuthContext';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -11,7 +11,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
-  const { signIn } = useAuth();
+  const { signIn } = useUserAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

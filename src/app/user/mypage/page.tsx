@@ -92,7 +92,7 @@ export default function MyPage() {
       <main className="max-w-6xl mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">マイページ</h1>
-          <p className="text-gray-600">{user.displayName || user.email} さん</p>
+          <p className="text-gray-600">{user.displayName || user.email || 'ユーザー'} さん</p>
         </div>
 
         {/* 自分の投稿 */}

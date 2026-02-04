@@ -1,13 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { getIdeas, Idea, getActiveTheme, Theme, getThemes } from '@/lib/firestore';
 import { useUserAuth } from '@/contexts/UserAuthContext';
 import Header from '@/components/Header';
 
-export default function IdeasPage() {
+function IdeasPageContent() {
   const [ideas, setIdeas] = useState<Idea[]>([]);
   const [activeTheme, setActiveTheme] = useState<Theme | null>(null);
   const [themes, setThemes] = useState<Theme[]>([]);
@@ -27,16 +27,7 @@ export default function IdeasPage() {
           getThemes()
         ]);
         
-        // 検索クエリでフィルタリング
-        let filteredIdeas = ideasData;
-        if (searchQuery.trim()) {
-          filteredIdeas = ideasData.filter(idea => 
-            idea.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            idea.description.toLowerCase().includes(searchQuery.toLowerCase())
-          );
-        }
-        
-        setIdeas(filteredIdeas);
+        setIdeas(ideasData);
         setActiveTheme(activeThemeData);
         setThemes(themesData);
       } catch (error) {
@@ -47,18 +38,25 @@ export default function IdeasPage() {
     };
 
     fetchData();
-  }, [searchQuery]);
+  }, []);
 
   const filteredAndSortedIdeas = ideas
     .filter(idea => {
       if (filter === 'all') return idea.status !== 'rejected' && idea.status !== 'completed';
       return idea.status === filter;
     })
+    .filter(idea => {
+      if (searchQuery) {
+        return idea.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+               idea.description.toLowerCase().includes(searchQuery.toLowerCase());
+      }
+      return true;
+    })
     .sort((a, b) => {
       if (sortBy === 'likes') {
         return b.likes - a.likes;
       } else {
-        return b.createdAt.toMillis() - a.createdAt.toMillis();
+        return b.createdAt.toDate().getTime() - a.createdAt.toDate().getTime();
       }
     });
 
@@ -83,117 +81,128 @@ export default function IdeasPage() {
           </h1>
           
           {/* フィルター */}
-          <div className="bg-white rounded-lg shadow p-4 mb-6">
-            <div className="flex flex-wrap gap-4 items-center">
-              <div className="flex items-center gap-2">
-                <label className="text-sm font-medium text-gray-700">テーマ:</label>
-                <select
-                  value={filter}
-                  onChange={(e) => setFilter(e.target.value as any)}
-                  className="px-3 py-2 border border-gray-300 rounded-md text-sm"
-                >
-                  <option value="all">すべて</option>
-                  <option value="idea">募集中</option>
-                  <option value="preparing">検討中</option>
-                  <option value="event_planned">イベント化決定</option>
-                  <option value="rejected">見送り</option>
-                </select>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <label className="text-sm font-medium text-gray-700">並び順:</label>
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value as any)}
-                  className="px-3 py-2 border border-gray-300 rounded-md text-sm"
-                >
-                  <option value="createdAt">新着順</option>
-                  <option value="likes">👍多い順</option>
-                </select>
-              </div>
+          <div className="flex flex-wrap gap-4 mb-6">
+            <div className="flex items-center gap-2">
+              <label className="text-sm font-medium text-gray-700">状態:</label>
+              <select
+                value={filter}
+                onChange={(e) => setFilter(e.target.value as any)}
+                className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="all">すべて</option>
+                <option value="idea">募集中</option>
+                <option value="preparing">検討中</option>
+                <option value="event_planned">イベント化決定</option>
+                <option value="rejected">見送り</option>
+              </select>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <label className="text-sm font-medium text-gray-700">並び順:</label>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as any)}
+                className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="createdAt">新着順</option>
+                <option value="likes">人気順</option>
+              </select>
             </div>
           </div>
 
-          {/* アイデアカード */}
-          {loading ? (
-            <div className="text-center py-8">
-              <p className="text-gray-600">読み込み中...</p>
-            </div>
-          ) : filteredAndSortedIdeas.length === 0 ? (
-            <div className="text-center py-12 bg-white rounded-lg shadow">
-              <p className="text-gray-600 mb-4">該当するアイデアがありません</p>
-              <Link
-                href="/post/select"
-                className="text-blue-600 hover:text-blue-700 font-semibold"
-              >
-                アイデアを投稿する
-              </Link>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredAndSortedIdeas.map((idea) => (
-                <Link
-                  key={idea.id}
-                  href={`/ideas/${idea.id}`}
-                  className="bg-white rounded-lg shadow hover:shadow-md transition-shadow p-4 block"
-                >
-                  {/* タイトル（最重要） */}
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
-                    {idea.title}
-                  </h3>
-                  
-                  {/* テーマタグ */}
-                  <div className="mb-2">
-                    {idea.themeId ? (
-                      <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
-                        {getThemeName(idea.themeId)}
-                      </span>
-                    ) : (
-                      <span className="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full">
-                        自由投稿
-                      </span>
-                    )}
-                  </div>
-                  
-                  {/* 反応（いいね・参加意思） */}
-                  <div className="flex items-center gap-4 text-sm text-gray-600 mb-2">
-                    <span className="flex items-center">
-                      <span className="text-lg mr-1">👍</span>
-                      <span className="font-semibold">{idea.likes}</span>
-                    </span>
-                    <span className="flex items-center">
-                      <span className="text-lg mr-1">👥</span>
-                      <span className="font-semibold">0</span>
-                    </span>
-                  </div>
-                  
-                  {/* 状態 */}
-                  <div className="flex justify-between items-center">
-                    <span
-                      className={`px-2 py-1 text-xs rounded-full ${
-                        idea.status === 'idea'
-                          ? 'bg-gray-100 text-gray-800'
-                          : idea.status === 'preparing'
-                          ? 'bg-yellow-100 text-yellow-800'
-                          : idea.status === 'event_planned'
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-red-100 text-red-800'
-                      }`}
-                    >
-                      {idea.status === 'idea' ? '募集中' : 
-                       idea.status === 'preparing' ? '検討中' : 
-                       idea.status === 'event_planned' ? 'イベント化決定' : '見送り'}
-                    </span>
-                    <span className="text-xs text-gray-500">
-                      {idea.createdAt.toDate().toLocaleDateString('ja-JP')}
-                    </span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          )}
+          {/* 検索結果数 */}
+          <p className="text-sm text-gray-600 mb-4">
+            {filteredAndSortedIdeas.length}件のアイデアが見つかりました
+          </p>
         </div>
+
+        {/* アイデアカード */}
+        {loading ? (
+          <div className="text-center py-8">
+            <p className="text-gray-600">読み込み中...</p>
+          </div>
+        ) : filteredAndSortedIdeas.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-gray-600 mb-4">アイデアが見つかりません</p>
+            <Link
+              href="/post/select"
+              className="text-blue-600 hover:text-blue-700 font-semibold"
+            >
+              アイデアを投稿する
+            </Link>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredAndSortedIdeas.map((idea) => (
+              <Link
+                key={idea.id}
+                href={`/ideas/${idea.id}`}
+                className="bg-white rounded-lg shadow hover:shadow-md transition-shadow p-4 block"
+              >
+                {/* タイトル（最重要） */}
+                <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2">
+                  {idea.title}
+                </h3>
+                
+                {/* テーマタグ */}
+                <div className="mb-2">
+                  {idea.themeId ? (
+                    <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+                      {getThemeName(idea.themeId)}
+                    </span>
+                  ) : (
+                    <span className="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full">
+                      自由投稿
+                    </span>
+                  )}
+                </div>
+                
+                {/* 反応（いいね・参加意思） */}
+                <div className="flex items-center gap-4 text-sm text-gray-600 mb-2">
+                  <span className="flex items-center">
+                    <span className="text-lg mr-1">👍</span>
+                    <span className="font-semibold">{idea.likes}</span>
+                  </span>
+                  <span className="flex items-center">
+                    <span className="text-lg mr-1">👥</span>
+                    <span className="font-semibold">0</span>
+                  </span>
+                </div>
+                
+                {/* 状態 */}
+                <div className="flex justify-between items-center">
+                  <span
+                    className={`px-2 py-1 text-xs rounded-full ${
+                      idea.status === 'idea'
+                        ? 'bg-gray-100 text-gray-800'
+                        : idea.status === 'preparing'
+                        ? 'bg-yellow-100 text-yellow-800'
+                        : idea.status === 'event_planned'
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-red-100 text-red-800'
+                    }`}
+                  >
+                    {idea.status === 'idea' ? '募集中' : 
+                     idea.status === 'preparing' ? '検討中' : 
+                     idea.status === 'event_planned' ? 'イベント化決定' : '見送り'}
+                  </span>
+                  <span className="text-xs text-gray-500">
+                    {idea.createdAt.toDate().toLocaleDateString('ja-JP')}
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
       </main>
     </div>
+  );
+}
+
+export default function IdeasPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center"><p className="text-gray-600">読み込み中...</p></div>}>
+      <IdeasPageContent />
+    </Suspense>
   );
 }

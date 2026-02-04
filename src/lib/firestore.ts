@@ -6,6 +6,9 @@ export { db, Timestamp }; // dbとTimestampをエクスポート
 
 export interface User {
   id?: string;
+  uid: string;
+  email: string;
+  displayName: string;
   username: string;
   bio?: string;
   postCount: number;

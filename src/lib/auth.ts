@@ -278,6 +278,9 @@ export class SimpleAuth {
     if (!user) {
       // 新規ユーザー作成
       const userData = {
+        uid: userId,
+        email: '',
+        displayName: username || `ユーザー${userId.substring(0, 6)}`,
         username: username || `ユーザー${userId.substring(0, 6)}`,
         postCount: 0,
         themeCount: 0

@@ -17,12 +17,12 @@ export default function Header() {
 
   // 通知データ取得
   useEffect(() => {
-    if (user && user.id) {
+    if (user && user.uid) {
       const fetchNotifications = async () => {
         try {
           const [notificationsData, unreadData] = await Promise.all([
-            getUserNotifications(user.id),
-            getUnreadNotificationCount(user.id)
+            getUserNotifications(user.uid),
+            getUnreadNotificationCount(user.uid)
           ]);
           setNotifications(notificationsData);
           setUnreadCount(unreadData);
