@@ -58,6 +58,8 @@ export interface Idea {
   likes: number;
   createdAt: Timestamp;
   updatedAt?: Timestamp;
+  createdBy?: string;
+  themeId?: string;
   adminMemo?: string;
   adminChecklist?: {
     safety?: boolean;
@@ -69,7 +71,6 @@ export interface Idea {
     timestamp: Timestamp;
     details?: string;
   }>;
-  themeId?: string; // テーマとの紐付け
   problem?: string; // 何を解決したいか
   successCriteria?: string; // どんな形になれば成功か
   userId?: string; // ユーザーとの紐付け
@@ -342,10 +343,43 @@ export async function likeIdea(ideaId: string, userIp: string) {
   await updateDoc(ideaRef, { likes: increment(1) });
 }
 
+export async function unlikeIdea(ideaId: string, userIp: string) {
+  // 共感記録を検索
+  const q = query(likesCollection, where('ideaId', '==', ideaId), where('userIp', '==', userIp));
+  const snapshot = await getDocs(q);
+  
+  if (snapshot.empty) {
+    throw new Error('共感していません');
+  }
+
+  // 共感記録を削除
+  const likeDoc = snapshot.docs[0];
+  await deleteDoc(likeDoc.ref);
+
+  // アイデアの共感数を減らす
+  const ideaRef = doc(db, 'ideas', ideaId);
+  await updateDoc(ideaRef, { likes: increment(-1) });
+}
+
 export async function hasUserLiked(ideaId: string, userIp: string): Promise<boolean> {
   const q = query(likesCollection, where('ideaId', '==', ideaId), where('userIp', '==', userIp));
   const snapshot = await getDocs(q);
   return !snapshot.empty;
+}
+
+export async function getUserLikedIdeas(userIp: string): Promise<Idea[]> {
+  const q = query(likesCollection, where('userIp', '==', userIp));
+  const snapshot = await getDocs(q);
+  const likedIdeaIds = snapshot.docs.map(doc => doc.data().ideaId);
+  
+  if (likedIdeaIds.length === 0) {
+    return [];
+  }
+  
+  // アイデア情報を取得
+  const ideasQ = query(collection(db, 'ideas'), where('id', 'in', likedIdeaIds));
+  const ideasSnapshot = await getDocs(ideasQ);
+  return ideasSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Idea));
 }
 
 // 通知

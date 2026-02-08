@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { getActiveTheme, Theme } from '@/lib/firestore';
+import Header from '@/components/Header';
 
 export default function PostSelectPage() {
   const router = useRouter();
@@ -26,36 +27,19 @@ export default function PostSelectPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <p className="text-gray-600">読み込み中...</p>
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="flex items-center justify-center pt-20">
+          <p className="text-gray-600">読み込み中...</p>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm">
-        <div className="max-w-6xl mx-auto px-4 py-6">
-          <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold text-gray-900">ZERO-ONE</h1>
-            <nav className="flex space-x-6">
-              <Link href="/" className="text-gray-700 hover:text-gray-900">
-                トップ
-              </Link>
-              <Link href="/post" className="text-blue-600 font-semibold">
-                投稿
-              </Link>
-              <Link href="/user/demo" className="text-gray-700 hover:text-gray-900">
-                マイページ
-              </Link>
-              <Link href="/about" className="text-gray-700 hover:text-gray-900">
-                About
-              </Link>
-            </nav>
-          </div>
-        </div>
-      </header>
-
+      <Header />
+      
       <main className="max-w-4xl mx-auto px-4 py-8">
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold text-gray-900 mb-4">
@@ -74,7 +58,11 @@ export default function PostSelectPage() {
               <h3 className="text-2xl font-bold mb-2">{activeTheme.title}</h3>
               <p className="text-base mb-3 opacity-90">{activeTheme.description}</p>
               <p className="text-sm opacity-80">
-                募集期間: {activeTheme.startDate.toDate().toLocaleDateString('ja-JP')} 〜 {activeTheme.endDate.toDate().toLocaleDateString('ja-JP')}
+                募集期間: {activeTheme.startDate?.toDate?.() ? 
+                  activeTheme.startDate.toDate().toLocaleDateString('ja-JP') : '不明'
+                } 〜 {activeTheme.endDate?.toDate?.() ? 
+                  activeTheme.endDate.toDate().toLocaleDateString('ja-JP') : '不明'
+                }
               </p>
             </div>
           </div>
@@ -95,78 +83,90 @@ export default function PostSelectPage() {
               </div>
               <h3 className="text-2xl font-bold text-gray-900 mb-2">テーマに投稿する</h3>
               <p className="text-gray-600">
-                今月のテーマに沿ったアイデアを投稿
+                今月のテーマに沿ったアイデアを投稿します。テーマ期間中は特別な表示がされます。
               </p>
             </div>
-
-            <div className="space-y-4 mb-6">
-              <div className="flex items-center text-sm text-gray-600">
-                <span className="text-green-500 mr-2">✓</span>
-                テーマが明確なので書きやすい
+            
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2">
+                <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                <span className="text-sm text-gray-700">テーマ期間中は特別表示</span>
               </div>
-              <div className="flex items-center text-sm text-gray-600">
-                <span className="text-green-500 mr-2">✓</span>
-                イベント化の可能性が高い
+              <div className="flex items-center space-x-2">
+                <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                <span className="text-sm text-gray-700">イベント化の可能性が高い</span>
               </div>
-              <div className="flex items-center text-sm text-gray-600">
-                <span className="text-green-500 mr-2">✓</span>
-                管理側が重点的に見ます
+              <div className="flex items-center space-x-2">
+                <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                <span className="text-sm text-gray-700">コミュニティの注目を集めやすい</span>
               </div>
             </div>
-
-            <Link
-              href="/post/theme"
-              className={`block w-full text-center py-3 px-6 rounded-lg font-semibold transition-colors ${
-                activeTheme 
-                  ? 'bg-blue-600 text-white hover:bg-blue-700' 
-                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              }`}
+            
+            <button
+              onClick={() => router.push('/post/theme')}
+              disabled={!activeTheme}
+              className="w-full mt-6 bg-blue-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-blue-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
-              {activeTheme ? 'テーマで投稿する' : '現在テーマはありません'}
-            </Link>
+              {activeTheme ? 'テーマで投稿する' : 'テーマがありません'}
+            </button>
           </div>
 
-          {/* 自由投稿 */}
+          {/* フリー投稿 */}
           <div className="bg-white rounded-lg shadow-md p-8 border-2 border-gray-200">
             <div className="text-center mb-6">
               <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl">💡</span>
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">自由投稿</h3>
+              <h3 className="text-2xl font-bold text-gray-900 mb-2">自由に投稿する</h3>
               <p className="text-gray-600">
-                テーマに関係ないアイデアを投稿
+                テーマに縛られず、自由なアイデアを投稿します。いつでも投稿可能です。
               </p>
             </div>
-
-            <div className="space-y-4 mb-6">
-              <div className="flex items-center text-sm text-gray-600">
-                <span className="text-blue-500 mr-2">•</span>
-                自由なテーマで投稿可能
+            
+            <div className="space-y-4">
+              <div className="flex items-center space-x-2">
+                <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                <span className="text-sm text-gray-700">いつでも投稿可能</span>
               </div>
-              <div className="flex items-center text-sm text-gray-600">
-                <span className="text-blue-500 mr-2">•</span>
-                今すぐ言いたいアイデアを共有
+              <div className="flex items-center space-x-2">
+                <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                <span className="text-sm text-gray-700">自由なテーマでOK</span>
               </div>
-              <div className="flex items-center text-sm text-gray-600">
-                <span className="text-blue-500 mr-2">•</span>
-                別タブで表示されます
+              <div className="flex items-center space-x-2">
+                <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+                <span className="text-sm text-gray-700">独自の切り口で発案</span>
               </div>
             </div>
-
-            <Link
-              href="/post/free"
-              className="block w-full text-center py-3 px-6 bg-gray-600 text-white rounded-lg font-semibold hover:bg-gray-700 transition-colors"
+            
+            <button
+              onClick={() => router.push('/post/free')}
+              className="w-full mt-6 bg-gray-600 text-white py-3 px-6 rounded-lg font-medium hover:bg-gray-700 transition-colors"
             >
-              自由で投稿する
-            </Link>
+              自由に投稿する
+            </button>
           </div>
         </div>
 
         <div className="mt-12 text-center">
           <Link
             href="/"
-            className="text-gray-600 hover:text-gray-800 font-medium"
+            className="inline-flex items-center text-gray-600 hover:text-gray-900"
           >
+            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
             トップページに戻る
           </Link>
         </div>

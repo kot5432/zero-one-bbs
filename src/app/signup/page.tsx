@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useUserAuth } from '@/contexts/UserAuthContext';
+import Header from '@/components/Header';
 
 export default function SignUpPage() {
   const [email, setEmail] = useState('');
@@ -28,25 +29,19 @@ export default function SignUpPage() {
     }
 
     if (password.length < 6) {
-      setError('パスワードは6文字以上にしてください');
+      setError('パスワードは6文字以上で入力してください');
       setLoading(false);
       return;
     }
 
     try {
       await signUp(email, password, displayName);
-      
-      // 登録成功後、自動でログイン状態に
-      alert('アカウントを作成しました！\n次にプロフィール設定を行います。');
-      
-      // プロフィール設定画面へ遷移
-      router.push('/user/profile/setup');
+      router.push('/login');
     } catch (err: any) {
       console.error('Signup error:', err);
       console.error('Error code:', err.code);
       console.error('Error message:', err.message);
       
-      // Firebaseエラーコードに応じた具体的なメッセージ
       if (err.code === 'auth/email-already-in-use') {
         setError('このメールアドレスは既に使用されています。ログインするか、別のメールアドレスをお試しください。');
       } else if (err.code === 'auth/invalid-email') {
@@ -68,21 +63,24 @@ export default function SignUpPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <h2 className="text-center text-3xl font-extrabold text-gray-900">
-          ZERO-ONE アカウント作成
-        </h2>
-        <p className="mt-2 text-center text-sm text-gray-700">
-          すでにアカウントをお持ちですか？{' '}
-          <Link href="/login" className="font-medium text-blue-600 hover:text-blue-500">
-            ログイン
-          </Link>
-        </p>
-      </div>
+    <div className="min-h-screen bg-gray-50">
+      <Header />
+      
+      <div className="flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+        <div className="sm:mx-auto sm:w-full sm:max-w-md">
+          <h2 className="text-center text-3xl font-extrabold text-gray-900">
+            ZERO-ONE アカウント作成
+          </h2>
+          <p className="mt-2 text-center text-sm text-gray-700">
+            すでにアカウントをお持ちですか？{' '}
+            <Link href="/login" className="font-medium text-blue-600 hover:text-blue-500">
+              ログイン
+            </Link>
+          </p>
+        </div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+        <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+          <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
           <form className="space-y-6" onSubmit={handleSubmit}>
             {error && (
               <div className="bg-red-100 border-2 border-red-300 text-red-800 px-4 py-3 rounded-lg shadow-sm">
@@ -93,25 +91,6 @@ export default function SignUpPage() {
                   <div>
                     <span className="font-medium">登録エラー</span>
                     <p className="text-sm mt-1">{error}</p>
-                    {error.includes('email-already-in-use') && (
-                      <div className="mt-2 p-3 bg-red-50 rounded text-xs">
-                        <strong>解決方法：</strong><br/>
-                        このメールアドレスは既に使用されています。<br/><br/>
-                        <strong>1. 既存ユーザーの場合：</strong><br/>
-                        <a href="/login" className="text-blue-600 underline font-medium">→ ログイン画面へ</a><br/><br/>
-                        
-                        <strong>2. アカウント削除後の場合：</strong><br/>
-                        Firebaseコンソールから手動で削除が必要です。<br/><br/>
-                        <strong>Firebaseコンソールでの削除手順：</strong><br/>
-                        ① Firebaseコンソールにアクセス<br/>
-                        ② Authentication → Users に移動<br/>
-                        ③ 該当メールアドレスを検索<br/>
-                        ④ ユーザーを選択して削除<br/><br/>
-                        
-                        <strong>3. セルフ削除の場合：</strong><br/>
-                        マイページ → 設定 → アカウント削除から削除してください。
-                      </div>
-                    )}
                   </div>
                 </div>
               </div>
@@ -125,25 +104,25 @@ export default function SignUpPage() {
             )}
 
             <div>
-              <label htmlFor="displayName" className="block text-sm font-medium text-gray-800">
-                表示名（ニックネーム）
+              <label htmlFor="displayName" className="block text-sm font-medium text-gray-700">
+                表示名
               </label>
               <div className="mt-1">
                 <input
                   id="displayName"
                   name="displayName"
                   type="text"
-                  autoComplete="name"
+                  required
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
-                  className="appearance-none block w-full px-4 py-3 border-2 border-gray-300 rounded-lg placeholder-gray-600 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors duration-200 autofill:bg-white autofill:text-gray-900"
-                  placeholder="山田太郎"
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  placeholder="表示名を入力"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-800">
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                 メールアドレス
               </label>
               <div className="mt-1">
@@ -152,16 +131,17 @@ export default function SignUpPage() {
                   name="email"
                   type="email"
                   autoComplete="email"
+                  required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="appearance-none block w-full px-4 py-3 border-2 border-gray-300 rounded-lg placeholder-gray-600 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors duration-200 autofill:bg-white autofill:text-gray-900"
-                  placeholder="your@email.com"
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  placeholder="メールアドレスを入力"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-800">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                 パスワード
               </label>
               <div className="mt-1">
@@ -170,16 +150,17 @@ export default function SignUpPage() {
                   name="password"
                   type="password"
                   autoComplete="new-password"
+                  required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="appearance-none block w-full px-4 py-3 border-2 border-gray-300 rounded-lg placeholder-gray-600 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors duration-200 autofill:bg-white autofill:text-gray-900"
-                  placeholder="••••••••"
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  placeholder="パスワードを入力（6文字以上）"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-800">
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
                 パスワード（確認）
               </label>
               <div className="mt-1">
@@ -188,10 +169,11 @@ export default function SignUpPage() {
                   name="confirmPassword"
                   type="password"
                   autoComplete="new-password"
+                  required
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="appearance-none block w-full px-4 py-3 border-2 border-gray-300 rounded-lg placeholder-gray-600 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors duration-200 autofill:bg-white autofill:text-gray-900"
-                  placeholder="••••••••"
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  placeholder="パスワードを再入力"
                 />
               </div>
             </div>
@@ -200,9 +182,9 @@ export default function SignUpPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
               >
-                {loading ? '作成中...' : 'アカウント作成'}
+                {loading ? 'アカウント作成中...' : 'アカウント作成'}
               </button>
             </div>
           </form>
@@ -220,7 +202,7 @@ export default function SignUpPage() {
             <div className="mt-6 text-center">
               <Link
                 href="/"
-                className="font-medium text-gray-700 hover:text-gray-900"
+                className="font-medium text-gray-600 hover:text-gray-500"
               >
                 トップページに戻る
               </Link>

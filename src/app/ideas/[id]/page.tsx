@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { getIdeas, likeIdea, addComment, getComments, Idea, Comment, getUserIp, hasUserLiked } from '@/lib/firestore';
+import { getIdeas, likeIdea, unlikeIdea, addComment, getComments, Idea, Comment, getUserIp, hasUserLiked, getUserLikedIdeas } from '@/lib/firestore';
 import { useUserAuth } from '@/contexts/UserAuthContext';
 import Header from '@/components/Header';
 
@@ -55,16 +55,24 @@ export default function IdeaDetailPage() {
   }, [ideaId, router]);
 
   const handleLike = async () => {
-    if (!idea || liking || hasLiked) return;
+    if (!idea || liking) return;
     
     setLiking(true);
     try {
-      await likeIdea(ideaId, userIp);
-      setIdea(prev => prev ? { ...prev, likes: prev.likes + 1 } : null);
-      setHasLiked(true);
+      if (hasLiked) {
+        // 共感を取り消す
+        await unlikeIdea(ideaId, userIp);
+        setIdea(prev => prev ? { ...prev, likes: prev.likes - 1 } : null);
+        setHasLiked(false);
+      } else {
+        // 共感する
+        await likeIdea(ideaId, userIp);
+        setIdea(prev => prev ? { ...prev, likes: prev.likes + 1 } : null);
+        setHasLiked(true);
+      }
     } catch (error) {
-      console.error('Error liking idea:', error);
-      alert('すでに共感しています');
+      console.error('Error toggling like:', error);
+      alert(hasLiked ? '共感の取り消しに失敗しました' : '共感に失敗しました');
     } finally {
       setLiking(false);
     }
@@ -168,15 +176,15 @@ export default function IdeaDetailPage() {
           <div className="flex gap-4 mb-8">
             <button
               onClick={handleLike}
-              disabled={liking || hasLiked}
+              disabled={liking}
               className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-colors ${
                 hasLiked 
-                  ? 'bg-gray-400 text-white cursor-not-allowed' 
+                  ? 'bg-gray-400 text-white hover:bg-gray-500' 
                   : 'bg-blue-600 text-white hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed'
               }`}
             >
               <span className="text-xl">👍</span>
-              <span>{hasLiked ? '共感済み' : `共感する`} ({idea.likes})</span>
+              <span>{hasLiked ? `共感済み (${idea.likes})` : `共感する (${idea.likes})`}</span>
             </button>
             
             <button

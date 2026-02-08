@@ -3,12 +3,13 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useUserAuth } from '@/contexts/UserAuthContext';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { getUserNotifications, Notification, getUnreadNotificationCount, markNotificationAsRead } from '@/lib/firestore';
 
 export default function Header() {
-  const { user, signOut } = useUserAuth();
+  const { user } = useUserAuth();
   const router = useRouter();
+  const pathname = usePathname();
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -78,23 +79,15 @@ export default function Header() {
     setShowNotifications(false);
   };
 
-  const handleSignOut = async () => {
-    if (confirm('本当にログアウトしますか？')) {
-      try {
-        await signOut();
-        router.push('/');
-      } catch (error) {
-        console.error('Sign out error:', error);
-      }
-    }
-  };
-
   return (
     <header className="bg-white shadow-sm border-b border-gray-200">
-      <div className="max-w-6xl mx-auto px-4 py-6">
+      <div className="max-w-screen-2xl mx-auto px-8 py-3">
         <div className="flex justify-between items-center">
           {/* ロゴ */}
-          <Link href="/" className="text-2xl font-bold text-gray-900">
+          <Link 
+            href="/" 
+            className="text-2xl font-bold text-gray-900"
+          >
             ZERO-ONE
           </Link>
 
@@ -143,7 +136,7 @@ export default function Header() {
                   className="p-3 text-gray-600 hover:text-gray-800 transition-colors"
                   title="検索"
                 >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
                 </button>
@@ -158,7 +151,7 @@ export default function Header() {
                     className="relative p-3 text-gray-600 hover:text-gray-800 transition-colors" 
                     title="通知"
                   >
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                     </svg>
                     {unreadCount > 0 && (
@@ -214,37 +207,38 @@ export default function Header() {
               )}
 
               {/* ナビゲーションリンク */}
-            <Link href="/ideas" className="text-gray-700 hover:text-gray-900 font-medium py-2">
+            <Link 
+              href="/ideas" 
+              className="font-medium py-2 text-gray-700 hover:text-gray-900"
+            >
               アイデア一覧
             </Link>
-            <Link href="/post/select" className="text-gray-700 hover:text-gray-900 font-medium py-2">
+            <Link 
+              href="/post/select" 
+              className="font-medium py-2 ml-4 text-gray-700 hover:text-gray-900"
+            >
               投稿する
             </Link>
 
             {/* ユーザー関連 */}
             {user ? (
-              <>
-                <Link href="/user/mypage" className="text-blue-600 font-medium py-2">
-                  マイページ
-                </Link>
-                <button
-                  onClick={handleSignOut}
-                  className="text-gray-700 hover:text-gray-900 font-medium py-2"
-                >
-                  ログアウト
-                </button>
-              </>
+              <Link 
+                href="/user/mypage" 
+                className="font-medium py-2 ml-4 text-gray-700 hover:text-gray-900"
+              >
+                マイページ
+              </Link>
             ) : (
               <>
                 <Link
                   href="/login"
-                  className="text-blue-600 hover:text-blue-700 font-medium py-2"
+                  className="font-medium py-2 ml-4 text-blue-600 hover:text-blue-700"
                 >
                   ログイン
                 </Link>
                 <Link
                   href="/signup"
-                  className="text-gray-700 hover:text-gray-900 font-medium py-2"
+                  className="font-medium py-2 ml-4 text-gray-700 hover:text-gray-900"
                 >
                   アカウント作成
                 </Link>
