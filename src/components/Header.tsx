@@ -209,13 +209,13 @@ export default function Header() {
               {/* ナビゲーションリンク */}
             <Link 
               href="/ideas" 
-              className="font-medium py-2 text-gray-700 hover:text-gray-900"
+              className="font-medium py-2 text-gray-700 hover:bg-gray-100"
             >
               アイデア一覧
             </Link>
             <Link 
               href="/post/select" 
-              className="font-medium py-2 ml-4 text-gray-700 hover:text-gray-900"
+              className="font-medium py-2 ml-4 text-gray-700 hover:bg-gray-100"
             >
               投稿する
             </Link>
@@ -224,7 +224,7 @@ export default function Header() {
             {user ? (
               <Link 
                 href="/user/mypage" 
-                className="font-medium py-2 ml-4 text-gray-700 hover:text-gray-900"
+                className="font-medium py-2 ml-4 text-gray-700 hover:bg-gray-100"
               >
                 マイページ
               </Link>
@@ -232,13 +232,13 @@ export default function Header() {
               <>
                 <Link
                   href="/login"
-                  className="font-medium py-2 ml-4 text-blue-600 hover:text-blue-700"
+                  className="font-medium py-2 ml-4 text-blue-600 hover:bg-blue-50"
                 >
                   ログイン
                 </Link>
                 <Link
                   href="/signup"
-                  className="font-medium py-2 ml-4 text-gray-700 hover:text-gray-900"
+                  className="font-medium py-2 ml-4 text-gray-700 hover:bg-gray-100"
                 >
                   アカウント作成
                 </Link>
