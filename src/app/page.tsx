@@ -203,30 +203,29 @@ export default function Home() {
 
       {/* フッター */}
       <footer className="bg-gray-900 text-white mt-16">
-        <div className="max-w-7xl mx-auto px-4 py-16">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="max-w-4xl mx-auto px-8 py-16">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
             {/* ブランドセクション */}
             <div className="space-y-4">
               <div className="flex items-center space-x-3">
-                <div className="w-12 h-12 bg-gray-800 rounded-xl flex items-center justify-center">
-                  <span className="text-white font-bold text-xl">Z1</span>
+                <div className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center">
+                  <span className="text-white font-bold text-lg">Z1</span>
                 </div>
-                <h3 className="text-2xl font-bold">
+                <h3 className="text-xl font-bold">
                   ZERO-ONE
                 </h3>
               </div>
-              <p className="text-gray-300 leading-relaxed">
-                創造的なアイデアを形にするプラットフォーム。<br/>
-                あなたのアイデアで世界を変えましょう。
+              <p className="text-gray-300 text-sm leading-relaxed">
+                創造的なアイデアを形にするプラットフォーム
               </p>
-              <div className="flex space-x-4">
+              <div className="flex space-x-3">
                 <a 
                   href="https://twitter.com/kto_543" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-gray-700 transition-colors"
+                  className="w-8 h-8 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-gray-700 transition-colors"
                 >
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
                   </svg>
                 </a>
@@ -235,8 +234,8 @@ export default function Home() {
 
             {/* サービスセクション */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold mb-6">サービス</h3>
-              <ul className="space-y-3">
+              <h3 className="text-base font-semibold mb-4">サービス</h3>
+              <ul className="space-y-2 text-sm">
                 <li>
                   <Link href="/ideas" className="text-gray-300 hover:text-white transition-colors">
                     アイデア一覧
@@ -257,8 +256,8 @@ export default function Home() {
 
             {/* サポートセクション */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold mb-6">サポート</h3>
-              <ul className="space-y-3">
+              <h3 className="text-base font-semibold mb-4">サポート</h3>
+              <ul className="space-y-2 text-sm">
                 <li>
                   <Link href="/login" className="text-gray-300 hover:text-white transition-colors">
                     ログイン
@@ -279,28 +278,28 @@ export default function Home() {
 
             {/* お問い合わせセクション */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold mb-6">お問い合わせ</h3>
-              <p className="text-gray-300 mb-6">
+              <h3 className="text-base font-semibold mb-4">お問い合わせ</h3>
+              <p className="text-gray-300 text-sm mb-4">
                 ご質問やご要望がございましたら、お気軽にお問い合わせください。
               </p>
-              <div className="space-y-3">
+              <div className="space-y-2">
                 <Link 
                   href="/contact"
-                  className="inline-flex items-center px-6 py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors w-full justify-center"
+                  className="inline-flex items-center px-4 py-2 bg-gray-800 text-white text-sm rounded-lg hover:bg-gray-700 transition-colors w-full justify-center"
                 >
-                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                   </svg>
                   一般のお問い合わせ
                 </Link>
                 <Link 
                   href="/business-contact"
-                  className="inline-flex items-center px-6 py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors w-full justify-center"
+                  className="inline-flex items-center px-4 py-2 bg-gray-800 text-white text-sm rounded-lg hover:bg-gray-700 transition-colors w-full justify-center"
                 >
-                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                   </svg>
-                  ビジネス関連のお問い合わせ
+                  ビジネス関連
                 </Link>
               </div>
             </div>
