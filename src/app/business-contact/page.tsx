@@ -7,10 +7,12 @@ import { useRouter } from 'next/navigation';
 import { db } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
-export default function ContactPage() {
+export default function BusinessContactPage() {
   const [formData, setFormData] = useState({
-    name: '',
+    companyName: '',
+    contactName: '',
     email: '',
+    phone: '',
     subject: '',
     message: ''
   });
@@ -34,8 +36,14 @@ export default function ContactPage() {
     setSuccess('');
 
     // バリデーション
-    if (!formData.name.trim()) {
-      setError('お名前を入力してください');
+    if (!formData.companyName.trim()) {
+      setError('会社名を入力してください');
+      setLoading(false);
+      return;
+    }
+
+    if (!formData.contactName.trim()) {
+      setError('担当者名を入力してください');
       setLoading(false);
       return;
     }
@@ -48,6 +56,12 @@ export default function ContactPage() {
 
     if (!formData.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
       setError('有効なメールアドレスを入力してください');
+      setLoading(false);
+      return;
+    }
+
+    if (!formData.phone.trim()) {
+      setError('電話番号を入力してください');
       setLoading(false);
       return;
     }
@@ -65,35 +79,40 @@ export default function ContactPage() {
     }
 
     try {
-      // お問い合わせデータをFirestoreに保存
-      const contactData = {
-        name: formData.name.trim(),
+      // ビジネスお問い合わせデータをFirestoreに保存
+      const businessContactData = {
+        companyName: formData.companyName.trim(),
+        contactName: formData.contactName.trim(),
         email: formData.email.trim(),
+        phone: formData.phone.trim(),
         subject: formData.subject,
         message: formData.message.trim(),
         status: 'pending', // pending, answered, closed
+        type: 'business',
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       };
 
-      const docRef = await addDoc(collection(db, 'contacts'), contactData);
+      const docRef = await addDoc(collection(db, 'businessContacts'), businessContactData);
       
       // 管理者に通知を作成
       const notificationData = {
-        title: '新しいお問い合わせ',
-        message: `${formData.name}さんから「${formData.subject}」に関するお問い合わせがありました。`,
-        type: 'contact',
-        link: `/admin/contacts/${docRef.id}`,
+        title: 'ビジネス関連のお問い合わせ',
+        message: `${formData.companyName}の${formData.contactName}様から「${formData.subject}」に関するお問い合わせがありました。`,
+        type: 'business',
+        link: `/admin/business-contacts/${docRef.id}`,
         isRead: false,
         createdAt: serverTimestamp()
       };
 
       await addDoc(collection(db, 'notifications'), notificationData);
       
-      setSuccess('お問い合わせを受け付けました。ありがとうございます。');
+      setSuccess('ビジネス関連のお問い合わせを受け付けました。担当者から折り返しご連絡いたします。');
       setFormData({
-        name: '',
+        companyName: '',
+        contactName: '',
         email: '',
+        phone: '',
         subject: '',
         message: ''
       });
@@ -104,7 +123,7 @@ export default function ContactPage() {
       }, 3000);
       
     } catch (err) {
-      console.error('Contact form error:', err);
+      console.error('Business contact form error:', err);
       setError('送信に失敗しました。時間をおいて再度お試しください。');
     } finally {
       setLoading(false);
@@ -118,9 +137,9 @@ export default function ContactPage() {
       <main className="max-w-4xl mx-auto px-4 py-12">
         {/* ページヘッダー */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">お問い合わせ</h1>
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">ビジネス関連のお問い合わせ</h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            ご質問、ご要望、ご提案などございましたら、お気軽にお問い合わせください。
+            提携・協力、広告掲載、その他ビジネス関連のお問い合わせはこちらからお願いします。
           </p>
         </div>
 
@@ -149,16 +168,33 @@ export default function ContactPage() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* お名前 */}
+            {/* 会社名 */}
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                お名前 <span className="text-red-500">*</span>
+              <label htmlFor="companyName" className="block text-sm font-medium text-gray-700 mb-2">
+                会社名・団体名 <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
-                id="name"
-                name="name"
-                value={formData.name}
+                id="companyName"
+                name="companyName"
+                value={formData.companyName}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                placeholder="株式会社ZERO-ONE"
+              />
+            </div>
+
+            {/* 担当者名 */}
+            <div>
+              <label htmlFor="contactName" className="block text-sm font-medium text-gray-700 mb-2">
+                担当者名 <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                id="contactName"
+                name="contactName"
+                value={formData.contactName}
                 onChange={handleChange}
                 required
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
@@ -179,7 +215,24 @@ export default function ContactPage() {
                 onChange={handleChange}
                 required
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                placeholder="example@email.com"
+                placeholder="example@company.com"
+              />
+            </div>
+
+            {/* 電話番号 */}
+            <div>
+              <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
+                電話番号 <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="tel"
+                id="phone"
+                name="phone"
+                value={formData.phone}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                placeholder="03-1234-5678"
               />
             </div>
 
@@ -197,17 +250,18 @@ export default function ContactPage() {
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
               >
                 <option value="">件名を選択してください</option>
-                <option value="technical">技術的問題</option>
-                <option value="usage">利用方法に関する質問</option>
-                <option value="account">アカウント関連</option>
-                <option value="other">その他</option>
+                <option value="partnership">提携・協力について</option>
+                <option value="advertising">広告掲載について</option>
+                <option value="investment">投資・出資について</option>
+                <option value="media">メディア取材について</option>
+                <option value="other_business">その他ビジネス関連</option>
               </select>
             </div>
 
             {/* メッセージ */}
             <div>
               <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
-                メッセージ <span className="text-red-500">*</span>
+                お問い合わせ内容 <span className="text-red-500">*</span>
               </label>
               <textarea
                 id="message"
@@ -233,7 +287,7 @@ export default function ContactPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg font-semibold hover:from-blue-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none shadow-lg"
+                className="px-8 py-3 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-lg font-semibold hover:from-purple-600 hover:to-indigo-700 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none shadow-lg"
               >
                 {loading ? (
                   <span className="flex items-center">
@@ -258,41 +312,41 @@ export default function ContactPage() {
 
         {/* よくある質問 */}
         <div className="mt-12 bg-white rounded-lg shadow-lg p-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">よくある質問</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-6">ビジネス関連よくある質問</h2>
           
           <div className="space-y-6">
             <div className="border-b border-gray-200 pb-4">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">ZERO-ONEとはどのようなサービスですか？</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">どのような提携・協力を検討していますか？</h3>
               <p className="text-gray-600">
-                ZERO-ONEは、地域のアイデアを集めて形にするプラットフォームです。みんなの力で0から1へ、新しい企画を生み出します。
+                地域活性化、教育支援、イベント開催、技術開発など、ZERO-ONEの理念に合致する様々な提携・協力を検討しています。
               </p>
             </div>
 
             <div className="border-b border-gray-200 pb-4">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">どのようにしてアイデアを投稿できますか？</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">広告掲載の条件はありますか？</h3>
               <p className="text-gray-600">
-                アカウントを作成してログイン後、「投稿する」ボタンからアイデアを投稿できます。テーマ投稿と自由投稿の2種類があります。
+                ZERO-ONEの利用者に価値を提供できる広告であれば検討いたします。詳細はお問い合わせください。
               </p>
             </div>
 
             <div className="border-b border-gray-200 pb-4">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">アイデアが採用されるにはどうすればよいですか？</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">メディア取材は可能ですか？</h3>
               <p className="text-gray-600">
-                具体的で実現可能なアイデア、多くの人の共感を得られる企画、地域の課題解決に繋がる提案などが評価されやすいです。
+                是非お願いいたします。ZERO-ONEの取り組みやビジョンについて、積極的に情報発信しております。
               </p>
             </div>
 
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">提携や協力について相談したいです</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">投資・出資について</h3>
               <p className="text-gray-600">
-                お問い合わせフォームから「提携・協力について」を選択してご連絡ください。担当者から折り返しご連絡いたします。
+                ZERO-ONEの成長と地域貢献にご賛同いただける投資家様をお待ちしております。詳細はビジネス関連のお問い合わせからご連絡ください。
               </p>
             </div>
           </div>
         </div>
 
         {/* 連絡先情報 */}
-        <div className="mt-12 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-8 text-center">
+        <div className="mt-12 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg p-8 text-center">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">その他の連絡方法</h2>
           <div className="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-8">
             <a 

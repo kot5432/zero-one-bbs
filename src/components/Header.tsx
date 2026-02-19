@@ -225,6 +225,12 @@ export default function Header() {
             >
               お問い合わせ
             </Link>
+            <Link 
+              href="/business-contact" 
+              className="font-medium py-2 ml-4 text-purple-600 hover:bg-purple-50"
+            >
+              ビジネス関連
+            </Link>
 
             {/* ユーザー関連 */}
             {user ? (

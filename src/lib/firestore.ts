@@ -516,3 +516,19 @@ export async function updateContactStatus(contactId: string, status: 'pending' |
     updatedAt: serverTimestamp()
   });
 }
+
+// ビジネス関連お問い合わせを取得
+export async function getBusinessContacts() {
+  const q = query(collection(db, 'businessContacts'), orderBy('createdAt', 'desc'));
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Contact));
+}
+
+// ビジネス関連お問い合わせのステータスを更新
+export async function updateBusinessContactStatus(contactId: string, status: 'pending' | 'answered' | 'closed') {
+  const contactRef = doc(db, 'businessContacts', contactId);
+  await updateDoc(contactRef, {
+    status,
+    updatedAt: serverTimestamp()
+  });
+}
