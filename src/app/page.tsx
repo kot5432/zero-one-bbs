@@ -58,10 +58,10 @@ export default function Home() {
             Buildea
           </h1>
           <p className="text-2xl text-gray-600 mb-8">
-            コミュニティのアイデアを形にするプラットフォーム
+            あなたのアイデアを、一緒に形に。
           </p>
           <p className="text-lg text-gray-500 mb-12 max-w-2xl mx-auto">
-            地域の課題解決や新しい企画を、みんなの力で0から1へ
+            投稿から実績化まで、伴走します。
           </p>
         </div>
 
