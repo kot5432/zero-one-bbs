@@ -202,50 +202,130 @@ export default function Home() {
       </main>
 
       {/* フッター */}
-      <footer className="bg-gray-800 text-white mt-16">
-        <div className="max-w-6xl mx-auto px-4 py-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div>
-              <h3 className="text-lg font-semibold mb-4">ZERO-ONE</h3>
-              <p className="text-gray-300">
-                ZERO-ONE
+      <footer className="bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 text-white mt-16 relative overflow-hidden">
+        {/* 背景装飾 */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-0 left-0 w-64 h-64 bg-blue-500 rounded-full filter blur-3xl"></div>
+          <div className="absolute bottom-0 right-0 w-96 h-96 bg-purple-500 rounded-full filter blur-3xl"></div>
+          <div className="absolute top-1/2 left-1/2 w-80 h-80 bg-teal-500 rounded-full filter blur-3xl"></div>
+        </div>
+        
+        <div className="relative max-w-7xl mx-auto px-4 py-16">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            {/* ブランドセクション */}
+            <div className="space-y-4">
+              <div className="flex items-center space-x-3">
+                <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                  <span className="text-white font-bold text-xl">Z1</span>
+                </div>
+                <h3 className="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                  ZERO-ONE
+                </h3>
+              </div>
+              <p className="text-gray-300 leading-relaxed">
+                創造的なアイデアを形にするプラットフォーム。<br/>
+                あなたのアイデアで世界を変えましょう。
               </p>
+              <div className="flex space-x-4">
+                <a 
+                  href="https://twitter.com/kto_543" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center hover:bg-white/20 transition-all duration-300 hover:scale-110"
+                >
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                  </svg>
+                </a>
+              </div>
             </div>
-            <div>
-              <h3 className="text-lg font-semibold mb-4">サービス</h3>
-              <ul className="space-y-2">
+
+            {/* サービスセクション */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-white mb-6">サービス</h3>
+              <ul className="space-y-3">
                 <li>
-                  <Link href="/ideas" className="text-gray-300 hover:text-white">
+                  <Link href="/ideas" className="text-gray-300 hover:text-white transition-colors duration-300 flex items-center group">
+                    <span className="w-2 h-2 bg-blue-400 rounded-full mr-3 group-hover:scale-150 transition-transform"></span>
                     アイデア一覧
                   </Link>
                 </li>
                 <li>
-                  <Link href="/post/select" className="text-gray-300 hover:text-white">
+                  <Link href="/post/select" className="text-gray-300 hover:text-white transition-colors duration-300 flex items-center group">
+                    <span className="w-2 h-2 bg-purple-400 rounded-full mr-3 group-hover:scale-150 transition-transform"></span>
                     投稿する
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/contact" className="text-gray-300 hover:text-white transition-colors duration-300 flex items-center group">
+                    <span className="w-2 h-2 bg-teal-400 rounded-full mr-3 group-hover:scale-150 transition-transform"></span>
+                    お問い合わせ
                   </Link>
                 </li>
               </ul>
             </div>
-            <div>
-              <h3 className="text-lg font-semibold mb-4">サポート</h3>
-              <ul className="space-y-2">
+
+            {/* サポートセクション */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-white mb-6">サポート</h3>
+              <ul className="space-y-3">
                 <li>
-                  <Link href="/login" className="text-gray-300 hover:text-white">
+                  <Link href="/login" className="text-gray-300 hover:text-white transition-colors duration-300 flex items-center group">
+                    <span className="w-2 h-2 bg-green-400 rounded-full mr-3 group-hover:scale-150 transition-transform"></span>
                     ログイン
                   </Link>
                 </li>
                 <li>
-                  <Link href="/signup" className="text-gray-300 hover:text-white">
+                  <Link href="/signup" className="text-gray-300 hover:text-white transition-colors duration-300 flex items-center group">
+                    <span className="w-2 h-2 bg-yellow-400 rounded-full mr-3 group-hover:scale-150 transition-transform"></span>
                     アカウント作成
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/about" className="text-gray-300 hover:text-white transition-colors duration-300 flex items-center group">
+                    <span className="w-2 h-2 bg-pink-400 rounded-full mr-3 group-hover:scale-150 transition-transform"></span>
+                    ZERO-ONEについて
                   </Link>
                 </li>
               </ul>
             </div>
+
+            {/* お問い合わせセクション */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-white mb-6">お問い合わせ</h3>
+              <p className="text-gray-300 mb-6">
+                ご質問やご要望がございましたら、お気軽にお問い合わせください。
+              </p>
+              <Link 
+                href="/contact"
+                className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 shadow-lg"
+              >
+                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+                お問い合わせフォーム
+              </Link>
+            </div>
           </div>
-          <div className="mt-8 pt-8 border-t border-gray-700 text-center">
-            <p className="text-gray-400">
-              &copy; 2024 ZERO-ONE. All rights reserved.
-            </p>
+
+          {/* コピーライトセクション */}
+          <div className="mt-12 pt-8 border-t border-white/20">
+            <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+              <p className="text-gray-400 text-sm">
+                &copy; 2024 ZERO-ONE. All rights reserved.
+              </p>
+              <div className="flex space-x-6 text-sm">
+                <Link href="/privacy" className="text-gray-400 hover:text-white transition-colors">
+                  プライバシーポリシー
+                </Link>
+                <Link href="/terms" className="text-gray-400 hover:text-white transition-colors">
+                  利用規約
+                </Link>
+                <Link href="/sitemap" className="text-gray-400 hover:text-white transition-colors">
+                  サイトマップ
+                </Link>
+              </div>
+            </div>
           </div>
         </div>
       </footer>
