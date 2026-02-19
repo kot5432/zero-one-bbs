@@ -141,6 +141,13 @@ export default function BusinessContactPage() {
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
             提携・協力、広告掲載、その他ビジネス関連のお問い合わせはこちらからお願いします。
           </p>
+          <p className="text-lg text-gray-500 max-w-2xl mx-auto">
+            技術的問題、利用方法、アカウント関連など一般のお問い合わせは
+            <Link href="/contact" className="text-blue-600 hover:text-blue-700 underline">
+              一般のお問い合わせ
+            </Link>
+            からお願いします。
+          </p>
         </div>
 
         {/* お問い合わせフォーム */}

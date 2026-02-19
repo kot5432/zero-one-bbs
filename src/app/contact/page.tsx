@@ -120,7 +120,14 @@ export default function ContactPage() {
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">お問い合わせ</h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            ご質問、ご要望、ご提案などございましたら、お気軽にお問い合わせください。
+            技術的問題、利用方法、アカウント関連についてのお問い合わせはこちらからお願いします。
+          </p>
+          <p className="text-lg text-gray-500 max-w-2xl mx-auto">
+            ビジネス関連のお問い合わせ（提携・協力、広告掲載など）は
+            <Link href="/business-contact" className="text-blue-600 hover:text-blue-700 underline">
+              ビジネス関連のお問い合わせ
+            </Link>
+            からお願いします。
           </p>
         </div>
 
