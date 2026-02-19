@@ -3,21 +3,23 @@
 import { useState } from 'react';
 import Header from '@/components/Header';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { db } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     subject: '',
-    message: ''
+    message: '',
+    url: '',
+    device: '',
+    browser: '',
   });
   const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState('');
+  const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState('');
-  const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -31,54 +33,48 @@ export default function ContactPage() {
     e.preventDefault();
     setLoading(true);
     setError('');
-    setSuccess('');
 
     // バリデーション
     if (!formData.name.trim()) {
-      setError('お名前を入力してください');
+      setError('お名前を教えてください');
       setLoading(false);
       return;
     }
 
-    if (!formData.email.trim()) {
-      setError('メールアドレスを入力してください');
-      setLoading(false);
-      return;
-    }
-
-    if (!formData.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+    if (!formData.email.trim() || !formData.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
       setError('有効なメールアドレスを入力してください');
       setLoading(false);
       return;
     }
 
-    if (!formData.subject.trim()) {
-      setError('件名を入力してください');
+    if (!formData.subject) {
+      setError('お問い合わせの種類を選んでください');
       setLoading(false);
       return;
     }
 
     if (!formData.message.trim()) {
-      setError('メッセージを入力してください');
+      setError('詳しい内容を教えてください');
       setLoading(false);
       return;
     }
 
     try {
-      // お問い合わせデータをFirestoreに保存
       const contactData = {
         name: formData.name.trim(),
         email: formData.email.trim(),
         subject: formData.subject,
         message: formData.message.trim(),
-        status: 'pending', // pending, answered, closed
+        url: formData.subject === 'technical' ? formData.url : '',
+        device: formData.subject === 'technical' ? formData.device : '',
+        browser: formData.subject === 'technical' ? formData.browser : '',
+        status: 'pending',
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp()
       };
 
       const docRef = await addDoc(collection(db, 'contacts'), contactData);
-      
-      // 管理者に通知を作成
+
       const notificationData = {
         title: '新しいお問い合わせ',
         message: `${formData.name}さんから「${formData.subject}」に関するお問い合わせがありました。`,
@@ -89,20 +85,8 @@ export default function ContactPage() {
       };
 
       await addDoc(collection(db, 'notifications'), notificationData);
-      
-      setSuccess('お問い合わせを受け付けました。ありがとうございます。');
-      setFormData({
-        name: '',
-        email: '',
-        subject: '',
-        message: ''
-      });
-      
-      // 3秒後にトップページへリダイレクト
-      setTimeout(() => {
-        router.push('/');
-      }, 3000);
-      
+
+      setSubmitted(true);
     } catch (err) {
       console.error('Contact form error:', err);
       setError('送信に失敗しました。時間をおいて再度お試しください。');
@@ -111,89 +95,114 @@ export default function ContactPage() {
     }
   };
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
-      
-      <main className="max-w-4xl mx-auto px-4 py-12">
-        {/* ページヘッダー */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">お問い合わせ</h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            技術的問題、利用方法、アカウント関連についてのお問い合わせはこちらからお願いします。
-          </p>
-          <p className="text-lg text-gray-500 max-w-2xl mx-auto">
-            ビジネス関連のお問い合わせ（提携・協力、広告掲載など）は
-            <Link href="/business-contact" className="text-blue-600 hover:text-blue-700 underline">
-              ビジネス関連のお問い合わせ
+  if (submitted) {
+    return (
+      <div className="min-h-screen bg-[#F8FAFC]">
+        <Header />
+        <main className="max-w-2xl mx-auto px-4 py-20">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white rounded-2xl shadow-xl p-12 text-center border border-slate-100"
+          >
+            <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-8">
+              <svg className="w-10 h-10 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h2 className="text-3xl font-bold text-slate-900 mb-4">お問い合わせを受け付けました</h2>
+            <p className="text-lg text-slate-600 mb-10 leading-relaxed">
+              内容を確認のうえ、担当者よりご連絡いたします。<br />
+              いましばらくお待ちくださいませ。
+            </p>
+            <Link
+              href="/"
+              className="inline-block px-8 py-4 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+            >
+              トップページに戻る
             </Link>
-            からお願いします。
+          </motion.div>
+        </main>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-[#F8FAFC] selection:bg-indigo-100 selection:text-indigo-900">
+      <Header />
+
+      <main className="max-w-3xl mx-auto px-4 py-16">
+        <div className="mb-12">
+          <h1 className="text-4xl font-black text-slate-900 mb-6 tracking-tight">困っていることを教えてください</h1>
+          <p className="text-lg text-slate-600 font-medium">
+            技術的問題、利用方法、アカウント関連など、サポートチームがお答えします。
           </p>
+          <div className="mt-4 p-4 bg-indigo-50 rounded-xl border border-indigo-100">
+            <p className="text-indigo-900 text-sm">
+              💡 <strong>ビジネス関連のお問い合わせ</strong>（提携・広告など）は
+              <Link href="/business-contact" className="ml-1 font-bold underline decoration-2 underline-offset-4 hover:text-indigo-700">
+                こちら
+              </Link>
+              からお願いします。
+            </p>
+          </div>
         </div>
 
-        {/* お問い合わせフォーム */}
-        <div className="bg-white rounded-lg shadow-lg p-8">
-          {success && (
-            <div className="mb-6 p-4 bg-green-100 border border-green-300 text-green-800 rounded-lg">
-              <div className="flex items-center">
-                <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                </svg>
-                <span className="font-medium">{success}</span>
-              </div>
-            </div>
-          )}
-
+        <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12 border border-slate-200/60 backdrop-blur-sm">
           {error && (
-            <div className="mb-6 p-4 bg-red-100 border border-red-300 text-red-800 rounded-lg">
-              <div className="flex items-center">
-                <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                </svg>
-                <span className="font-medium">{error}</span>
-              </div>
-            </div>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="mb-8 p-4 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl flex items-center font-medium"
+            >
+              <svg className="w-5 h-5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+              {error}
+            </motion.div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* お名前 */}
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                お名前 <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                placeholder="山田 太郎"
-              />
-            </div>
+          <form onSubmit={handleSubmit} className="space-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* お名前 */}
+              <div className="space-y-2">
+                <label htmlFor="name" className="block text-sm font-bold text-slate-700 ml-1">
+                  お名前
+                </label>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-400 font-medium"
+                  placeholder="例：山田 太郎"
+                />
+              </div>
 
-            {/* メールアドレス */}
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                メールアドレス <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-                placeholder="example@email.com"
-              />
+              {/* メールアドレス */}
+              <div className="space-y-2">
+                <label htmlFor="email" className="block text-sm font-bold text-slate-700 ml-1">
+                  メールアドレス
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-400 font-medium"
+                  placeholder="name@example.com"
+                />
+              </div>
             </div>
 
             {/* 件名 */}
-            <div>
-              <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-2">
-                件名 <span className="text-red-500">*</span>
+            <div className="space-y-2">
+              <label htmlFor="subject" className="block text-sm font-bold text-slate-700 ml-1">
+                お問い合わせの種類
               </label>
               <select
                 id="subject"
@@ -201,20 +210,89 @@ export default function ContactPage() {
                 value={formData.subject}
                 onChange={handleChange}
                 required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all font-medium appearance-none cursor-pointer"
               >
-                <option value="">件名を選択してください</option>
-                <option value="technical">技術的問題</option>
-                <option value="usage">利用方法に関する質問</option>
-                <option value="account">アカウント関連</option>
+                <option value="">選択してください</option>
+                <option value="technical">技術的問題（エラーが出る・動かないなど）</option>
+                <option value="usage">利用方法（使い方がわからないなど）</option>
+                <option value="account">アカウント関連（ログイン・登録解除など）</option>
                 <option value="other">その他</option>
               </select>
             </div>
 
-            {/* メッセージ */}
-            <div>
-              <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
-                メッセージ <span className="text-red-500">*</span>
+            {/* 条件分岐フィールド: 技術的問題の場合 */}
+            <AnimatePresence>
+              {formData.subject === 'technical' && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="space-y-6 pt-2 overflow-hidden"
+                >
+                  <div className="p-6 bg-slate-50 rounded-2xl border border-slate-200 space-y-6">
+                    <div className="flex items-center space-x-2 text-indigo-600 mb-2">
+                      <svg className="w-5 h-5 font-bold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span className="text-sm font-bold uppercase tracking-wider">Additional details</span>
+                    </div>
+
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <label htmlFor="url" className="block text-xs font-bold text-slate-500 ml-1 uppercase">
+                          発生しているページのURL
+                        </label>
+                        <input
+                          type="text"
+                          id="url"
+                          name="url"
+                          value={formData.url}
+                          onChange={handleChange}
+                          className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl focus:border-indigo-500 outline-none transition-all placeholder:text-slate-300 text-sm"
+                          placeholder="https://buildea.com/..."
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <label htmlFor="device" className="block text-xs font-bold text-slate-500 ml-1 uppercase">
+                            使用端末
+                          </label>
+                          <input
+                            type="text"
+                            id="device"
+                            name="device"
+                            value={formData.device}
+                            onChange={handleChange}
+                            className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl focus:border-indigo-500 outline-none transition-all placeholder:text-slate-300 text-sm"
+                            placeholder="例：iPhone 15 / Windows PC"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <label htmlFor="browser" className="block text-xs font-bold text-slate-500 ml-1 uppercase">
+                            ブラウザ
+                          </label>
+                          <input
+                            type="text"
+                            id="browser"
+                            name="browser"
+                            value={formData.browser}
+                            onChange={handleChange}
+                            className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl focus:border-indigo-500 outline-none transition-all placeholder:text-slate-300 text-sm"
+                            placeholder="例：Chrome / Safari"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* 内容 */}
+            <div className="space-y-2">
+              <label htmlFor="message" className="block text-sm font-bold text-slate-700 ml-1">
+                詳しい内容
               </label>
               <textarea
                 id="message"
@@ -223,57 +301,47 @@ export default function ContactPage() {
                 onChange={handleChange}
                 required
                 rows={6}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors resize-none"
-                placeholder="お問い合わせ内容を詳しくお書きください..."
+                className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-400 font-medium resize-none"
+                placeholder={`例）ログイン後、マイページが表示されません。\n発生した状況や、表示されたエラーメッセージなどをご記入ください。`}
               />
             </div>
 
             {/* 送信ボタン */}
-            <div className="flex items-center justify-between">
-              <Link
-                href="/"
-                className="text-gray-600 hover:text-gray-800 transition-colors"
-              >
-                ← トップページに戻る
-              </Link>
-              
+            <div className="pt-6">
               <button
                 type="submit"
                 disabled={loading}
-                className="px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg font-semibold hover:from-blue-600 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none shadow-lg"
+                className="w-full py-5 bg-indigo-600 text-white rounded-2xl font-bold flex items-center justify-center space-x-3 hover:bg-indigo-700 active:scale-[0.98] transition-all shadow-xl shadow-indigo-200 disabled:opacity-50 disabled:cursor-not-allowed group"
               >
                 {loading ? (
-                  <span className="flex items-center">
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <>
+                    <svg className="animate-spin h-6 w-6 text-white" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    送信中...
-                  </span>
+                    <span>送信中...</span>
+                  </>
                 ) : (
-                  <span className="flex items-center">
-                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  <>
+                    <span>メッセージを送る</span>
+                    <svg className="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                     </svg>
-                    送信する
-                  </span>
+                  </>
                 )}
               </button>
             </div>
           </form>
         </div>
 
-        {/* 連絡先情報 */}
-        <div className="mt-12 text-center">
-          <p className="text-gray-600 mb-4">その他の連絡方法</p>
-          <a 
-            href="https://twitter.com/kto_543" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="text-blue-600 hover:text-blue-700 transition-colors"
-          >
-            X (Twitter) @kto_543
-          </a>
+        {/* フッターリンク */}
+        <div className="mt-12 flex flex-col items-center space-y-6 text-slate-500 font-medium">
+          <Link href="/" className="hover:text-slate-900 transition-colors">
+            ← トップページに戻る
+          </Link>
+          <div className="flex items-center space-x-6 text-sm">
+            <span>お問い合わせ：@kto_543 (X)</span>
+          </div>
         </div>
       </main>
     </div>

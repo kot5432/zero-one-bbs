@@ -25,20 +25,20 @@ export default function AdminPage() {
   const getStats = () => {
     const now = new Date();
     const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    
-    const thisMonthIdeas = ideas.filter(idea => 
+
+    const thisMonthIdeas = ideas.filter(idea =>
       idea.createdAt && idea.createdAt.toDate() >= thisMonth
     );
-    
+
     const unconfirmedIdeas = ideas.filter(idea => idea.status === 'idea');
     const checkedIdeas = ideas.filter(idea => idea.status === 'checked');
     const preparingIdeas = ideas.filter(idea => idea.status === 'preparing');
     const eventPlannedIdeas = ideas.filter(idea => idea.status === 'event_planned');
     const rejectedIdeas = ideas.filter(idea => idea.status === 'rejected');
     const completedIdeas = ideas.filter(idea => idea.status === 'completed');
-    
+
     const activeTheme = themes.find(theme => theme.isActive);
-    
+
     return {
       totalUsers: users.length,
       totalPosts: ideas.length,
@@ -66,7 +66,7 @@ export default function AdminPage() {
         setIdeas(ideasData);
         setThemes(themesData);
         setContacts(contactsData);
-        
+
         // ユーザーの重複を除去（ユーザー名で最新のもののみ保持）
         const usersByName = new Map<string, User>();
         usersData.forEach(user => {
@@ -76,7 +76,7 @@ export default function AdminPage() {
           }
         });
         setUsers(Array.from(usersByName.values()));
-        
+
         setDeletionLogs(deletionLogsData);
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -114,7 +114,7 @@ export default function AdminPage() {
     }
 
     const confirmMessage = `本当に${selectedUsers.size}人のユーザーを削除しますか？\n\n⚠️ 重要：この操作はFirestoreのユーザーデータのみ削除します。\nFirebase Authenticationのユーザーは削除されないため、同じメールアドレスでの再登録はできません。\n\nユーザー自身にアカウント削除を案内してください。`;
-    
+
     if (!confirm(confirmMessage)) {
       return;
     }
@@ -129,10 +129,10 @@ export default function AdminPage() {
         await deleteUser(userId);
         await logDeletion('user', userId, reason, 'admin');
       }
-      
+
       setUsers(prev => prev.filter(user => !selectedUsers.has(user.id!)));
       setSelectedUsers(new Set());
-      
+
       alert(`${selectedUsers.size}人のユーザーを削除しました。\n\n重要：\n• Firestoreのデータは削除されました\n• Firebase Authenticationのユーザーは残っています\n• 同じメールアドレスでの再登録はできません\n• ユーザー自身にアカウント削除を案内してください`);
     } catch (error) {
       console.error('Error deleting users:', error);
@@ -154,10 +154,10 @@ export default function AdminPage() {
       // Firestoreからユーザーを削除
       await deleteUser(userId);
       await logDeletion('user', userId, reason, 'admin');
-      
+
       // 状態を更新
       setUsers(prev => prev.filter(user => user.id !== userId));
-      
+
       alert(`ユーザー「${username}」を削除しました。\n\n重要：\n• Firestoreのデータは削除されました\n• Firebase Authenticationのユーザーは残っています\n• 同じメールアドレスでの再登録はできません\n\n【緊急対応】\nFirebaseコンソールから手動でユーザーを削除してください：\n1. Firebaseコンソールにアクセス\n2. Authentication → Users に移動\n3. 該当ユーザーのメールアドレスを検索\n4. ユーザーを選択して削除\n\nまたは、ユーザー自身にマイページからアカウント削除を案内してください。`);
     } catch (error) {
       console.error('Error deleting user:', error);
@@ -212,19 +212,19 @@ export default function AdminPage() {
       };
 
       await addTheme(themeData);
-      
+
       // テーマを再取得
       const themesData = await getThemes();
       setThemes(themesData);
-      
+
       // フォームをリセット
-      setThemeForm({ 
-        title: '', 
-        description: '', 
+      setThemeForm({
+        title: '',
+        description: '',
         targetMonth: new Date().toISOString().slice(0, 7)
       });
       setShowThemeForm(false);
-      
+
       alert('テーマを作成しました');
     } catch (error) {
       console.error('Error creating theme:', error);
@@ -240,11 +240,11 @@ export default function AdminPage() {
 
     try {
       await deleteTheme(themeId);
-      
+
       // テーマを再取得
       const themesData = await getThemes();
       setThemes(themesData);
-      
+
       alert(`テーマ「${themeTitle}」を削除しました。`);
     } catch (error) {
       console.error('Error deleting theme:', error);
@@ -256,7 +256,7 @@ export default function AdminPage() {
   const updateThemeStatus = async (themeId: string, isActive: boolean) => {
     try {
       await updateTheme(themeId, { isActive });
-      
+
       // 他のテーマを非公開にする（同時に1つのみ公開）
       if (isActive) {
         const otherThemes = themes.filter(t => t.id !== themeId);
@@ -264,11 +264,11 @@ export default function AdminPage() {
           await updateTheme(theme.id!, { isActive: false });
         }
       }
-      
+
       // テーマを再取得
       const themesData = await getThemes();
       setThemes(themesData);
-      
+
       alert(isActive ? 'テーマを公開しました' : 'テーマを非公開にしました');
     } catch (error) {
       console.error('Error updating theme status:', error);
@@ -288,8 +288,8 @@ export default function AdminPage() {
   const updateIdeaStatus = async (ideaId: string, newStatus: string) => {
     try {
       await updateIdea(ideaId, { status: newStatus as Idea['status'] });
-      setIdeas(prev => 
-        prev.map(idea => 
+      setIdeas(prev =>
+        prev.map(idea =>
           idea.id === ideaId ? { ...idea, status: newStatus as Idea['status'] } : idea
         )
       );
@@ -370,7 +370,7 @@ export default function AdminPage() {
         <div className="px-6 py-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-4">
-              <h1 className="text-2xl font-bold text-gray-900">ZERO-ONE</h1>
+              <h1 className="text-2xl font-bold text-gray-900">Buildea 管理画面</h1>
               <span className="text-gray-400">|</span>
               <span className="text-lg text-gray-600">管理画面</span>
             </div>
@@ -394,11 +394,10 @@ export default function AdminPage() {
               <li>
                 <button
                   onClick={() => setCurrentView('dashboard')}
-                  className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-colors ${
-                    currentView === 'dashboard' 
-                      ? 'bg-blue-600 text-white' 
+                  className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-colors ${currentView === 'dashboard'
+                      ? 'bg-blue-600 text-white'
                       : 'hover:bg-gray-100 text-gray-700'
-                  }`}
+                    }`}
                 >
                   ダッシュボード
                 </button>
@@ -406,11 +405,10 @@ export default function AdminPage() {
               <li>
                 <button
                   onClick={() => setCurrentView('users')}
-                  className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-colors ${
-                    currentView === 'users' 
-                      ? 'bg-blue-600 text-white' 
+                  className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-colors ${currentView === 'users'
+                      ? 'bg-blue-600 text-white'
                       : 'hover:bg-gray-100 text-gray-700'
-                  }`}
+                    }`}
                 >
                   ユーザー管理
                 </button>
@@ -418,11 +416,10 @@ export default function AdminPage() {
               <li>
                 <button
                   onClick={() => setCurrentView('posts')}
-                  className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-colors ${
-                    currentView === 'posts' 
-                      ? 'bg-blue-600 text-white' 
+                  className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-colors ${currentView === 'posts'
+                      ? 'bg-blue-600 text-white'
                       : 'hover:bg-gray-100 text-gray-700'
-                  }`}
+                    }`}
                 >
                   投稿管理
                   {stats.unconfirmedCount > 0 && (
@@ -435,11 +432,10 @@ export default function AdminPage() {
               <li>
                 <button
                   onClick={() => setCurrentView('themes')}
-                  className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-colors ${
-                    currentView === 'themes' 
-                      ? 'bg-blue-600 text-white' 
+                  className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-colors ${currentView === 'themes'
+                      ? 'bg-blue-600 text-white'
                       : 'hover:bg-gray-100 text-gray-700'
-                  }`}
+                    }`}
                 >
                   テーマ管理
                 </button>
@@ -447,11 +443,10 @@ export default function AdminPage() {
               <li>
                 <button
                   onClick={() => setCurrentView('contacts')}
-                  className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-colors ${
-                    currentView === 'contacts' 
-                      ? 'bg-blue-600 text-white' 
+                  className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-colors ${currentView === 'contacts'
+                      ? 'bg-blue-600 text-white'
                       : 'hover:bg-gray-100 text-gray-700'
-                  }`}
+                    }`}
                 >
                   お問い合わせ管理
                   {contacts.filter(c => c.status === 'pending').length > 0 && (
@@ -464,11 +459,10 @@ export default function AdminPage() {
               <li>
                 <button
                   onClick={() => setCurrentView('data')}
-                  className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-colors ${
-                    currentView === 'data' 
-                      ? 'bg-blue-600 text-white' 
+                  className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-colors ${currentView === 'data'
+                      ? 'bg-blue-600 text-white'
                       : 'hover:bg-gray-100 text-gray-700'
-                  }`}
+                    }`}
                 >
                   データ管理
                 </button>
@@ -476,11 +470,10 @@ export default function AdminPage() {
               <li>
                 <button
                   onClick={() => setCurrentView('settings')}
-                  className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-colors ${
-                    currentView === 'settings' 
-                      ? 'bg-blue-600 text-white' 
+                  className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-colors ${currentView === 'settings'
+                      ? 'bg-blue-600 text-white'
                       : 'hover:bg-gray-100 text-gray-700'
-                  }`}
+                    }`}
                 >
                   設定
                 </button>
@@ -495,7 +488,7 @@ export default function AdminPage() {
           {currentView === 'dashboard' && (
             <div>
               <h2 className="text-2xl font-bold text-gray-900 mb-6">ダッシュボード</h2>
-              
+
               {/* 重要指標 */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                 <div className="bg-white rounded-lg shadow p-6">
@@ -506,7 +499,7 @@ export default function AdminPage() {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="bg-white rounded-lg shadow p-6">
                   <div className="flex items-center justify-between">
                     <div>
@@ -515,7 +508,7 @@ export default function AdminPage() {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="bg-white rounded-lg shadow p-6">
                   <div className="flex items-center justify-between">
                     <div>
@@ -524,7 +517,7 @@ export default function AdminPage() {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="bg-white rounded-lg shadow p-6">
                   <div className="flex items-center justify-between">
                     <div>
@@ -551,7 +544,7 @@ export default function AdminPage() {
                     </button>
                   </div>
                 )}
-                
+
                 <div className="bg-white rounded-lg shadow p-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">今月のテーマ</h3>
                   <p className="text-gray-600 mb-4">
@@ -625,7 +618,7 @@ export default function AdminPage() {
           {currentView === 'users' && (
             <div>
               <h2 className="text-2xl font-bold text-gray-900 mb-6">👥 ユーザー管理</h2>
-              
+
               {/* ユーザー統計 */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
@@ -645,7 +638,7 @@ export default function AdminPage() {
                   </p>
                 </div>
               </div>
-              
+
               {/* 検索と絞り込み */}
               <div className="bg-white rounded-lg shadow p-4 mb-4">
                 <div className="flex gap-4">
@@ -662,7 +655,7 @@ export default function AdminPage() {
                   </select>
                 </div>
               </div>
-              
+
               {/* 複数選択操作バー */}
               <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 mb-4">
                 <div className="flex justify-between items-center">
@@ -689,7 +682,7 @@ export default function AdminPage() {
                   </div>
                 </div>
               </div>
-              
+
               {/* ユーザーリスト */}
               <div className="bg-white rounded-lg shadow overflow-hidden">
                 <table className="w-full">
@@ -735,7 +728,7 @@ export default function AdminPage() {
                           </select>
                         </td>
                         <td className="px-4 py-3 text-sm text-gray-500">
-                          {user.lastLoginAt 
+                          {user.lastLoginAt
                             ? user.lastLoginAt.toDate().toLocaleDateString('ja-JP')
                             : '未ログイン'
                           }
@@ -760,7 +753,7 @@ export default function AdminPage() {
                     ))}
                   </tbody>
                 </table>
-                
+
                 {users.length === 0 && (
                   <div className="text-center py-8 text-gray-500">
                     ユーザーがまだ登録されていません
@@ -774,7 +767,7 @@ export default function AdminPage() {
           {currentView === 'posts' && (
             <div>
               <h2 className="text-2xl font-bold text-gray-900 mb-6">投稿管理</h2>
-              
+
               <div className="bg-white rounded-lg shadow p-6">
                 <div className="overflow-x-auto">
                   <table className="w-full">
@@ -818,17 +811,17 @@ export default function AdminPage() {
                                   ✓
                                 </span>
                               )}
-                              
+
                               {/* 状態表示 */}
                               {canChangeStatus(idea.status) ? (
-                                <select 
+                                <select
                                   value={idea.status}
                                   onChange={(e) => updateIdeaStatus(idea.id!, e.target.value)}
                                   className="px-2 py-1 text-xs rounded-full border border-gray-300"
                                 >
                                   {getAvailableStatusOptions(idea.status).map((option) => (
-                                    <option 
-                                      key={option.value} 
+                                    <option
+                                      key={option.value}
                                       value={option.value}
                                       disabled={option.disabled}
                                     >
@@ -852,7 +845,7 @@ export default function AdminPage() {
                               <button className="text-green-600 hover:text-green-700 text-sm font-medium">
                                 コメント
                               </button>
-                              <button 
+                              <button
                                 onClick={() => deleteIdeaHandler(idea.id!, idea.title)}
                                 className="text-red-600 hover:text-red-700 text-sm font-medium"
                               >
@@ -873,7 +866,7 @@ export default function AdminPage() {
           {currentView === 'themes' && (
             <div>
               <h2 className="text-2xl font-bold text-gray-900 mb-6">🎯 テーマ管理</h2>
-              
+
               {/* テーマ作成フォーム */}
               <div className="bg-white rounded-lg shadow p-6 mb-6">
                 <div className="flex justify-between items-center mb-4">
@@ -885,7 +878,7 @@ export default function AdminPage() {
                     {showThemeForm ? '閉じる' : '開く'}
                   </button>
                 </div>
-                
+
                 {showThemeForm && (
                   <div className="space-y-4">
                     <div>
@@ -932,7 +925,7 @@ export default function AdminPage() {
                   </div>
                 )}
               </div>
-              
+
               {/* テーマ一覧 */}
               <div className="bg-white rounded-lg shadow p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">テーマ一覧</h3>
@@ -970,22 +963,20 @@ export default function AdminPage() {
                             </div>
                           </td>
                           <td className="px-4 py-3">
-                            <span className={`px-2 py-1 text-xs rounded-full ${
-                              theme.visibility === 'public' ? 'bg-green-100 text-green-800' :
-                              theme.visibility === 'private' ? 'bg-yellow-100 text-yellow-800' :
-                              'bg-gray-100 text-gray-800'
-                            }`}>
+                            <span className={`px-2 py-1 text-xs rounded-full ${theme.visibility === 'public' ? 'bg-green-100 text-green-800' :
+                                theme.visibility === 'private' ? 'bg-yellow-100 text-yellow-800' :
+                                  'bg-gray-100 text-gray-800'
+                              }`}>
                               {theme.visibility === 'public' ? '公開' :
-                               theme.visibility === 'private' ? '非公開' : '下書き'}
+                                theme.visibility === 'private' ? '非公開' : '下書き'}
                             </span>
                           </td>
                           <td className="px-4 py-3">
                             <div className="flex gap-2">
-                              <span className={`px-2 py-1 text-xs rounded-full ${
-                                theme.isActive
+                              <span className={`px-2 py-1 text-xs rounded-full ${theme.isActive
                                   ? 'bg-blue-100 text-blue-800'
                                   : 'bg-gray-100 text-gray-800'
-                              }`}>
+                                }`}>
                                 {theme.isActive ? 'アクティブ' : '非アクティブ'}
                               </span>
                               {theme.isArchived && (
@@ -1002,11 +993,10 @@ export default function AdminPage() {
                             <div className="flex gap-2">
                               <button
                                 onClick={() => updateThemeStatus(theme.id!, !theme.isActive)}
-                                className={`text-sm font-medium ${
-                                  theme.isActive
+                                className={`text-sm font-medium ${theme.isActive
                                     ? 'text-gray-600 hover:text-gray-700'
                                     : 'text-green-600 hover:text-green-700'
-                                }`}
+                                  }`}
                               >
                                 {theme.isActive ? '非公開にする' : '公開する'}
                               </button>
@@ -1023,7 +1013,7 @@ export default function AdminPage() {
                     </tbody>
                   </table>
                 </div>
-                
+
                 {themes.length === 0 && (
                   <div className="text-center py-8 text-gray-500">
                     テーマがまだありません
@@ -1037,7 +1027,7 @@ export default function AdminPage() {
           {currentView === 'contacts' && (
             <div>
               <h2 className="text-2xl font-bold text-gray-900 mb-6">📧 お問い合わせ管理</h2>
-              
+
               {/* お問い合わせ統計 */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <div className="bg-green-50 p-4 rounded-lg border border-green-200">
@@ -1059,7 +1049,7 @@ export default function AdminPage() {
                   </p>
                 </div>
               </div>
-              
+
               {/* お問い合わせ一覧 */}
               <div className="bg-white rounded-lg shadow overflow-hidden">
                 <div className="overflow-x-auto">
@@ -1090,8 +1080,8 @@ export default function AdminPage() {
                       {contacts.map((contact) => (
                         <tr key={contact.id} className="hover:bg-gray-50">
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {contact.createdAt?.toDate?.() ? 
-                              new Date(contact.createdAt.toDate()).toLocaleString('ja-JP') : 
+                            {contact.createdAt?.toDate?.() ?
+                              new Date(contact.createdAt.toDate()).toLocaleString('ja-JP') :
                               '不明'
                             }
                           </td>
@@ -1107,15 +1097,14 @@ export default function AdminPage() {
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                              contact.status === 'pending' 
+                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${contact.status === 'pending'
                                 ? 'bg-red-100 text-red-800'
                                 : contact.status === 'answered'
-                                ? 'bg-yellow-100 text-yellow-800'
-                                : 'bg-green-100 text-green-800'
-                            }`}>
-                              {contact.status === 'pending' ? '未対応' : 
-                               contact.status === 'answered' ? '対応中' : '対応完了'}
+                                  ? 'bg-yellow-100 text-yellow-800'
+                                  : 'bg-green-100 text-green-800'
+                              }`}>
+                              {contact.status === 'pending' ? '未対応' :
+                                contact.status === 'answered' ? '対応中' : '対応完了'}
                             </span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -1149,7 +1138,7 @@ export default function AdminPage() {
                       ))}
                     </tbody>
                   </table>
-                  
+
                   {contacts.length === 0 && (
                     <div className="text-center py-8">
                       <p className="text-gray-500">お問い合わせがありません</p>
@@ -1164,7 +1153,7 @@ export default function AdminPage() {
           {currentView === 'data' && (
             <div>
               <h2 className="text-2xl font-bold text-gray-900 mb-6">📈 データ管理</h2>
-              
+
               {/* データ概要 */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <div className="bg-white rounded-lg shadow p-6">
@@ -1180,7 +1169,7 @@ export default function AdminPage() {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="bg-white rounded-lg shadow p-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">いいね数・参加意思数</h3>
                   <div className="space-y-2">
@@ -1194,7 +1183,7 @@ export default function AdminPage() {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="bg-white rounded-lg shadow p-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">イベント化率</h3>
                   <div className="space-y-2">
@@ -1209,7 +1198,7 @@ export default function AdminPage() {
                   </div>
                 </div>
               </div>
-              
+
               {/* 活用方法 */}
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
                 <h3 className="text-lg font-semibold text-blue-900 mb-4">活用方法</h3>
@@ -1226,7 +1215,7 @@ export default function AdminPage() {
           {currentView === 'settings' && (
             <div>
               <h2 className="text-2xl font-bold text-gray-900 mb-6">設定</h2>
-              
+
               {/* テーマ設定（ルール） */}
               <div className="bg-white rounded-lg shadow p-6 mb-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">テーマ設定（ルール）</h3>
@@ -1255,7 +1244,7 @@ export default function AdminPage() {
                   </div>
                 </div>
               </div>
-              
+
               {/* テーマ管理設定 */}
               <div className="bg-white rounded-lg shadow p-6 mb-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">テーマ管理設定</h3>
@@ -1335,7 +1324,7 @@ export default function AdminPage() {
                   </div>
                 </div>
               </div>
-              
+
               {/* 表示設定（最小） */}
               <div className="bg-white rounded-lg shadow p-6 mb-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">表示設定（最小）</h3>
@@ -1381,7 +1370,7 @@ export default function AdminPage() {
                   </div>
                 </div>
               </div>
-              
+
               <div className="flex gap-4">
                 <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
                   設定を変更する

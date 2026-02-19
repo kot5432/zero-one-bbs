@@ -86,7 +86,7 @@ export interface Idea {
   problem?: string; // 何を解決したいか
   successCriteria?: string; // どんな形になれば成功か
   userId?: string; // ユーザーとの紐付け
-  
+
   // 管理用拡張項目
   nextAction?: string; // 次のアクション
   rejectionReason?: string; // 保留・見送り理由
@@ -202,10 +202,8 @@ export async function createEvent(event: Omit<Event, 'id' | 'createdAt'>) {
 // User管理関数
 export async function getUser(userId: string) {
   try {
-    console.log('Firestore: Getting user for ID:', userId);
     const userDoc = await getDoc(doc(usersCollection, userId));
     const user = userDoc.exists() ? { id: userDoc.id, ...userDoc.data() } as User : null;
-    console.log('Firestore: User result:', user);
     return user;
   } catch (error) {
     console.error('Firestore: Error getting user:', error);
@@ -299,7 +297,7 @@ export async function getAllUserSettings() {
 export async function deleteUser(userId: string) {
   // Firestoreのユーザードキュメントを削除
   await deleteDoc(doc(db, 'users', userId));
-  
+
   // ユーザー設定も削除
   await deleteUserSettings(userId);
 }
@@ -338,7 +336,7 @@ export async function likeIdea(ideaId: string, userIp: string) {
   // すでに共感しているかチェック
   const q = query(likesCollection, where('ideaId', '==', ideaId), where('userIp', '==', userIp));
   const snapshot = await getDocs(q);
-  
+
   if (!snapshot.empty) {
     throw new Error('すでに共感しています');
   }
@@ -359,7 +357,7 @@ export async function unlikeIdea(ideaId: string, userIp: string) {
   // 共感記録を検索
   const q = query(likesCollection, where('ideaId', '==', ideaId), where('userIp', '==', userIp));
   const snapshot = await getDocs(q);
-  
+
   if (snapshot.empty) {
     throw new Error('共感していません');
   }
@@ -383,11 +381,11 @@ export async function getUserLikedIdeas(userIp: string): Promise<Idea[]> {
   const q = query(likesCollection, where('userIp', '==', userIp));
   const snapshot = await getDocs(q);
   const likedIdeaIds = snapshot.docs.map(doc => doc.data().ideaId);
-  
+
   if (likedIdeaIds.length === 0) {
     return [];
   }
-  
+
   // アイデア情報を取得
   const ideasQ = query(collection(db, 'ideas'), where('id', 'in', likedIdeaIds));
   const ideasSnapshot = await getDocs(ideasQ);
@@ -479,11 +477,11 @@ function generateUserIp(): string {
   const timestamp = Date.now().toString(36);
   const random = Math.random().toString(36).substring(2);
   const ip = `user_${timestamp}_${random}`;
-  
+
   if (typeof window !== 'undefined') {
     localStorage.setItem('userIp', ip);
   }
-  
+
   return ip;
 }
 

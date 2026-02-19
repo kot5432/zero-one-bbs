@@ -15,7 +15,7 @@ export async function getClientIP(): Promise<string> {
 // ローカルストレージからユーザーIDを取得
 export function getStoredUserId(): string | null {
   if (typeof window !== 'undefined') {
-    return localStorage.getItem('zero-one-user-id');
+    return localStorage.getItem('buildea-user-id');
   }
   return null;
 }
@@ -23,6 +23,6 @@ export function getStoredUserId(): string | null {
 // ローカルストレージにユーザーIDを保存
 export function setStoredUserId(userId: string): void {
   if (typeof window !== 'undefined') {
-    localStorage.setItem('zero-one-user-id', userId);
+    localStorage.setItem('buildea-user-id', userId);
   }
 }

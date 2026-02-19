@@ -49,19 +49,19 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      
+
       {/* ファーストビュー */}
       <main className="max-w-6xl mx-auto px-4 py-12">
         {/* ヒき */}
         <div className="text-center mb-16">
           <h1 className="text-5xl font-bold text-gray-900 mb-6">
-            ZERO-ONE
+            あなたのアイデアを、一緒に形に。
           </h1>
           <p className="text-2xl text-gray-600 mb-8">
             コミュニティのアイデアを形にするプラットフォーム
           </p>
           <p className="text-lg text-gray-500 mb-12 max-w-2xl mx-auto">
-            地域の課題解決や新しい企画を、みんなの力で0から1へ
+            投稿から実績化まで、伴走します。
           </p>
         </div>
 
@@ -124,7 +124,7 @@ export default function Home() {
         {/* 最新のアイデア（軽量表示） */}
         <div className="bg-white rounded-lg shadow-lg p-8 mb-16">
           <h3 className="text-3xl font-bold text-gray-900 mb-8 text-center">最新のアイデア</h3>
-          
+
           {loading ? (
             <div className="text-center py-8">
               <p className="text-gray-600">読み込み中...</p>
@@ -162,19 +162,18 @@ export default function Home() {
                           <span className="font-semibold">0</span>
                         </span>
                         <span
-                          className={`px-2 py-1 text-xs rounded-full ${
-                            idea.status === 'idea'
-                              ? 'bg-gray-100 text-gray-800'
-                              : idea.status === 'preparing'
+                          className={`px-2 py-1 text-xs rounded-full ${idea.status === 'idea'
+                            ? 'bg-gray-100 text-gray-800'
+                            : idea.status === 'preparing'
                               ? 'bg-yellow-100 text-yellow-800'
                               : idea.status === 'event_planned'
-                              ? 'bg-green-100 text-green-800'
-                              : 'bg-red-100 text-red-800'
-                          }`}
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-red-100 text-red-800'
+                            }`}
                         >
-                          {idea.status === 'idea' ? '募集中' : 
-                           idea.status === 'preparing' ? '検討中' : 
-                           idea.status === 'event_planned' ? 'イベント化決定' : '見送り'}
+                          {idea.status === 'idea' ? '募集中' :
+                            idea.status === 'preparing' ? '検討中' :
+                              idea.status === 'event_planned' ? 'イベント化決定' : '見送り'}
                         </span>
                         <span className="text-xs text-gray-500">
                           {idea.themeId ? `テーマ` : '自由投稿'}
@@ -189,7 +188,7 @@ export default function Home() {
               ))}
             </div>
           )}
-          
+
           <div className="text-center mt-8">
             <Link
               href="/ideas"
@@ -209,24 +208,24 @@ export default function Home() {
             <div className="space-y-4">
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 bg-gray-800 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">Z1</span>
+                  <span className="text-white font-bold text-lg">B</span>
                 </div>
                 <h3 className="text-xl font-bold">
-                  ZERO-ONE
+                  Buildea
                 </h3>
               </div>
               <p className="text-gray-300 text-sm leading-relaxed">
                 創造的なアイデアを形にするプラットフォーム
               </p>
               <div className="flex space-x-3">
-                <a 
-                  href="https://twitter.com/kto_543" 
-                  target="_blank" 
+                <a
+                  href="https://twitter.com/kto_543"
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="w-8 h-8 bg-gray-800 rounded-lg flex items-center justify-center hover:bg-gray-700 transition-colors"
                 >
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                   </svg>
                 </a>
               </div>
@@ -244,11 +243,6 @@ export default function Home() {
                 <li>
                   <Link href="/post/select" className="text-gray-300 hover:text-white transition-colors">
                     投稿する
-                  </Link>
-                </li>
-                <li>
-                  <Link href="/contact" className="text-gray-300 hover:text-white transition-colors">
-                    お問い合わせ
                   </Link>
                 </li>
               </ul>
@@ -270,7 +264,7 @@ export default function Home() {
                 </li>
                 <li>
                   <Link href="/about" className="text-gray-300 hover:text-white transition-colors">
-                    ZERO-ONEについて
+                    Buildeaについて
                   </Link>
                 </li>
               </ul>
@@ -283,7 +277,7 @@ export default function Home() {
                 ご質問やご要望がございましたら、お気軽にお問い合わせください。
               </p>
               <div className="space-y-2">
-                <Link 
+                <Link
                   href="/contact"
                   className="inline-flex items-center px-4 py-2 bg-gray-800 text-white text-sm rounded-lg hover:bg-gray-700 transition-colors w-full justify-center"
                 >
@@ -292,7 +286,7 @@ export default function Home() {
                   </svg>
                   一般のお問い合わせ
                 </Link>
-                <Link 
+                <Link
                   href="/business-contact"
                   className="inline-flex items-center px-4 py-2 bg-gray-800 text-white text-sm rounded-lg hover:bg-gray-700 transition-colors w-full justify-center"
                 >
@@ -309,7 +303,7 @@ export default function Home() {
           <div className="mt-12 pt-8 border-t border-gray-800">
             <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
               <p className="text-gray-400 text-sm">
-                &copy; 2024 ZERO-ONE. All rights reserved.
+                &copy; 2024 Buildea. All rights reserved.
               </p>
               <div className="flex space-x-6 text-sm">
                 <Link href="/privacy" className="text-gray-400 hover:text-white transition-colors">

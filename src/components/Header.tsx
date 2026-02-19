@@ -63,7 +63,7 @@ export default function Header() {
       try {
         await markNotificationAsRead(notification.id);
         setUnreadCount(prev => Math.max(0, prev - 1));
-        setNotifications(prev => 
+        setNotifications(prev =>
           prev.map(n => n.id === notification.id ? { ...n, isRead: true } : n)
         );
       } catch (error) {
@@ -75,7 +75,7 @@ export default function Header() {
     if (notification.link) {
       router.push(notification.link);
     }
-    
+
     setShowNotifications(false);
   };
 
@@ -84,11 +84,11 @@ export default function Header() {
       <div className="max-w-screen-2xl mx-auto px-8 py-3">
         <div className="flex justify-between items-center">
           {/* ロゴ */}
-          <Link 
-            href="/" 
+          <Link
+            href="/"
             className="text-2xl font-bold text-gray-900"
           >
-            ZERO-ONE
+            Buildea
           </Link>
 
           {/* ナィゲーション */}
@@ -144,89 +144,88 @@ export default function Header() {
             </div>
 
             {/* 通知（ログイン時のみ） */}
-              {user && (
-                <div className="relative">
-                  <button 
-                    onClick={() => setShowNotifications(!showNotifications)}
-                    className="relative p-3 text-gray-600 hover:text-gray-800 transition-colors" 
-                    title="通知"
-                  >
-                    <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                    </svg>
-                    {unreadCount > 0 && (
-                      <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full"></span>
-                    )}
-                  </button>
-
-                  {/* 通知ドロップダウン */}
-                  {showNotifications && (
-                    <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
-                      <div className="p-4 border-b border-gray-200">
-                        <h3 className="font-semibold text-gray-900">通知</h3>
-                      </div>
-                      <div className="max-h-96 overflow-y-auto">
-                        {notifications.length === 0 ? (
-                          <div className="p-4 text-gray-500 text-center">
-                            通知がありません
-                          </div>
-                        ) : (
-                          notifications.map((notification) => (
-                            <div
-                              key={notification.id}
-                              onClick={() => handleNotificationClick(notification)}
-                              className={`p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 ${
-                                !notification.isRead ? 'bg-blue-50' : ''
-                              }`}
-                            >
-                              <div className="flex items-start space-x-3">
-                                <span className="text-xl">{getNotificationIcon(notification.type)}</span>
-                                <div className="flex-1">
-                                  <h4 className={`text-sm font-medium ${!notification.isRead ? 'text-blue-900' : 'text-gray-900'}`}>
-                                    {notification.title}
-                                  </h4>
-                                  <p className="text-sm text-gray-600 mt-1">{notification.message}</p>
-                                  <p className="text-xs text-gray-400 mt-2">
-                                    {notification.createdAt?.toDate?.() ? 
-                                      new Date(notification.createdAt.toDate()).toLocaleDateString('ja-JP') : 
-                                      '不明'
-                                    }
-                                  </p>
-                                </div>
-                                {!notification.isRead && (
-                                  <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
-                                )}
-                              </div>
-                            </div>
-                          ))
-                        )}
-                      </div>
-                    </div>
+            {user && (
+              <div className="relative">
+                <button
+                  onClick={() => setShowNotifications(!showNotifications)}
+                  className="relative p-3 text-gray-600 hover:text-gray-800 transition-colors"
+                  title="通知"
+                >
+                  <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                  </svg>
+                  {unreadCount > 0 && (
+                    <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full"></span>
                   )}
-                </div>
-              )}
+                </button>
 
-              {/* ナビゲーションリンク */}
-            <Link 
-              href="/ideas" 
+                {/* 通知ドロップダウン */}
+                {showNotifications && (
+                  <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                    <div className="p-4 border-b border-gray-200">
+                      <h3 className="font-semibold text-gray-900">通知</h3>
+                    </div>
+                    <div className="max-h-96 overflow-y-auto">
+                      {notifications.length === 0 ? (
+                        <div className="p-4 text-gray-500 text-center">
+                          通知がありません
+                        </div>
+                      ) : (
+                        notifications.map((notification) => (
+                          <div
+                            key={notification.id}
+                            onClick={() => handleNotificationClick(notification)}
+                            className={`p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 ${!notification.isRead ? 'bg-blue-50' : ''
+                              }`}
+                          >
+                            <div className="flex items-start space-x-3">
+                              <span className="text-xl">{getNotificationIcon(notification.type)}</span>
+                              <div className="flex-1">
+                                <h4 className={`text-sm font-medium ${!notification.isRead ? 'text-blue-900' : 'text-gray-900'}`}>
+                                  {notification.title}
+                                </h4>
+                                <p className="text-sm text-gray-600 mt-1">{notification.message}</p>
+                                <p className="text-xs text-gray-400 mt-2">
+                                  {notification.createdAt?.toDate?.() ?
+                                    new Date(notification.createdAt.toDate()).toLocaleDateString('ja-JP') :
+                                    '不明'
+                                  }
+                                </p>
+                              </div>
+                              {!notification.isRead && (
+                                <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
+                              )}
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ナビゲーションリンク */}
+            <Link
+              href="/ideas"
               className="font-medium py-2 text-gray-700 hover:bg-gray-100"
             >
               アイデア一覧
             </Link>
-            <Link 
-              href="/post/select" 
+            <Link
+              href="/post/select"
               className="font-medium py-2 ml-4 text-gray-700 hover:bg-gray-100"
             >
               投稿する
             </Link>
-            <Link 
-              href="/contact" 
+            <Link
+              href="/contact"
               className="font-medium py-2 ml-4 text-gray-700 hover:bg-gray-100"
             >
               お問い合わせ
             </Link>
-            <Link 
-              href="/business-contact" 
+            <Link
+              href="/business-contact"
               className="font-medium py-2 ml-4 text-gray-700 hover:bg-gray-100"
             >
               ビジネス関連
@@ -234,8 +233,8 @@ export default function Header() {
 
             {/* ユーザー関連 */}
             {user ? (
-              <Link 
-                href="/user/mypage" 
+              <Link
+                href="/user/mypage"
                 className="font-medium py-2 ml-4 text-gray-700 hover:bg-gray-100"
               >
                 マイページ

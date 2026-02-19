@@ -45,7 +45,7 @@ export default function ThemePostPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.title.trim() || !formData.description.trim()) {
       setError('タイトルと内容は必須です');
       return;
@@ -74,9 +74,9 @@ export default function ThemePostPage() {
         ...(formData.problem && { problem: formData.problem }),
         ...(formData.successCriteria && { successCriteria: formData.successCriteria })
       };
-      
+
       await addIdea(ideaData);
-      
+
       router.push('/');
     } catch (error: any) {
       setError('投稿に失敗しました。再度お試しください。');
@@ -99,7 +99,7 @@ export default function ThemePostPage() {
       <header className="bg-white shadow-sm">
         <div className="max-w-6xl mx-auto px-4 py-6">
           <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold text-gray-900">ZERO-ONE</h1>
+            <h1 className="text-3xl font-bold text-gray-900">Buildea</h1>
             <nav className="flex space-x-6">
               <Link href="/" className="text-gray-700 hover:text-gray-900">
                 トップ
@@ -141,7 +141,7 @@ export default function ThemePostPage() {
             </span>
             <h2 className="text-2xl font-bold text-gray-900">アイデアを投稿する</h2>
           </div>
-          
+
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-6">
               {error}

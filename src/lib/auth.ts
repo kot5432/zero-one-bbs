@@ -1,7 +1,7 @@
-import { 
-  signInWithEmailAndPassword, 
-  createUserWithEmailAndPassword, 
-  signOut, 
+import {
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut,
   onAuthStateChanged,
   User as FirebaseUser,
   updateProfile,
@@ -38,28 +38,26 @@ export class FirebaseAuth {
     return new Promise((resolve) => {
       const unsubscribe = onAuthStateChanged(firebaseAuthInstance, async (firebaseUser) => {
         this.firebaseUser = firebaseUser;
-        
+
         if (firebaseUser) {
           // ユーザー設定を取得
           let user = await getUser(firebaseUser.uid);
-          
+
           // ユーザーがFirestoreに存在しない場合は作成（新規ユーザーの場合）
           if (!user) {
-            console.log('User not found in Firestore, Firebase user:', firebaseUser.uid);
             this.currentUser = null;
             resolve(null);
             unsubscribe();
             return;
           }
-          
+
           this.currentUser = user;
-          console.log('User found and set:', user);
           resolve(user);
         } else {
           this.currentUser = null;
           resolve(null);
         }
-        
+
         unsubscribe();
       });
     });
@@ -74,7 +72,7 @@ export class FirebaseAuth {
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     };
-    
+
     const docRef = doc(db, 'userSettings', uid);
     await setDoc(docRef, userSettings);
   }
@@ -82,20 +80,15 @@ export class FirebaseAuth {
   // サインイン
   async signIn(email: string, password: string): Promise<User> {
     try {
-      console.log('FirebaseAuth: Attempting sign in for email:', email);
       const userCredential = await signInWithEmailAndPassword(firebaseAuthInstance, email, password);
-      console.log('FirebaseAuth: Firebase sign in successful, UID:', userCredential.user.uid);
-      
+
       const user = await this.getUserFromFirebase(userCredential.user);
-      console.log('FirebaseAuth: User from Firestore:', user);
-      
+
       if (!user) {
-        console.error('FirebaseAuth: User not found in Firestore for UID:', userCredential.user.uid);
         throw new Error('ユーザーが見つかりません');
       }
-      
+
       this.currentUser = user;
-      console.log('FirebaseAuth: Sign in completed successfully');
       return user;
     } catch (error: any) {
       console.error('FirebaseAuth: Sign in error:', error);
@@ -109,18 +102,14 @@ export class FirebaseAuth {
   // サインアップ
   async signUp(email: string, password: string, displayName: string): Promise<User> {
     try {
-      console.log('FirebaseAuth: Attempting sign up for email:', email);
       const userCredential = await createUserWithEmailAndPassword(firebaseAuthInstance, email, password);
-      console.log('FirebaseAuth: Firebase sign up successful, UID:', userCredential.user.uid);
-      
+
       // 表示名を設定
       await updateProfile(userCredential.user, { displayName });
-      console.log('FirebaseAuth: Profile updated with display name:', displayName);
-      
+
       // ユーザー設定を作成
       await this.createUserSettings(userCredential.user.uid, email, displayName);
-      console.log('FirebaseAuth: User settings created');
-      
+
       // ユーザーデータを作成
       const userData = {
         username: displayName,
@@ -128,28 +117,25 @@ export class FirebaseAuth {
         postCount: 0,
         themeCount: 0
       };
-      
+
       // Firebase UIDをドキュメントIDとして使用
       const userDocRef = doc(db, 'users', userCredential.user.uid);
       await setDoc(userDocRef, {
         ...userData,
         createdAt: serverTimestamp()
       });
-      console.log('FirebaseAuth: User document created with Firebase UID:', userCredential.user.uid);
-      
+
       // 作成したユーザーデータを取得
       const user = await getUser(userCredential.user.uid);
-      console.log('FirebaseAuth: Retrieved user from Firestore:', user);
-      
+
       if (!user) {
         throw new Error('ユーザーデータの作成に失敗しました');
       }
-      
+
       // 現在のユーザーを設定
       this.currentUser = user;
       this.firebaseUser = userCredential.user;
-      
-      console.log('FirebaseAuth: Sign up completed successfully');
+
       return user;
     } catch (error: any) {
       console.error('FirebaseAuth: Sign up error:', error);
@@ -164,22 +150,18 @@ export class FirebaseAuth {
   async deleteUserCompletely(userId: string): Promise<void> {
     try {
       console.log('Starting complete user deletion for:', userId);
-      
+
       // Firestoreのユーザーデータを削除
       await this.deleteUserFromFirestore(userId);
-      console.log('Firestore data deleted successfully');
-      
+
       // 現在ログインしているユーザーの場合、Firebase Authからも削除
       if (this.firebaseUser && this.firebaseUser.uid === userId) {
-        console.log('Deleting Firebase Auth user:', this.firebaseUser.uid);
         await deleteFirebaseUser(this.firebaseUser);
-        console.log('Firebase Auth user deleted successfully');
-        
+
         // 現在のユーザー状態をクリア
         this.currentUser = null;
         this.firebaseUser = null;
       } else {
-        console.log('User not logged in or UID mismatch');
         throw new Error('ログインしているユーザーと削除対象のユーザーが一致しません');
       }
     } catch (error) {
@@ -205,9 +187,7 @@ export class FirebaseAuth {
   // Firebaseユーザーからシステムユーザーを取得
   private async getUserFromFirebase(firebaseUser: FirebaseUser): Promise<User | null> {
     try {
-      console.log('FirebaseAuth: Getting user from Firestore for UID:', firebaseUser.uid);
       const user = await getUser(firebaseUser.uid);
-      console.log('FirebaseAuth: getUser result:', user);
       return user;
     } catch (error) {
       console.error('FirebaseAuth: Error getting user from Firebase:', error);
@@ -272,9 +252,9 @@ export class SimpleAuth {
   // ユーザーを取得または作成
   async getOrCreateUser(ip: string, username?: string): Promise<User> {
     const userId = this.generateUserId(ip);
-    
+
     let user = await getUser(userId);
-    
+
     if (!user) {
       // 新規ユーザー作成
       const userData = {
@@ -285,21 +265,21 @@ export class SimpleAuth {
         postCount: 0,
         themeCount: 0
       };
-      
+
       const docRef = await createUser(userData);
       user = {
         id: docRef.id,
         ...userData,
         createdAt: new Date() as any
       };
-      
+
       // IDを設定（本来はcreateDocでIDを取得できるが、簡易実装）
       await this.updateUser(userId, { id: docRef.id });
     } else {
       // 最終ログインを更新
       await this.updateUser(userId, { lastLoginAt: new Date() as any });
     }
-    
+
     this.currentUser = user;
     return user;
   }

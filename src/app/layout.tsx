@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ZERO-ONE - アイデア投稿プラットフォーム",
+  title: "Buildea - アイデア投稿プラットフォーム",
   description: "学校生活を良くするアイデアを投稿し、みんなで実現させるプラットフォーム",
 };
 

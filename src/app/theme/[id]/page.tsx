@@ -19,15 +19,15 @@ export default function ThemeDetailPage() {
       try {
         const themesData = await getThemes();
         const ideasData = await getIdeas();
-        
+
         const foundTheme = themesData.find(t => t.id === themeId);
         if (!foundTheme) {
           router.push('/');
           return;
         }
-        
+
         setTheme(foundTheme);
-        
+
         // このテーマに関連するアイデアを取得
         const themeIdeas = ideasData.filter(idea => idea.themeId === themeId);
         setIdeas(themeIdeas);
@@ -68,7 +68,7 @@ export default function ThemeDetailPage() {
       <header className="bg-white shadow-sm">
         <div className="max-w-6xl mx-auto px-4 py-6">
           <div className="flex justify-between items-center">
-            <Link href="/" className="text-3xl font-bold text-gray-900">ZERO-ONE</Link>
+            <Link href="/" className="text-3xl font-bold text-gray-900">Buildea</Link>
             <nav className="flex space-x-6">
               <Link href="/" className="text-gray-700 hover:text-gray-900">
                 トップ
@@ -93,7 +93,7 @@ export default function ThemeDetailPage() {
               {theme.startDate.toDate().toLocaleDateString('ja-JP')} 〜 {theme.endDate.toDate().toLocaleDateString('ja-JP')}
             </div>
           </div>
-          
+
           <div className="bg-blue-50 rounded-lg p-6 mb-6">
             <h2 className="text-xl font-semibold text-blue-900 mb-3">【テーマ説明】</h2>
             <div className="text-blue-800">
@@ -103,7 +103,7 @@ export default function ThemeDetailPage() {
               <p>学生生活をより良くするための具体的なアイデアを期待しています。小さな改善から大胆な提案まで、ぜひ投稿してください。</p>
             </div>
           </div>
-          
+
           <div className="text-center">
             <Link
               href={`/post/theme/${themeId}`}
@@ -117,7 +117,7 @@ export default function ThemeDetailPage() {
         {/* みんなのアイデア */}
         <div className="bg-white rounded-lg shadow-md p-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">【みんなのアイデア】</h2>
-          
+
           {ideas.length === 0 ? (
             <div className="text-center py-8">
               <p className="text-gray-600 mb-4">まだこのテーマでのアイデアがありません</p>
@@ -150,16 +150,15 @@ export default function ThemeDetailPage() {
                           <span className="font-semibold">{idea.likes}</span>
                         </span>
                         <span
-                          className={`px-2 py-1 text-xs rounded-full ${
-                            idea.status === 'idea'
+                          className={`px-2 py-1 text-xs rounded-full ${idea.status === 'idea'
                               ? 'bg-yellow-100 text-yellow-800'
                               : idea.status === 'preparing'
-                              ? 'bg-blue-100 text-blue-800'
-                              : 'bg-green-100 text-green-800'
-                          }`}
+                                ? 'bg-blue-100 text-blue-800'
+                                : 'bg-green-100 text-green-800'
+                            }`}
                         >
-                          {idea.status === 'idea' ? '募集中' : 
-                           idea.status === 'preparing' ? '検討中' : 'イベント化'}
+                          {idea.status === 'idea' ? '募集中' :
+                            idea.status === 'preparing' ? '検討中' : 'イベント化'}
                         </span>
                         <span>{idea.mode === 'online' ? 'オンライン' : 'オフライン'}</span>
                       </div>

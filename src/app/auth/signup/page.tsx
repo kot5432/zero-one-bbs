@@ -37,7 +37,7 @@ export default function SignUpPage() {
     // パスワード強度のチェック（任意）
     const hasLetter = /[a-zA-Z]/.test(password);
     const hasNumber = /[0-9]/.test(password);
-    
+
     if (!hasLetter || !hasNumber) {
       setError('パスワードは英数字を混合してください（例: user1234）');
       setLoading(false);
@@ -52,15 +52,15 @@ export default function SignUpPage() {
 
     try {
       await signUp(email, password, displayName);
-      
+
       // 登録成功
       alert('アカウントを作成しました！');
-      
+
       // 登録成功後、すぐにマイページへ遷移
       router.push('/user/mypage');
     } catch (err: any) {
       console.error('Signup error:', err);
-      
+
       // 具体的なエラーメッセージ
       if (err.code === 'auth/email-already-in-use') {
         setError('このメールアドレスは既に使用されています');
@@ -84,7 +84,7 @@ export default function SignUpPage() {
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <h2 className="text-center text-3xl font-extrabold text-gray-900">
-          ZERO-ONE アカウント作成
+          Buildea アカウント作成
         </h2>
         <p className="mt-2 text-center text-sm text-gray-700">
           すでにアカウントをお持ちですか？{' '}

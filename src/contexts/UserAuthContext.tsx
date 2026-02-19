@@ -23,7 +23,6 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
       try {
         const currentUser = await firebaseAuth.initAuthStateListener();
         setUser(currentUser);
-        console.log('UserAuthContext: Auth initialized, user:', currentUser);
       } catch (error) {
         console.error('UserAuthContext: Auth initialization error:', error);
       } finally {
@@ -38,7 +37,6 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
     try {
       const user = await firebaseAuth.signIn(email, password);
       setUser(user);
-      console.log('UserAuthContext: User signed in:', user);
     } catch (error) {
       console.error('UserAuthContext: Sign in error:', error);
       throw error;
@@ -49,7 +47,6 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
     try {
       const user = await firebaseAuth.signUp(email, password, displayName);
       setUser(user);
-      console.log('UserAuthContext: User signed up:', user);
     } catch (error) {
       console.error('UserAuthContext: Sign up error:', error);
       throw error;
@@ -60,7 +57,6 @@ export function UserAuthProvider({ children }: { children: ReactNode }) {
     try {
       await firebaseAuth.signOut();
       setUser(null);
-      console.log('UserAuthContext: User signed out');
     } catch (error) {
       console.error('UserAuthContext: Sign out error:', error);
       throw error;

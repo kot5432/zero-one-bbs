@@ -51,7 +51,7 @@ export default function ThemePostPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.title.trim() || !formData.description.trim()) {
       setError('タイトルと内容は必須です');
       return;
@@ -68,9 +68,9 @@ export default function ThemePostPage() {
         status: 'idea' as const,
         themeId: themeId
       };
-      
+
       await addIdea(ideaData);
-      
+
       router.push(`/theme/${themeId}`);
     } catch (error: any) {
       setError('投稿に失敗しました。再度お試しください。');
@@ -93,7 +93,7 @@ export default function ThemePostPage() {
       <header className="bg-white shadow-sm">
         <div className="max-w-6xl mx-auto px-4 py-6">
           <div className="flex justify-between items-center">
-            <Link href="/" className="text-3xl font-bold text-gray-900">ZERO-ONE</Link>
+            <Link href="/" className="text-3xl font-bold text-gray-900">Buildea</Link>
             <nav className="flex space-x-6">
               <Link href="/" className="text-gray-700 hover:text-gray-900">
                 トップ
@@ -118,7 +118,7 @@ export default function ThemePostPage() {
             <h2 className="text-2xl font-bold text-gray-900 mb-2">アイデア投稿</h2>
             <p className="text-gray-600">テーマ：{theme.title}</p>
           </div>
-          
+
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-6">
               {error}
@@ -176,7 +176,7 @@ export default function ThemePostPage() {
 
             <div className="border-t pt-6">
               <p className="text-sm font-medium text-gray-700 mb-4">（任意）</p>
-              
+
               <div className="space-y-4">
                 <div>
                   <label htmlFor="reason" className="block text-sm font-medium text-gray-700 mb-2">

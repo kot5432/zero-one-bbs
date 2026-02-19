@@ -6,7 +6,7 @@ export default function AboutPage() {
       <header className="bg-white shadow-sm">
         <div className="max-w-6xl mx-auto px-4 py-6">
           <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold text-gray-900">ZERO-ONE</h1>
+            <h1 className="text-3xl font-bold text-gray-900">Buildea</h1>
             <nav className="flex space-x-6">
               <Link href="/" className="text-gray-700 hover:text-gray-900">
                 トップ
@@ -24,13 +24,13 @@ export default function AboutPage() {
 
       <main className="max-w-4xl mx-auto px-4 py-8">
         <div className="bg-white rounded-lg shadow-md p-8">
-          <h2 className="text-4xl font-bold text-gray-900 mb-8 text-center">ZERO-ONEとは？</h2>
-          
+          <h2 className="text-4xl font-bold text-gray-900 mb-8 text-center">Buildeaとは？</h2>
+
           <div className="space-y-8">
             <section>
               <h3 className="text-2xl font-semibold text-gray-900 mb-4">🚀 概要</h3>
               <p className="text-lg text-gray-700 leading-relaxed">
-                ZERO-ONEは、学生のアイデアを形にするためのプラットフォームです。
+                Buildeaは、学生のアイデアを形にするためのプラットフォームです。
                 「0」の状態から「1」を生み出す挑戦を応援します。
                 新しいサービス、イベント、プロジェクトのきっかけをここから始めましょう。
               </p>
@@ -48,7 +48,7 @@ export default function AboutPage() {
                     </p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-start gap-3">
                   <span className="text-2xl">🤝</span>
                   <div>
@@ -58,7 +58,7 @@ export default function AboutPage() {
                     </p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-start gap-3">
                   <span className="text-2xl">🌱</span>
                   <div>
@@ -80,21 +80,21 @@ export default function AboutPage() {
                     <strong>アイデアを投稿：</strong>タイトルと内容を入力してアイデアを共有
                   </p>
                 </div>
-                
+
                 <div className="flex items-center gap-3">
                   <span className="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-semibold">2</span>
                   <p className="text-gray-700">
                     <strong>共感を集める：</strong>👍ボタンでアイデアに共感を表現
                   </p>
                 </div>
-                
+
                 <div className="flex items-center gap-3">
                   <span className="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-semibold">3</span>
                   <p className="text-gray-700">
                     <strong>コメントで交流：</strong>短いコメントで意見や感想を交換
                   </p>
                 </div>
-                
+
                 <div className="flex items-center gap-3">
                   <span className="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-semibold">4</span>
                   <p className="text-gray-700">
@@ -112,7 +112,7 @@ export default function AboutPage() {
                 仲間が見つからない」という理由で消えていってしまいます。
               </p>
               <p className="text-lg text-gray-700 leading-relaxed">
-                ZERO-ONEは、そんな学生のアイデアが「0」から「1」へと進化するための
+                Buildeaは、そんな学生のアイデアが「0」から「1」へと進化するための
                 プラットフォームです。気軽にアイデアを投稿し、共感してくれる仲間と出会い、
                 実際に行動を起こすきっかけを作る。そんな場所を目指しています。
               </p>

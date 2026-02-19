@@ -20,12 +20,12 @@ export default function LoginPage() {
 
     try {
       await signIn(email, password);
-      
+
       // ログイン成功後、マイページへ遷移
       router.push('/user/mypage');
     } catch (err: any) {
       console.error('Login error:', err);
-      
+
       // 具体的なエラーメッセージ
       if (err.code === 'auth/user-not-found') {
         setError('メールアドレスまたはパスワードが違います');
@@ -53,7 +53,7 @@ export default function LoginPage() {
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <h2 className="text-center text-3xl font-extrabold text-gray-900">
-          ZERO-ONE ログイン
+          Buildea ログイン
         </h2>
         <p className="mt-2 text-center text-sm text-gray-700">
           アカウントをお持ちでないですか？{' '}

@@ -21,7 +21,7 @@ export default function LoginPage() {
 
     try {
       await signIn(email, password);
-      
+
       // ログイン成功後、リダイレクト先を確認
       const redirectUrl = new URLSearchParams(window.location.search).get('redirect');
       router.push(redirectUrl || '/');
@@ -29,7 +29,7 @@ export default function LoginPage() {
       console.error('Login error:', err);
       console.error('Error code:', err.code);
       console.error('Error message:', err.message);
-      
+
       if (err.code === 'auth/user-not-found') {
         setError('ユーザーが見つかりません。新規登録をお試しください。');
       } else {
@@ -43,11 +43,11 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      
+
       <div className="flex flex-col justify-center py-12 sm:px-6 lg:px-8">
         <div className="sm:mx-auto sm:w-full sm:max-w-md">
           <h2 className="text-center text-3xl font-extrabold text-gray-900">
-            ZERO-ONE ログイン
+            Buildea ログイン
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
             または{' '}

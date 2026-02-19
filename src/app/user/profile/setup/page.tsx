@@ -40,8 +40,8 @@ export default function ProfileSetupPage() {
 
       // ここでプロフィール更新処理を実装（将来的に）
       // 今は簡単にマイページへリダイレクト
-      
-      alert('プロフィール設定が完了しました！\nZERO-ONEへようこそ！');
+
+      alert('プロフィール設定が完了しました！\nBuildeaへようこそ！');
       router.push(`/user/${currentUser.id}`);
     } catch (error) {
       console.error('Error updating profile:', error);
@@ -54,7 +54,7 @@ export default function ProfileSetupPage() {
   const handleSkip = () => {
     const currentUser = firebaseAuth.getCurrentUser();
     if (currentUser) {
-      alert('プロフィール設定は後からいつでも変更できます。\nZERO-ONEへようこそ！');
+      alert('プロフィール設定は後からいつでも変更できます。\nBuildeaへようこそ！');
       router.push(`/user/${currentUser.id}`);
     }
   };
@@ -67,7 +67,7 @@ export default function ProfileSetupPage() {
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
           アカウント作成ありがとうございます！<br />
-          プロフィールを設定して、ZERO-ONEを始めましょう
+          プロフィールを設定して、Buildeaを始めましょう
         </p>
       </div>
 
@@ -102,7 +102,7 @@ export default function ProfileSetupPage() {
             </div>
 
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <h3 className="text-sm font-medium text-blue-800 mb-2">🎉 ZERO-ONEへようこそ！</h3>
+              <h3 className="text-sm font-medium text-blue-800 mb-2">🎉 Buildeaへようこそ！</h3>
               <p className="text-sm text-blue-700">
                 これからアイデアを投稿したり、他の人のアイデアに共感したりできます。<br />
                 まずは簡単なプロフィール設定をしましょう！
@@ -117,7 +117,7 @@ export default function ProfileSetupPage() {
               >
                 {loading ? '保存中...' : 'プロフィールを保存'}
               </button>
-              
+
               <button
                 type="button"
                 onClick={handleSkip}
