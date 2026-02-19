@@ -138,12 +138,21 @@ export default function BusinessContactPage() {
 
       <main className="max-w-4xl mx-auto px-4 py-16">
         <div className="text-center mb-16">
-          <span className="inline-block px-4 py-1 bg-orange-100 text-orange-700 rounded-full text-sm font-bold mb-4">Business Partnership</span>
+          <span className="inline-block px-4 py-1 bg-orange-100 text-orange-700 rounded-full text-sm font-bold mb-4">お問い合わせの中のビジネス関連</span>
           <h1 className="text-5xl font-black text-slate-900 mb-6 tracking-tight">新しい価値を、共に。</h1>
           <p className="text-xl text-slate-600 font-medium max-w-2xl mx-auto leading-relaxed">
             本サービスは、オンラインのアイデアをオフラインイベントとして実現することを目的としています。<br />
             どのような形でご一緒できそうか、ぜひ教えてください。
           </p>
+          <div className="mt-4 p-4 bg-indigo-50 rounded-xl border border-indigo-100">
+            <p className="text-indigo-900 text-sm">
+              💡 <strong>技術的問題・利用方法など</strong>に関するお問い合わせは
+              <Link href="/contact" className="ml-1 font-bold underline decoration-2 underline-offset-4 hover:text-indigo-700">
+                こちら
+              </Link>
+              からお願いします。
+            </p>
+          </div>
         </div>
 
         <div className="bg-white rounded-[2.5rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] p-8 md:p-16 border border-slate-100">
