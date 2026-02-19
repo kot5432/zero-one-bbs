@@ -55,13 +55,13 @@ export default function Home() {
         {/* ヒき */}
         <div className="text-center mb-16">
           <h1 className="text-5xl font-bold text-gray-900 mb-6">
-            あなたのアイデアを、一緒に形に。
+            Buildea
           </h1>
           <p className="text-2xl text-gray-600 mb-8">
             コミュニティのアイデアを形にするプラットフォーム
           </p>
           <p className="text-lg text-gray-500 mb-12 max-w-2xl mx-auto">
-            投稿から実績化まで、伴走します。
+            地域の課題解決や新しい企画を、みんなの力で0から1へ
           </p>
         </div>
 

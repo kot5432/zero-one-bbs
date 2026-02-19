@@ -134,10 +134,14 @@ export default function ContactPage() {
       <main className="max-w-3xl mx-auto px-4 py-16">
         <div className="mb-12">
           <h1 className="text-4xl font-black text-slate-900 mb-6 tracking-tight">困っていることを教えてください</h1>
-          <p className="text-lg text-slate-600 font-medium">
+          <p className="text-lg text-slate-600 font-medium mb-4">
             技術的問題、利用方法、アカウント関連など、サポートチームがお答えします。
           </p>
-          <div className="mt-4 p-4 bg-indigo-50 rounded-xl border border-indigo-100">
+          <p className="text-lg text-slate-700 font-medium mb-6">
+            あなたのアイデアを、一緒に形に。<br />
+            投稿から実績化まで、伴走します。
+          </p>
+          <div className="p-4 bg-indigo-50 rounded-xl border border-indigo-100">
             <p className="text-indigo-900 text-sm">
               💡 <strong>ビジネス関連のお問い合わせ</strong>（提携・広告など）は
               <Link href="/business-contact" className="ml-1 font-bold underline decoration-2 underline-offset-4 hover:text-indigo-700">
