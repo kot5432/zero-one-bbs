@@ -12,9 +12,9 @@ export default function BusinessContactPage() {
     companyName: '',
     contactName: '',
     email: '',
-    phone: '',
     subject: '',
-    message: ''
+    message: '',
+    phone: '',
   });
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -136,13 +136,12 @@ export default function BusinessContactPage() {
     <div className="min-h-screen bg-[#FDFCFB]">
       <Header />
 
-      <main className="max-w-3xl mx-auto px-4 py-16">
-        <div className="mb-12">
+      <main className="max-w-4xl mx-auto px-4 py-16">
+        <div className="text-center mb-16">
           <span className="inline-block px-4 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm font-bold mb-4">お問い合わせの中のビジネス関連</span>
-          <h1 className="text-4xl font-black text-slate-900 mb-6 tracking-tight">新しい価値を、共に。</h1>
+          <h1 className="text-4xl font-black text-slate-900 mb-6 tracking-tight">困っていることを教えてください</h1>
           <p className="text-xl text-slate-600 font-medium max-w-2xl mx-auto leading-relaxed">
-            本サービスは、オンラインのアイデアをオフラインイベントとして実現することを目的としています。<br />
-            どのような形でご一緒できそうか、ぜひ教えてください。
+            技術的問題、利用方法、アカウント関連など、サポートチームがお答えします。
           </p>
           <div className="mt-4 p-4 bg-indigo-50 rounded-xl border border-indigo-100">
             <p className="text-indigo-900 text-sm">
@@ -155,18 +154,14 @@ export default function BusinessContactPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12 border border-slate-200/60 backdrop-blur-sm">
+        <div className="bg-white rounded-[2.5rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] p-8 md:p-16 border border-slate-100">
           {error && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="mb-8 p-4 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl flex items-center font-medium"
-            >
-              <svg className="w-5 h-5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+            <div className="mb-10 p-5 bg-rose-50 border border-rose-200 text-rose-700 rounded-2xl flex items-center font-bold">
+              <svg className="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
               </svg>
               {error}
-            </motion.div>
+            </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-8">
@@ -204,7 +199,9 @@ export default function BusinessContactPage() {
                   placeholder="例：山田 太郎"
                 />
               </div>
+            </div>
 
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {/* メールアドレス */}
               <div className="space-y-2">
                 <label htmlFor="email" className="block text-sm font-bold text-slate-700 ml-1">
@@ -241,9 +238,9 @@ export default function BusinessContactPage() {
             </div>
 
             {/* 件名 */}
-            <div className="space-y-3">
+            <div className="space-y-2">
               <label htmlFor="subject" className="block text-sm font-bold text-slate-700 ml-1">
-                お問い合わせ種別
+                お問い合わせの種類
               </label>
               <select
                 id="subject"
@@ -254,14 +251,15 @@ export default function BusinessContactPage() {
                 className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all font-medium appearance-none cursor-pointer"
               >
                 <option value="">選択してください</option>
-                <option value="partnership">提携について</option>
-                <option value="collaboration">協力のご相談</option>
-                <option value="advertising">広告掲載</option>
-                <option value="other_business">その他</option>
+                <option value="partnership">提携・協力について</option>
+                <option value="advertising">広告掲載について</option>
+                <option value="investment">投資・出資について</option>
+                <option value="media">メディア取材について</option>
+                <option value="other_business">その他ビジネス関連</option>
               </select>
             </div>
 
-            {/* 内容 */}
+            {/* メッセージ */}
             <div className="space-y-2">
               <label htmlFor="message" className="block text-sm font-bold text-slate-700 ml-1">
                 詳しい内容
@@ -274,14 +272,16 @@ export default function BusinessContactPage() {
                 required
                 rows={6}
                 className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-400 font-medium resize-none"
-                placeholder="例）どのような形で協力できるか、ご提案内容を詳しくお書きください。"
+                placeholder="例）弊社サービスとの提携につきまして、詳細をお聞きしたいと思っております。..."
               />
             </div>
+
+            {/* 送信ボタン */}
             <div className="pt-6">
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-6 bg-slate-900 text-white rounded-2xl font-black text-xl flex items-center justify-center space-x-4 hover:bg-slate-800 active:scale-[0.98] transition-all shadow-2xl shadow-slate-200 disabled:opacity-50 disabled:cursor-not-allowed group"
+                className="w-full py-5 bg-indigo-600 text-white rounded-2xl font-bold flex items-center justify-center space-x-3 hover:bg-indigo-700 active:scale-[0.98] transition-all shadow-xl shadow-indigo-200 disabled:opacity-50 disabled:cursor-not-allowed group"
               >
                 {loading ? (
                   <>
@@ -289,13 +289,13 @@ export default function BusinessContactPage() {
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    <span>内容を送信中...</span>
+                    <span>送信中...</span>
                   </>
                 ) : (
                   <>
-                    <span>この内容で提案する</span>
-                    <svg className="w-6 h-6 transition-transform group-hover:translate-x-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                    <span>メッセージを送る</span>
+                    <svg className="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
                     </svg>
                   </>
                 )}

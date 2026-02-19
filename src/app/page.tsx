@@ -248,6 +248,28 @@ export default function Home() {
               </ul>
             </div>
 
+            {/* サポートセクション */}
+            <div className="space-y-4">
+              <h3 className="text-base font-semibold mb-4">サポート</h3>
+              <ul className="space-y-2 text-sm">
+                <li>
+                  <Link href="/login" className="text-gray-300 hover:text-white transition-colors">
+                    ログイン
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/signup" className="text-gray-300 hover:text-white transition-colors">
+                    アカウント作成
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/about" className="text-gray-300 hover:text-white transition-colors">
+                    Buildeaについて
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
             {/* お問い合わせセクション */}
             <div className="space-y-4">
               <h3 className="text-base font-semibold mb-4">お問い合わせ</h3>
