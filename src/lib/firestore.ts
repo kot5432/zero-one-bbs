@@ -49,6 +49,18 @@ export interface Event {
   createdAt: Timestamp;
 }
 
+// お問い合わせ
+export interface Contact {
+  id?: string;
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+  status: 'pending' | 'answered' | 'closed';
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+}
+
 export interface Idea {
   id?: string;
   title: string;
@@ -484,9 +496,23 @@ export async function addComment(comment: Omit<Comment, 'id' | 'createdAt'>) {
 }
 
 export async function getComments(ideaId: string) {
-  const q = query(commentsCollection, orderBy('createdAt', 'desc'));
+  const q = query(commentsCollection, where('ideaId', '==', ideaId), orderBy('createdAt', 'desc'));
   const snapshot = await getDocs(q);
-  return snapshot.docs
-    .map(doc => ({ id: doc.id, ...doc.data() } as Comment))
-    .filter(comment => comment.ideaId === ideaId);
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Comment));
+}
+
+// お問い合わせを取得
+export async function getContacts() {
+  const q = query(collection(db, 'contacts'), orderBy('createdAt', 'desc'));
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Contact));
+}
+
+// お問い合わせのステータスを更新
+export async function updateContactStatus(contactId: string, status: 'pending' | 'answered' | 'closed') {
+  const contactRef = doc(db, 'contacts', contactId);
+  await updateDoc(contactRef, {
+    status,
+    updatedAt: serverTimestamp()
+  });
 }

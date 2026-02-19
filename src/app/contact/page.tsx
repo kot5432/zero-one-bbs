@@ -4,6 +4,8 @@ import { useState } from 'react';
 import Header from '@/components/Header';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { db } from '@/lib/firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -63,9 +65,30 @@ export default function ContactPage() {
     }
 
     try {
-      // ここで実際の送信処理を実装
-      // 今はダミーの送信処理
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // お問い合わせデータをFirestoreに保存
+      const contactData = {
+        name: formData.name.trim(),
+        email: formData.email.trim(),
+        subject: formData.subject,
+        message: formData.message.trim(),
+        status: 'pending', // pending, answered, closed
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp()
+      };
+
+      const docRef = await addDoc(collection(db, 'contacts'), contactData);
+      
+      // 管理者に通知を作成
+      const notificationData = {
+        title: '新しいお問い合わせ',
+        message: `${formData.name}さんから「${formData.subject}」に関するお問い合わせがありました。`,
+        type: 'contact',
+        link: `/admin/contacts/${docRef.id}`,
+        isRead: false,
+        createdAt: serverTimestamp()
+      };
+
+      await addDoc(collection(db, 'notifications'), notificationData);
       
       setSuccess('お問い合わせを受け付けました。ありがとうございます。');
       setFormData({

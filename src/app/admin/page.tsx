@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { getIdeas, Idea, getAllUsers, User, deleteUser, logDeletion, getAllDeletionLogs, updateIdea, deleteIdea, getThemes, Theme, addTheme, updateTheme, deleteTheme, Timestamp, createAdminComment, getAdminComments, AdminComment } from '@/lib/firestore';
+import { getIdeas, Idea, getAllUsers, User, deleteUser, logDeletion, getAllDeletionLogs, updateIdea, deleteIdea, getThemes, Theme, addTheme, updateTheme, deleteTheme, Timestamp, createAdminComment, getAdminComments, AdminComment, getContacts, Contact, updateContactStatus } from '@/lib/firestore';
 import { firebaseAuth } from '@/lib/auth';
 
 export default function AdminPage() {
@@ -10,9 +10,10 @@ export default function AdminPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [themes, setThemes] = useState<Theme[]>([]);
   const [deletionLogs, setDeletionLogs] = useState<any[]>([]);
+  const [contacts, setContacts] = useState<Contact[]>([]);
   const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
-  const [currentView, setCurrentView] = useState<'dashboard' | 'users' | 'posts' | 'themes' | 'data' | 'settings'>('dashboard');
+  const [currentView, setCurrentView] = useState<'dashboard' | 'users' | 'posts' | 'themes' | 'data' | 'settings' | 'contacts'>('dashboard');
   const [showThemeForm, setShowThemeForm] = useState(false);
   const [themeForm, setThemeForm] = useState({
     title: '',
@@ -55,14 +56,16 @@ export default function AdminPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [ideasData, usersData, themesData, deletionLogsData] = await Promise.all([
+        const [ideasData, usersData, themesData, deletionLogsData, contactsData] = await Promise.all([
           getIdeas(),
           getAllUsers(),
           getThemes(),
-          getAllDeletionLogs()
+          getAllDeletionLogs(),
+          getContacts()
         ]);
         setIdeas(ideasData);
         setThemes(themesData);
+        setContacts(contactsData);
         
         // ユーザーの重複を除去（ユーザー名で最新のもののみ保持）
         const usersByName = new Map<string, User>();
@@ -439,6 +442,23 @@ export default function AdminPage() {
                   }`}
                 >
                   テーマ管理
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => setCurrentView('contacts')}
+                  className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-colors ${
+                    currentView === 'contacts' 
+                      ? 'bg-blue-600 text-white' 
+                      : 'hover:bg-gray-100 text-gray-700'
+                  }`}
+                >
+                  お問い合わせ管理
+                  {contacts.filter(c => c.status === 'pending').length > 0 && (
+                    <span className="ml-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
+                      {contacts.filter(c => c.status === 'pending').length}
+                    </span>
+                  )}
                 </button>
               </li>
               <li>
@@ -1009,6 +1029,133 @@ export default function AdminPage() {
                     テーマがまだありません
                   </div>
                 )}
+              </div>
+            </div>
+          )}
+
+          {/* お問い合わせ管理 */}
+          {currentView === 'contacts' && (
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">📧 お問い合わせ管理</h2>
+              
+              {/* お問い合わせ統計 */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                  <p className="text-sm font-bold text-green-800">未対応</p>
+                  <p className="text-2xl font-bold text-green-900">
+                    {contacts.filter(c => c.status === 'pending').length}
+                  </p>
+                </div>
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                  <p className="text-sm font-bold text-blue-800">対応中</p>
+                  <p className="text-2xl font-bold text-blue-900">
+                    {contacts.filter(c => c.status === 'answered').length}
+                  </p>
+                </div>
+                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                  <p className="text-sm font-bold text-gray-800">対応完了</p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {contacts.filter(c => c.status === 'closed').length}
+                  </p>
+                </div>
+              </div>
+              
+              {/* お問い合わせ一覧 */}
+              <div className="bg-white rounded-lg shadow overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          日時
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          お名前
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          メールアドレス
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          件名
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          ステータス
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          操作
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {contacts.map((contact) => (
+                        <tr key={contact.id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {contact.createdAt?.toDate?.() ? 
+                              new Date(contact.createdAt.toDate()).toLocaleString('ja-JP') : 
+                              '不明'
+                            }
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {contact.name}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {contact.email}
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-900">
+                            <div className="max-w-xs truncate" title={contact.subject}>
+                              {contact.subject}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                              contact.status === 'pending' 
+                                ? 'bg-red-100 text-red-800'
+                                : contact.status === 'answered'
+                                ? 'bg-yellow-100 text-yellow-800'
+                                : 'bg-green-100 text-green-800'
+                            }`}>
+                              {contact.status === 'pending' ? '未対応' : 
+                               contact.status === 'answered' ? '対応中' : '対応完了'}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <button
+                              onClick={() => {
+                                // 詳細表示モーダルを開く（簡易版）
+                                alert(`お名前: ${contact.name}\nメール: ${contact.email}\n件名: ${contact.subject}\n内容: ${contact.message}`);
+                              }}
+                              className="text-blue-600 hover:text-blue-900 mr-3"
+                            >
+                              詳細
+                            </button>
+                            {contact.status !== 'closed' && (
+                              <button
+                                onClick={async () => {
+                                  const newStatus = contact.status === 'pending' ? 'answered' : 'closed';
+                                  if (confirm(`ステータスを「${newStatus === 'answered' ? '対応中' : '対応完了'}」に変更しますか？`)) {
+                                    await updateContactStatus(contact.id!, newStatus);
+                                    // データを再取得
+                                    const contactsData = await getContacts();
+                                    setContacts(contactsData);
+                                  }
+                                }}
+                                className="text-green-600 hover:text-green-900"
+                              >
+                                {contact.status === 'pending' ? '対応開始' : '完了'}
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  
+                  {contacts.length === 0 && (
+                    <div className="text-center py-8">
+                      <p className="text-gray-500">お問い合わせがありません</p>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           )}
