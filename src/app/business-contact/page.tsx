@@ -12,9 +12,9 @@ export default function BusinessContactPage() {
     companyName: '',
     contactName: '',
     email: '',
+    phone: '',
     subject: '',
-    message: '',
-    companyUrl: '',
+    message: ''
   });
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -69,9 +69,9 @@ export default function BusinessContactPage() {
         companyName: formData.companyName.trim(),
         contactName: formData.contactName.trim(),
         email: formData.email.trim(),
+        phone: formData.phone.trim(),
         subject: formData.subject,
         message: formData.message.trim(),
-        companyUrl: formData.companyUrl.trim(),
         status: 'pending',
         type: 'business',
         createdAt: serverTimestamp(),
@@ -136,10 +136,10 @@ export default function BusinessContactPage() {
     <div className="min-h-screen bg-[#FDFCFB]">
       <Header />
 
-      <main className="max-w-4xl mx-auto px-4 py-16">
-        <div className="text-center mb-16">
-          <span className="inline-block px-4 py-1 bg-orange-100 text-orange-700 rounded-full text-sm font-bold mb-4">お問い合わせの中のビジネス関連</span>
-          <h1 className="text-5xl font-black text-slate-900 mb-6 tracking-tight">新しい価値を、共に。</h1>
+      <main className="max-w-3xl mx-auto px-4 py-16">
+        <div className="mb-12">
+          <span className="inline-block px-4 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm font-bold mb-4">お問い合わせの中のビジネス関連</span>
+          <h1 className="text-4xl font-black text-slate-900 mb-6 tracking-tight">新しい価値を、共に。</h1>
           <p className="text-xl text-slate-600 font-medium max-w-2xl mx-auto leading-relaxed">
             本サービスは、オンラインのアイデアをオフラインイベントとして実現することを目的としています。<br />
             どのような形でご一緒できそうか、ぜひ教えてください。
@@ -155,21 +155,25 @@ export default function BusinessContactPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-[2.5rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] p-8 md:p-16 border border-slate-100">
+        <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12 border border-slate-200/60 backdrop-blur-sm">
           {error && (
-            <div className="mb-10 p-5 bg-rose-50 border border-rose-200 text-rose-700 rounded-2xl flex items-center font-bold">
-              <svg className="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 20 20">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="mb-8 p-4 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl flex items-center font-medium"
+            >
+              <svg className="w-5 h-5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
               </svg>
               {error}
-            </div>
+            </motion.div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-10">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+          <form onSubmit={handleSubmit} className="space-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {/* 会社名 */}
-              <div className="space-y-3">
-                <label htmlFor="companyName" className="block text-sm font-black text-slate-800 ml-1">
+              <div className="space-y-2">
+                <label htmlFor="companyName" className="block text-sm font-bold text-slate-700 ml-1">
                   会社名 / 団体名
                 </label>
                 <input
@@ -179,14 +183,14 @@ export default function BusinessContactPage() {
                   value={formData.companyName}
                   onChange={handleChange}
                   required
-                  className="w-full px-6 py-5 bg-slate-50 border border-slate-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-all placeholder:text-slate-300 font-bold text-lg"
-                  placeholder="株式会社Buildea"
+                  className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-400 font-medium"
+                  placeholder="例：株式会社Buildea"
                 />
               </div>
 
               {/* 担当者名 */}
-              <div className="space-y-3">
-                <label htmlFor="contactName" className="block text-sm font-black text-slate-800 ml-1">
+              <div className="space-y-2">
+                <label htmlFor="contactName" className="block text-sm font-bold text-slate-700 ml-1">
                   担当者名
                 </label>
                 <input
@@ -196,32 +200,49 @@ export default function BusinessContactPage() {
                   value={formData.contactName}
                   onChange={handleChange}
                   required
-                  className="w-full px-6 py-5 bg-slate-50 border border-slate-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-all placeholder:text-slate-300 font-bold text-lg"
-                  placeholder="山田 太郎"
+                  className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-400 font-medium"
+                  placeholder="例：山田 太郎"
+                />
+              </div>
+
+              {/* メールアドレス */}
+              <div className="space-y-2">
+                <label htmlFor="email" className="block text-sm font-bold text-slate-700 ml-1">
+                  メールアドレス
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-400 font-medium"
+                  placeholder="name@example.com"
+                />
+              </div>
+
+              {/* 電話番号 */}
+              <div className="space-y-2">
+                <label htmlFor="phone" className="block text-sm font-bold text-slate-700 ml-1">
+                  電話番号
+                </label>
+                <input
+                  type="tel"
+                  id="phone"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-400 font-medium"
+                  placeholder="例：03-1234-5678"
                 />
               </div>
             </div>
 
-            {/* メールアドレス */}
-            <div className="space-y-3">
-              <label htmlFor="email" className="block text-sm font-black text-slate-800 ml-1">
-                メールアドレス
-              </label>
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-                className="w-full px-6 py-5 bg-slate-50 border border-slate-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-all placeholder:text-slate-300 font-bold text-lg"
-                placeholder="office@example.com"
-              />
-            </div>
-
             {/* 件名 */}
             <div className="space-y-3">
-              <label htmlFor="subject" className="block text-sm font-black text-slate-800 ml-1">
+              <label htmlFor="subject" className="block text-sm font-bold text-slate-700 ml-1">
                 お問い合わせ種別
               </label>
               <select
@@ -230,7 +251,7 @@ export default function BusinessContactPage() {
                 value={formData.subject}
                 onChange={handleChange}
                 required
-                className="w-full px-6 py-5 bg-slate-50 border border-slate-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-all font-bold text-lg appearance-none cursor-pointer"
+                className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all font-medium appearance-none cursor-pointer"
               >
                 <option value="">選択してください</option>
                 <option value="partnership">提携について</option>
@@ -240,53 +261,22 @@ export default function BusinessContactPage() {
               </select>
             </div>
 
-            {/* 会社URL (任意) */}
-            <div className="space-y-3">
-              <label htmlFor="companyUrl" className="block text-sm font-black text-slate-800 ml-1">
-                会社URL <span className="text-slate-400 font-medium ml-2">(任意)</span>
+            {/* 内容 */}
+            <div className="space-y-2">
+              <label htmlFor="message" className="block text-sm font-bold text-slate-700 ml-1">
+                詳しい内容
               </label>
-              <input
-                type="url"
-                id="companyUrl"
-                name="companyUrl"
-                value={formData.companyUrl}
+              <textarea
+                id="message"
+                name="message"
+                value={formData.message}
                 onChange={handleChange}
-                className="w-full px-6 py-5 bg-slate-50 border border-slate-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-all placeholder:text-slate-300 font-bold text-lg"
-                placeholder="https://example.com"
+                required
+                rows={6}
+                className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-400 font-medium resize-none"
+                placeholder="例）どのような形で協力できるか、ご提案内容を詳しくお書きください。"
               />
             </div>
-
-            {/* 内容 */}
-            <div className="space-y-3">
-              <label htmlFor="message" className="block text-sm font-black text-slate-800 ml-1">
-                ご提案内容
-              </label>
-              <div className="relative group">
-                <textarea
-                  id="message"
-                  name="message"
-                  value={formData.message}
-                  onChange={handleChange}
-                  required
-                  rows={8}
-                  className="w-full px-6 py-5 bg-slate-50 border border-slate-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-orange-500/10 focus:border-orange-500 outline-none transition-all placeholder:text-slate-300 font-bold text-lg resize-none"
-                  placeholder={`例）\n・オフラインイベント会場提供\n・スポンサー協力\n・共催企画のご相談\n\n具体的な内容やメリットを教えてください。`}
-                />
-              </div>
-            </div>
-
-            {/* 資料添付シミュレーション (UIのみ) */}
-            <div className="p-8 border-2 border-dashed border-slate-200 rounded-[2rem] text-center hover:border-orange-400 transition-colors cursor-pointer group">
-              <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-orange-100 transition-colors">
-                <svg className="w-6 h-6 text-slate-500 group-hover:text-orange-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                </svg>
-              </div>
-              <p className="text-sm font-black text-slate-700">資料を添付する</p>
-              <p className="text-xs text-slate-400 mt-1">PDF / PPTX (最大 10MB)</p>
-            </div>
-
-            {/* 送信ボタン */}
             <div className="pt-6">
               <button
                 type="submit"

@@ -218,17 +218,17 @@ export default function Header() {
             >
               投稿する
             </Link>
-            <Link
-              href="/contact"
+            <Link 
+              href="/contact" 
               className="font-medium py-2 ml-4 text-gray-700 hover:bg-gray-100"
             >
-              お問い合わせ
+              お問い合わせの中の技術関連
             </Link>
-            <Link
-              href="/business-contact"
+            <Link 
+              href="/business-contact" 
               className="font-medium py-2 ml-4 text-gray-700 hover:bg-gray-100"
             >
-              ビジネス関連
+              お問い合わせの中のビジネス関連
             </Link>
 
             {/* ユーザー関連 */}
