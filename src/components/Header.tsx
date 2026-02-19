@@ -221,13 +221,13 @@ export default function Header() {
             </Link>
             <Link 
               href="/contact" 
-              className="font-medium py-2 ml-4 text-blue-600 hover:bg-blue-50"
+              className="font-medium py-2 ml-4 text-gray-700 hover:bg-gray-100"
             >
               お問い合わせ
             </Link>
             <Link 
               href="/business-contact" 
-              className="font-medium py-2 ml-4 text-purple-600 hover:bg-purple-50"
+              className="font-medium py-2 ml-4 text-gray-700 hover:bg-gray-100"
             >
               ビジネス関連
             </Link>
@@ -244,7 +244,7 @@ export default function Header() {
               <>
                 <Link
                   href="/login"
-                  className="font-medium py-2 ml-4 text-blue-600 hover:bg-blue-50"
+                  className="font-medium py-2 ml-4 text-gray-700 hover:bg-gray-100"
                 >
                   ログイン
                 </Link>
