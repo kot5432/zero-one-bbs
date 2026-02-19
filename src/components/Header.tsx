@@ -222,13 +222,13 @@ export default function Header() {
               href="/contact"
               className="font-medium py-2 ml-4 text-gray-700 hover:bg-gray-100"
             >
-              お問い合わせの中の技術関連
+              お問い合わせの技術面
             </Link>
             <Link
               href="/business-contact"
               className="font-medium py-2 ml-4 text-gray-700 hover:bg-gray-100"
             >
-              お問い合わせの中のビジネス関連
+              お問い合わせのビジネス面
             </Link>
 
             {/* ユーザー関連 */}
