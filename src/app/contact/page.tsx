@@ -256,57 +256,17 @@ export default function ContactPage() {
           </form>
         </div>
 
-        {/* よくある質問 */}
-        <div className="mt-12 bg-white rounded-lg shadow-lg p-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">よくある質問</h2>
-          
-          <div className="space-y-6">
-            <div className="border-b border-gray-200 pb-4">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">ZERO-ONEとはどのようなサービスですか？</h3>
-              <p className="text-gray-600">
-                ZERO-ONEは、地域のアイデアを集めて形にするプラットフォームです。みんなの力で0から1へ、新しい企画を生み出します。
-              </p>
-            </div>
-
-            <div className="border-b border-gray-200 pb-4">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">どのようにしてアイデアを投稿できますか？</h3>
-              <p className="text-gray-600">
-                アカウントを作成してログイン後、「投稿する」ボタンからアイデアを投稿できます。テーマ投稿と自由投稿の2種類があります。
-              </p>
-            </div>
-
-            <div className="border-b border-gray-200 pb-4">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">アイデアが採用されるにはどうすればよいですか？</h3>
-              <p className="text-gray-600">
-                具体的で実現可能なアイデア、多くの人の共感を得られる企画、地域の課題解決に繋がる提案などが評価されやすいです。
-              </p>
-            </div>
-
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">提携や協力について相談したいです</h3>
-              <p className="text-gray-600">
-                お問い合わせフォームから「提携・協力について」を選択してご連絡ください。担当者から折り返しご連絡いたします。
-              </p>
-            </div>
-          </div>
-        </div>
-
         {/* 連絡先情報 */}
-        <div className="mt-12 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-8 text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">その他の連絡方法</h2>
-          <div className="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-8">
-            <a 
-              href="https://twitter.com/kto_543" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="flex items-center text-blue-600 hover:text-blue-700 transition-colors"
-            >
-              <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-              </svg>
-              X (Twitter) @kto_543
-            </a>
-          </div>
+        <div className="mt-12 text-center">
+          <p className="text-gray-600 mb-4">その他の連絡方法</p>
+          <a 
+            href="https://twitter.com/kto_543" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-blue-600 hover:text-blue-700 transition-colors"
+          >
+            X (Twitter) @kto_543
+          </a>
         </div>
       </main>
     </div>
