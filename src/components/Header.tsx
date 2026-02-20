@@ -233,13 +233,13 @@ export default function Header() {
                 href="/ideas"
                 className="px-4 py-2 text-gray-700 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all font-semibold"
               >
-                📋 アイデア一覧
+                アイデア一覧
               </Link>
               <Link
                 href="/post/select"
                 className="px-4 py-2 text-gray-700 hover:text-green-600 hover:bg-green-50 rounded-lg transition-all font-semibold"
               >
-                ✏️ 投稿する
+                投稿する
               </Link>
               
               {/* セパレーター */}
@@ -258,19 +258,19 @@ export default function Header() {
                     href="/contact"
                     className="block px-4 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
                   >
-                    📧 技術的なお問い合わせ
+                    技術的なお問い合わせ
                   </Link>
                   <Link
                     href="/business-contact"
                     className="block px-4 py-3 text-gray-700 hover:bg-green-50 hover:text-green-600 transition-colors"
                   >
-                    💼 ビジネスに関するお問い合わせ
+                    ビジネスに関するお問い合わせ
                   </Link>
                   <Link
                     href="/about"
                     className="block px-4 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 transition-colors"
                   >
-                    ℹ️ Buildeaについて
+                    Buildeaについて
                   </Link>
                 </div>
               </div>
@@ -298,28 +298,24 @@ export default function Header() {
                     </div>
                     <div className="space-y-2 text-sm">
                       <Link href="/user/mypage" className="block px-3 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors flex items-center">
-                        <span className="text-lg mr-3">👤</span>
                         <div>
                           <div className="font-medium">プロフィール</div>
                           <div className="text-xs text-gray-500">基本情報の設定</div>
                         </div>
                       </Link>
                       <Link href="/ideas" className="block px-3 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors flex items-center">
-                        <span className="text-lg mr-3">📋</span>
                         <div>
                           <div className="font-medium">投稿したアイデア</div>
                           <div className="text-xs text-gray-500">自分の投稿一覧</div>
                         </div>
                       </Link>
                       <Link href="/ideas" className="block px-3 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors flex items-center">
-                        <span className="text-lg mr-3">👍</span>
                         <div>
                           <div className="font-medium">共感したアイデア</div>
                           <div className="text-xs text-gray-500">いいねした投稿</div>
                         </div>
                       </Link>
                       <Link href="/user/mypage" className="block px-3 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors flex items-center">
-                        <span className="text-lg mr-3">⚙️</span>
                         <div>
                           <div className="font-medium">設定</div>
                           <div className="text-xs text-gray-500">アカウント設定</div>

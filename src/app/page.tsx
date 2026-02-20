@@ -84,7 +84,7 @@ export default function Home() {
                   className="group relative flex-1 w-full sm:w-auto px-10 py-5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl font-bold text-xl hover:from-blue-700 hover:to-indigo-700 transition-all shadow-2xl hover:shadow-3xl transform hover:-translate-y-1 overflow-hidden"
                 >
                   <span className="relative z-10 flex items-center">
-                    📋 アイデアを見る
+                    アイデアを見る
                   </span>
                   <div className="absolute inset-0 bg-gradient-to-r from-blue-700 to-indigo-700 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                 </Link>
@@ -93,7 +93,7 @@ export default function Home() {
                   className="group relative flex-1 w-full sm:w-auto px-10 py-5 bg-white text-blue-600 border-3 border-blue-600 rounded-2xl font-bold text-xl hover:bg-blue-50 transition-all shadow-xl hover:shadow-2xl transform hover:-translate-y-1 overflow-hidden"
                 >
                   <span className="relative z-10 flex items-center">
-                    ✏️ アイデアを投稿する
+                    アイデアを投稿する
                   </span>
                   <div className="absolute inset-0 bg-blue-50 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                 </Link>
@@ -116,7 +116,7 @@ export default function Home() {
                   {/* テーマ情報のグループ化 */}
                   <div className="mb-8">
                     <div className="inline-flex items-center px-4 py-2 bg-blue-100 text-blue-700 rounded-full text-sm font-semibold mb-6">
-                      🎯 募集中
+                      募集中
                     </div>
                     <h3 className="text-4xl font-bold text-gray-900 mb-6">{activeTheme.title}</h3>
                     <p className="text-xl text-gray-700 max-w-3xl mx-auto mb-8 leading-relaxed">
@@ -217,8 +217,8 @@ export default function Home() {
                               <div className="flex flex-wrap items-center gap-3 text-sm">
                                 {/* メタ情報のグループ化 - 反復の原則 */}
                                 <div className="flex items-center gap-2 px-3 py-1 bg-gray-100 rounded-lg border border-gray-200">
-                                  <span className="text-base">👍</span>
                                   <span className="font-semibold text-gray-800">{idea.likes}</span>
+                                  <span className="text-gray-600 ml-1">いいね</span>
                                 </div>
                                 <div className={`px-3 py-1 rounded-lg font-medium border ${idea.status === 'idea'
                                   ? 'bg-blue-50 text-blue-800 border-blue-200'
@@ -233,7 +233,7 @@ export default function Home() {
                                       idea.status === 'event_planned' ? 'イベント化決定' : '見送り'}
                                 </div>
                                 <div className="px-3 py-1 bg-blue-50 text-blue-800 rounded-lg text-sm font-medium border border-blue-200">
-                                  {idea.themeId ? '📋 テーマ' : '✨ 自由投稿'}
+                                  {idea.themeId ? 'テーマ投稿' : '自由投稿'}
                                 </div>
                               </div>
                             </div>
