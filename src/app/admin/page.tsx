@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { getIdeas, Idea, getAllUsers, User, deleteUser, logDeletion, getAllDeletionLogs, updateIdea, deleteIdea, getThemes, Theme, addTheme, updateTheme, deleteTheme, Timestamp, createAdminComment, getAdminComments, AdminComment, getContacts, Contact, updateContactStatus } from '@/lib/firestore';
-import { firebaseAuth } from '@/lib/auth';
+import Layout from '@/components/Layout';
 
 export default function AdminPage() {
   const [ideas, setIdeas] = useState<Idea[]>([]);
@@ -364,126 +364,172 @@ export default function AdminPage() {
   const stats = getStats();
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* ヘッダー */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="px-6 py-4">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-4">
-              <h1 className="text-2xl font-bold text-gray-900">Buildea 管理画面</h1>
-              <span className="text-gray-400">|</span>
-              <span className="text-lg text-gray-600">管理画面</span>
-            </div>
-            <div className="flex items-center gap-4">
-              {stats.unconfirmedCount > 0 && (
-                <div className="bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-medium">
-                  未確認: {stats.unconfirmedCount}件
-                </div>
-              )}
-              <span className="text-gray-600">管理者</span>
+    <Layout>
+      {/* 管理画面ヘッダー */}
+      <div className="bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 rounded-2xl p-8 mb-8 shadow-2xl">
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
+          <div>
+            <h1 className="text-4xl font-black text-white mb-2">Buildea 管理画面</h1>
+            <p className="text-gray-300 text-lg">プラットフォーム運営の司令塔</p>
+          </div>
+          <div className="flex items-center space-x-4">
+            {stats.unconfirmedCount > 0 && (
+              <div className="bg-red-600 text-white px-4 py-2 rounded-xl font-semibold shadow-lg">
+                未確認: {stats.unconfirmedCount}件
+              </div>
+            )}
+            <div className="bg-gray-700 text-gray-300 px-4 py-2 rounded-xl font-medium">
+              管理者
             </div>
           </div>
         </div>
-      </header>
+      </div>
 
-      <div className="flex">
+      <div className="flex flex-col lg:flex-row gap-8">
         {/* サイドメニュー */}
-        <aside className="w-64 bg-white shadow-lg min-h-screen">
-          <nav className="p-4">
-            <ul className="space-y-2">
-              <li>
-                <button
-                  onClick={() => setCurrentView('dashboard')}
-                  className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-colors ${currentView === 'dashboard'
-                      ? 'bg-blue-600 text-white'
-                      : 'hover:bg-gray-100 text-gray-700'
+        <aside className="lg:w-64">
+          <div className="bg-white border border-gray-200 rounded-2xl shadow-lg overflow-hidden">
+            <nav className="p-4">
+              <ul className="space-y-2">
+                <li>
+                  <button
+                    onClick={() => setCurrentView('dashboard')}
+                    className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all flex items-center justify-between ${
+                      currentView === 'dashboard'
+                        ? 'bg-blue-600 text-white shadow-md'
+                        : 'hover:bg-gray-100 text-gray-700'
                     }`}
-                >
-                  ダッシュボード
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => setCurrentView('users')}
-                  className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-colors ${currentView === 'users'
-                      ? 'bg-blue-600 text-white'
-                      : 'hover:bg-gray-100 text-gray-700'
+                  >
+                    <div className="flex items-center">
+                      <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                      </svg>
+                      ダッシュボード
+                    </div>
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => setCurrentView('users')}
+                    className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all flex items-center justify-between ${
+                      currentView === 'users'
+                        ? 'bg-blue-600 text-white shadow-md'
+                        : 'hover:bg-gray-100 text-gray-700'
                     }`}
-                >
-                  ユーザー管理
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => setCurrentView('posts')}
-                  className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-colors ${currentView === 'posts'
-                      ? 'bg-blue-600 text-white'
-                      : 'hover:bg-gray-100 text-gray-700'
+                  >
+                    <div className="flex items-center">
+                      <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                      </svg>
+                      ユーザー管理
+                    </div>
+                    <div className="bg-gray-200 text-gray-700 px-2 py-1 rounded-lg text-xs font-semibold">
+                      {users.length}
+                    </div>
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => setCurrentView('posts')}
+                    className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all flex items-center justify-between ${
+                      currentView === 'posts'
+                        ? 'bg-blue-600 text-white shadow-md'
+                        : 'hover:bg-gray-100 text-gray-700'
                     }`}
-                >
-                  投稿管理
-                  {stats.unconfirmedCount > 0 && (
-                    <span className="ml-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
-                      {stats.unconfirmedCount}
-                    </span>
-                  )}
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => setCurrentView('themes')}
-                  className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-colors ${currentView === 'themes'
-                      ? 'bg-blue-600 text-white'
-                      : 'hover:bg-gray-100 text-gray-700'
+                  >
+                    <div className="flex items-center">
+                      <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                      </svg>
+                      投稿管理
+                    </div>
+                    {stats.unconfirmedCount > 0 && (
+                      <div className="bg-red-600 text-white px-2 py-1 rounded-lg text-xs font-semibold">
+                        {stats.unconfirmedCount}
+                      </div>
+                    )}
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => setCurrentView('themes')}
+                    className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all flex items-center justify-between ${
+                      currentView === 'themes'
+                        ? 'bg-blue-600 text-white shadow-md'
+                        : 'hover:bg-gray-100 text-gray-700'
                     }`}
-                >
-                  テーマ管理
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => setCurrentView('contacts')}
-                  className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-colors ${currentView === 'contacts'
-                      ? 'bg-blue-600 text-white'
-                      : 'hover:bg-gray-100 text-gray-700'
+                  >
+                    <div className="flex items-center">
+                      <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                      </svg>
+                      テーマ管理
+                    </div>
+                    <div className="bg-gray-200 text-gray-700 px-2 py-1 rounded-lg text-xs font-semibold">
+                      {themes.length}
+                    </div>
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => setCurrentView('contacts')}
+                    className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all flex items-center justify-between ${
+                      currentView === 'contacts'
+                        ? 'bg-blue-600 text-white shadow-md'
+                        : 'hover:bg-gray-100 text-gray-700'
                     }`}
-                >
-                  お問い合わせ管理
-                  {contacts.filter(c => c.status === 'pending').length > 0 && (
-                    <span className="ml-2 bg-red-500 text-white text-xs px-2 py-1 rounded-full">
-                      {contacts.filter(c => c.status === 'pending').length}
-                    </span>
-                  )}
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => setCurrentView('data')}
-                  className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-colors ${currentView === 'data'
-                      ? 'bg-blue-600 text-white'
-                      : 'hover:bg-gray-100 text-gray-700'
+                  >
+                    <div className="flex items-center">
+                      <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                      </svg>
+                      お問い合わせ管理
+                    </div>
+                    {contacts.filter(c => c.status === 'pending').length > 0 && (
+                      <div className="bg-red-600 text-white px-2 py-1 rounded-lg text-xs font-semibold">
+                        {contacts.filter(c => c.status === 'pending').length}
+                      </div>
+                    )}
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => setCurrentView('data')}
+                    className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all flex items-center ${
+                      currentView === 'data'
+                        ? 'bg-blue-600 text-white shadow-md'
+                        : 'hover:bg-gray-100 text-gray-700'
                     }`}
-                >
-                  データ管理
-                </button>
-              </li>
-              <li>
-                <button
-                  onClick={() => setCurrentView('settings')}
-                  className={`w-full text-left px-4 py-3 rounded-lg font-medium transition-colors ${currentView === 'settings'
-                      ? 'bg-blue-600 text-white'
-                      : 'hover:bg-gray-100 text-gray-700'
+                  >
+                    <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                    データ管理
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => setCurrentView('settings')}
+                    className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all flex items-center ${
+                      currentView === 'settings'
+                        ? 'bg-blue-600 text-white shadow-md'
+                        : 'hover:bg-gray-100 text-gray-700'
                     }`}
-                >
-                  設定
-                </button>
-              </li>
-            </ul>
-          </nav>
+                  >
+                    <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    設定
+                  </button>
+                </li>
+              </ul>
+            </nav>
+          </div>
         </aside>
 
         {/* メイン画面 */}
-        <main className="flex-1 p-6">
+        <main className="flex-1">
           {/* ダッシュボード */}
           {currentView === 'dashboard' && (
             <div>
@@ -1382,7 +1428,7 @@ export default function AdminPage() {
             </div>
           )}
         </main>
-      </div>
+      </Layout>
     </div>
   );
 }

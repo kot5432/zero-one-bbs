@@ -297,30 +297,42 @@ export default function CommonHeader() {
                       </div>
                     </div>
                     <div className="space-y-2 text-sm">
-                      <Link href="/user/mypage" className="block px-3 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors flex items-center">
+                      <button
+                        onClick={() => window.location.href = '/user/mypage'}
+                        className="block px-3 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors flex items-center w-full text-left"
+                      >
                         <div>
                           <div className="font-medium">プロフィール</div>
                           <div className="text-xs text-gray-500">基本情報の設定</div>
                         </div>
-                      </Link>
-                      <Link href="/ideas" className="block px-3 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors flex items-center">
+                      </button>
+                      <button
+                        onClick={() => window.location.href = '/user/mypage'}
+                        className="block px-3 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors flex items-center w-full text-left"
+                      >
                         <div>
                           <div className="font-medium">投稿したアイデア</div>
                           <div className="text-xs text-gray-500">自分の投稿一覧</div>
                         </div>
-                      </Link>
-                      <Link href="/ideas" className="block px-3 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors flex items-center">
+                      </button>
+                      <button
+                        onClick={() => window.location.href = '/user/mypage'}
+                        className="block px-3 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors flex items-center w-full text-left"
+                      >
                         <div>
                           <div className="font-medium">共感したアイデア</div>
                           <div className="text-xs text-gray-500">いいねした投稿</div>
                         </div>
-                      </Link>
-                      <Link href="/user/mypage" className="block px-3 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors flex items-center">
+                      </button>
+                      <button
+                        onClick={() => window.location.href = '/user/mypage'}
+                        className="block px-3 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors flex items-center w-full text-left"
+                      >
                         <div>
                           <div className="font-medium">設定</div>
                           <div className="text-xs text-gray-500">アカウント設定</div>
                         </div>
-                      </Link>
+                      </button>
                     </div>
                   </div>
                 </div>
