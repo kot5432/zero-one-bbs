@@ -54,37 +54,50 @@ export default function Home() {
       <main className="max-w-7xl mx-auto px-6 py-16">
         
         {/* ヒーローセクション - 近接の原則 */}
-        <section className="text-center mb-20">
-          <div className="max-w-4xl mx-auto">
-            {/* ブランド情報のグループ化 */}
-            <div className="mb-10">
-              <h1 className="text-7xl font-bold text-gray-900 mb-5 tracking-tight">
-                Buildea
-              </h1>
-              <div className="space-y-3">
-                <p className="text-3xl text-gray-800 font-medium">
-                  あなたのアイデアを、一緒に形に。
-                </p>
-                <p className="text-xl text-gray-500 max-w-2xl mx-auto">
-                  投稿から実績化まで、伴走します。
-                </p>
+        <section className="relative bg-gradient-to-br from-blue-50 via-white to-indigo-50 py-24 mb-20">
+          <div className="max-w-6xl mx-auto px-6">
+            <div className="text-center">
+              {/* ブランド情報のグループ化 */}
+              <div className="mb-12">
+                <div className="inline-flex items-center justify-center mb-8">
+                  <div className="w-20 h-20 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-3xl flex items-center justify-center shadow-2xl transform rotate-3 hover:rotate-6 transition-transform">
+                    <span className="text-white font-bold text-3xl">B</span>
+                  </div>
+                </div>
+                <h1 className="text-8xl font-black text-gray-900 mb-6 tracking-tight leading-none">
+                  Buildea
+                </h1>
+                <div className="space-y-4">
+                  <p className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 leading-tight">
+                    あなたのアイデアを、一緒に形に。
+                  </p>
+                  <p className="text-2xl text-gray-600 max-w-3xl mx-auto font-medium leading-relaxed">
+                    投稿から実績化まで、伴走します。
+                  </p>
+                </div>
               </div>
-            </div>
 
-            {/* 主要アクションのグループ化 - コントラストの原則 */}
-            <div className="flex flex-col sm:flex-row gap-5 justify-center items-center max-w-lg mx-auto">
-              <Link
-                href="/ideas"
-                className="flex-1 w-full sm:w-auto px-8 py-4 bg-blue-600 text-white rounded-xl font-semibold text-lg hover:bg-blue-700 transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-              >
-                📋 アイデアを見る
-              </Link>
-              <Link
-                href="/post/select"
-                className="flex-1 w-full sm:w-auto px-8 py-4 bg-white text-blue-600 border-2 border-blue-600 rounded-xl font-semibold text-lg hover:bg-blue-50 transition-colors shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
-              >
-                ✏️ アイデアを投稿する
-              </Link>
+              {/* 主要アクションのグループ化 - コントラストの原則 */}
+              <div className="flex flex-col sm:flex-row gap-6 justify-center items-center max-w-2xl mx-auto">
+                <Link
+                  href="/ideas"
+                  className="group relative flex-1 w-full sm:w-auto px-10 py-5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-2xl font-bold text-xl hover:from-blue-700 hover:to-indigo-700 transition-all shadow-2xl hover:shadow-3xl transform hover:-translate-y-1 overflow-hidden"
+                >
+                  <span className="relative z-10 flex items-center">
+                    📋 アイデアを見る
+                  </span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-700 to-indigo-700 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                </Link>
+                <Link
+                  href="/post/select"
+                  className="group relative flex-1 w-full sm:w-auto px-10 py-5 bg-white text-blue-600 border-3 border-blue-600 rounded-2xl font-bold text-xl hover:bg-blue-50 transition-all shadow-xl hover:shadow-2xl transform hover:-translate-y-1 overflow-hidden"
+                >
+                  <span className="relative z-10 flex items-center">
+                    ✏️ アイデアを投稿する
+                  </span>
+                  <div className="absolute inset-0 bg-blue-50 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                </Link>
+              </div>
             </div>
           </div>
         </section>
