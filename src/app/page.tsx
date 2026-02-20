@@ -187,47 +187,45 @@ export default function Home() {
                 </div>
               ) : (
                 <>
-                  <div className="divide-y divide-gray-100">
+                  <div className="space-y-4">
                     {latestIdeas.map((idea, index) => (
                       <Link
                         key={idea.id}
                         href={`/ideas/${idea.id}`}
-                        className={`block p-8 hover:bg-gray-50 transition-colors ${index === 0 ? 'border-t-0' : ''}`}
+                        className="block bg-white border border-gray-200 rounded-xl p-6 hover:bg-gray-50 hover:border-gray-300 transition-all hover:shadow-md"
                       >
                         <div className="flex items-start justify-between">
                           <div className="flex-1 min-w-0">
                             {/* アイデア情報のグループ化 */}
                             <div className="mb-4">
-                              <h3 className="text-2xl font-bold text-gray-900 mb-3 truncate">
+                              <h3 className="text-xl font-bold text-gray-900 mb-3 truncate">
                                 {idea.title}
                               </h3>
-                              <div className="flex items-center gap-6 text-sm">
+                              <div className="flex flex-wrap items-center gap-3 text-sm">
                                 {/* メタ情報のグループ化 - 反復の原則 */}
-                                <div className="flex items-center gap-4">
-                                  <div className="flex items-center gap-2 px-3 py-1 bg-gray-100 rounded-lg border border-gray-200">
-                                    <span className="text-base">👍</span>
-                                    <span className="font-semibold text-gray-800">{idea.likes}</span>
-                                  </div>
-                                  <div className={`px-3 py-1 rounded-lg font-medium border ${idea.status === 'idea'
-                                    ? 'bg-blue-50 text-blue-800 border-blue-200'
-                                    : idea.status === 'preparing'
-                                      ? 'bg-yellow-50 text-yellow-800 border-yellow-200'
-                                      : idea.status === 'event_planned'
-                                        ? 'bg-green-50 text-green-800 border-green-200'
-                                        : 'bg-red-50 text-red-800 border-red-200'
-                                    }`}>
-                                    {idea.status === 'idea' ? '募集中' :
-                                      idea.status === 'preparing' ? '検討中' :
-                                        idea.status === 'event_planned' ? 'イベント化決定' : '見送り'}
-                                  </div>
-                                  <div className="px-3 py-1 bg-blue-50 text-blue-800 rounded-lg text-sm font-medium border border-blue-200">
-                                    {idea.themeId ? '📋 テーマ' : '✨ 自由投稿'}
-                                  </div>
+                                <div className="flex items-center gap-2 px-3 py-1 bg-gray-100 rounded-lg border border-gray-200">
+                                  <span className="text-base">👍</span>
+                                  <span className="font-semibold text-gray-800">{idea.likes}</span>
+                                </div>
+                                <div className={`px-3 py-1 rounded-lg font-medium border ${idea.status === 'idea'
+                                  ? 'bg-blue-50 text-blue-800 border-blue-200'
+                                  : idea.status === 'preparing'
+                                    ? 'bg-yellow-50 text-yellow-800 border-yellow-200'
+                                    : idea.status === 'event_planned'
+                                      ? 'bg-green-50 text-green-800 border-green-200'
+                                      : 'bg-red-50 text-red-800 border-red-200'
+                                  }`}>
+                                  {idea.status === 'idea' ? '募集中' :
+                                    idea.status === 'preparing' ? '検討中' :
+                                      idea.status === 'event_planned' ? 'イベント化決定' : '見送り'}
+                                </div>
+                                <div className="px-3 py-1 bg-blue-50 text-blue-800 rounded-lg text-sm font-medium border border-blue-200">
+                                  {idea.themeId ? '📋 テーマ' : '✨ 自由投稿'}
                                 </div>
                               </div>
                             </div>
                           </div>
-                          <div className="ml-6 flex-shrink-0">
+                          <div className="ml-4 flex-shrink-0">
                             <div className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-lg border border-gray-200">
                               {idea.createdAt.toDate().toLocaleDateString('ja-JP')}
                             </div>
