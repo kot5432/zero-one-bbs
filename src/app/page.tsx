@@ -204,23 +204,23 @@ export default function Home() {
                               <div className="flex items-center gap-6 text-sm">
                                 {/* メタ情報のグループ化 - 反復の原則 */}
                                 <div className="flex items-center gap-4">
-                                  <div className="flex items-center gap-2 px-3 py-1 bg-gray-100 rounded-lg">
+                                  <div className="flex items-center gap-2 px-3 py-1 bg-gray-100 rounded-lg border border-gray-200">
                                     <span className="text-base">👍</span>
-                                    <span className="font-semibold text-gray-700">{idea.likes}</span>
+                                    <span className="font-semibold text-gray-800">{idea.likes}</span>
                                   </div>
-                                  <div className={`px-3 py-1 rounded-lg font-medium ${idea.status === 'idea'
-                                    ? 'bg-gray-100 text-gray-700'
+                                  <div className={`px-3 py-1 rounded-lg font-medium border ${idea.status === 'idea'
+                                    ? 'bg-blue-50 text-blue-800 border-blue-200'
                                     : idea.status === 'preparing'
-                                      ? 'bg-yellow-100 text-yellow-700'
+                                      ? 'bg-yellow-50 text-yellow-800 border-yellow-200'
                                       : idea.status === 'event_planned'
-                                        ? 'bg-green-100 text-green-700'
-                                        : 'bg-red-100 text-red-700'
+                                        ? 'bg-green-50 text-green-800 border-green-200'
+                                        : 'bg-red-50 text-red-800 border-red-200'
                                     }`}>
                                     {idea.status === 'idea' ? '募集中' :
                                       idea.status === 'preparing' ? '検討中' :
                                         idea.status === 'event_planned' ? 'イベント化決定' : '見送り'}
                                   </div>
-                                  <div className="px-3 py-1 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium">
+                                  <div className="px-3 py-1 bg-blue-50 text-blue-800 rounded-lg text-sm font-medium border border-blue-200">
                                     {idea.themeId ? '📋 テーマ' : '✨ 自由投稿'}
                                   </div>
                                 </div>
@@ -228,7 +228,7 @@ export default function Home() {
                             </div>
                           </div>
                           <div className="ml-6 flex-shrink-0">
-                            <div className="text-sm text-gray-400 bg-gray-50 px-3 py-1 rounded-lg">
+                            <div className="text-sm text-gray-500 bg-gray-100 px-3 py-1 rounded-lg border border-gray-200">
                               {idea.createdAt.toDate().toLocaleDateString('ja-JP')}
                             </div>
                           </div>
@@ -238,11 +238,11 @@ export default function Home() {
                   </div>
                   
                   {/* もっと見るボタン - 反復の原則 */}
-                  <div className="border-t border-gray-100 p-6 bg-gray-50">
+                  <div className="border-t border-gray-200 p-6 bg-gray-50">
                     <div className="text-center">
                       <Link
                         href="/ideas"
-                        className="inline-flex items-center px-6 py-3 bg-white text-blue-600 border border-blue-200 rounded-xl font-medium hover:bg-blue-50 transition-colors"
+                        className="inline-flex items-center px-6 py-3 bg-white text-blue-700 border border-blue-300 rounded-xl font-medium hover:bg-blue-50 transition-colors"
                       >
                         もっと見る
                         <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -253,32 +253,6 @@ export default function Home() {
                   </div>
                 </>
               )}
-            </div>
-          </div>
-        </section>
-
-        {/* 行動喚起セクション - コントラストの原則 */}
-        <section className="mb-24">
-          <div className="max-w-4xl mx-auto">
-            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl p-12 text-center text-white shadow-xl">
-              <h2 className="text-3xl font-bold mb-4">準備はできましたか？</h2>
-              <p className="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
-                あなたの創造的なアイデアで、世界を変えましょう。今すぐ投稿して、コミュニティと繋がりましょう。
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link
-                  href="/post/select"
-                  className="inline-flex items-center px-8 py-4 bg-white text-blue-600 rounded-xl font-semibold text-lg hover:bg-gray-100 transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-                >
-                  ✨ アイデアを投稿する
-                </Link>
-                <Link
-                  href="/ideas"
-                  className="inline-flex items-center px-8 py-4 bg-blue-700 text-white rounded-xl font-semibold text-lg hover:bg-blue-800 transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-                >
-                  📋 アイデアを見る
-                </Link>
-              </div>
             </div>
           </div>
         </section>
