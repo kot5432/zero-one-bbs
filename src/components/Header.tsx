@@ -80,8 +80,8 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-white shadow-sm border-b border-gray-200">
-      <div className="max-w-screen-2xl mx-auto px-8 py-3">
+    <header className="bg-white border-b border-gray-200">
+      <div className="max-w-screen-2xl mx-auto px-6 py-4">
         <div className="flex justify-between items-center">
           {/* ロゴ */}
           <Link
@@ -91,12 +91,12 @@ export default function Header() {
             Buildea
           </Link>
 
-          {/* ナィゲーション */}
-          <nav className="flex items-center space-x-8">
+          {/* ナビゲーション */}
+          <nav className="flex items-center space-x-6">
             {/* 検索 */}
             <div className="relative">
               {showSearch ? (
-                <div className="flex items-center">
+                <div className="flex items-center bg-gray-50 rounded-lg p-2">
                   <input
                     type="text"
                     value={searchQuery}
@@ -108,7 +108,7 @@ export default function Header() {
                       }
                     }}
                     placeholder="アイデアを検索..."
-                    className="px-4 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="px-3 py-2 bg-white border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     autoFocus
                   />
                   <button
@@ -116,7 +116,7 @@ export default function Header() {
                       handleSearch(searchQuery);
                       setShowSearch(false);
                     }}
-                    className="ml-2 px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700"
+                    className="ml-2 px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 transition-colors"
                   >
                     検索
                   </button>
@@ -125,7 +125,7 @@ export default function Header() {
                       setShowSearch(false);
                       setSearchQuery('');
                     }}
-                    className="ml-2 px-3 py-2 text-gray-600 hover:text-gray-800"
+                    className="ml-2 p-2 text-gray-500 hover:text-gray-700 transition-colors"
                   >
                     ✕
                   </button>
@@ -133,10 +133,10 @@ export default function Header() {
               ) : (
                 <button
                   onClick={() => setShowSearch(true)}
-                  className="p-3 text-gray-600 hover:text-gray-800 transition-colors"
+                  className="p-2 text-gray-600 hover:text-gray-900 transition-colors rounded-lg hover:bg-gray-100"
                   title="検索"
                 >
-                  <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
                 </button>
@@ -148,14 +148,14 @@ export default function Header() {
               <div className="relative">
                 <button
                   onClick={() => setShowNotifications(!showNotifications)}
-                  className="relative p-3 text-gray-600 hover:text-gray-800 transition-colors"
+                  className="relative p-2 text-gray-600 hover:text-gray-900 transition-colors rounded-lg hover:bg-gray-100"
                   title="通知"
                 >
-                  <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                   </svg>
                   {unreadCount > 0 && (
-                    <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full"></span>
+                    <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white"></span>
                   )}
                 </button>
 
@@ -175,11 +175,11 @@ export default function Header() {
                           <div
                             key={notification.id}
                             onClick={() => handleNotificationClick(notification)}
-                            className={`p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 ${!notification.isRead ? 'bg-blue-50' : ''
+                            className={`p-4 border-b border-gray-100 cursor-pointer hover:bg-gray-50 transition-colors ${!notification.isRead ? 'bg-blue-50' : ''
                               }`}
                           >
                             <div className="flex items-start space-x-3">
-                              <span className="text-xl">{getNotificationIcon(notification.type)}</span>
+                              <span className="text-lg">{getNotificationIcon(notification.type)}</span>
                               <div className="flex-1">
                                 <h4 className={`text-sm font-medium ${!notification.isRead ? 'text-blue-900' : 'text-gray-900'}`}>
                                   {notification.title}
@@ -206,54 +206,57 @@ export default function Header() {
             )}
 
             {/* ナビゲーションリンク */}
-            <Link
-              href="/ideas"
-              className="font-medium py-2 text-gray-700 hover:bg-gray-100"
-            >
-              アイデア一覧
-            </Link>
-            <Link
-              href="/post/select"
-              className="font-medium py-2 ml-4 text-gray-700 hover:bg-gray-100"
-            >
-              投稿する
-            </Link>
-            <Link
-              href="/contact"
-              className="font-medium py-2 ml-4 text-gray-700 hover:bg-gray-100"
-            >
-              技術的なお問い合わせ
-            </Link>
-            <Link
-              href="/business-contact"
-              className="font-medium py-2 ml-4 text-gray-700 hover:bg-gray-100"
-            >
-              ビジネスに関するお問い合わせ
-            </Link>
+            <div className="flex items-center space-x-1">
+              <Link
+                href="/ideas"
+                className="px-3 py-2 text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors font-medium"
+              >
+                アイデア一覧
+              </Link>
+              <Link
+                href="/post/select"
+                className="px-3 py-2 text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors font-medium"
+              >
+                投稿する
+              </Link>
+              <div className="border-l border-gray-300 h-6 mx-2"></div>
+              <Link
+                href="/contact"
+                className="px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors text-sm"
+              >
+                技術的なお問い合わせ
+              </Link>
+              <Link
+                href="/business-contact"
+                className="px-3 py-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors text-sm"
+              >
+                ビジネスに関するお問い合わせ
+              </Link>
+            </div>
 
             {/* ユーザー関連 */}
             {user ? (
               <Link
                 href="/user/mypage"
-                className="font-medium py-2 ml-4 text-gray-700 hover:bg-gray-100"
+                className="px-3 py-2 text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors font-medium"
               >
                 マイページ
               </Link>
             ) : (
-              <>
+              <div className="flex items-center space-x-2">
                 <Link
                   href="/login"
-                  className="font-medium py-2 ml-4 text-gray-700 hover:bg-gray-100"
+                  className="px-3 py-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors font-medium"
                 >
                   ログイン
                 </Link>
                 <Link
                   href="/signup"
-                  className="font-medium py-2 ml-4 text-gray-700 hover:bg-gray-100"
+                  className="px-3 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-colors font-medium"
                 >
                   アカウント作成
                 </Link>
-              </>
+              </div>
             )}
           </nav>
         </div>
