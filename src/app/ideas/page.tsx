@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { getIdeas, Idea, getActiveTheme, Theme, getThemes } from '@/lib/firestore';
 import { useUserAuth } from '@/contexts/UserAuthContext';
-import Header from '@/components/Header';
+import Layout from '@/components/Layout';
 
 function IdeasPageContent() {
   const [ideas, setIdeas] = useState<Idea[]>([]);
@@ -66,10 +66,7 @@ function IdeasPageContent() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
-      
-      <main className="max-w-6xl mx-auto px-4 py-8">
+    <Layout>
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-6">
             アイデア一覧
@@ -194,8 +191,7 @@ function IdeasPageContent() {
             ))}
           </div>
         )}
-      </main>
-    </div>
+      </Layout>
   );
 }
 
