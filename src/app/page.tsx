@@ -287,28 +287,28 @@ export default function Home() {
       {/* フッター */}
       <footer className="bg-gray-900 text-white">
         <div className="max-w-7xl mx-auto px-6 py-16">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
             {/* ブランドセクション */}
             <div className="space-y-6">
-              <div className="flex items-center space-x-3">
-                <div className="w-12 h-12 bg-gray-800 rounded-xl flex items-center justify-center">
-                  <span className="text-white font-bold text-xl">B</span>
+              <div className="flex items-center space-x-4">
+                <div className="w-14 h-14 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
+                  <span className="text-white font-bold text-2xl">B</span>
                 </div>
                 <h3 className="text-2xl font-bold">
                   Buildea
                 </h3>
               </div>
-              <p className="text-gray-300 text-base leading-relaxed">
+              <p className="text-gray-300 text-lg leading-relaxed">
                 創造的なアイデアを形にするプラットフォーム
               </p>
-              <div className="flex space-x-3">
+              <div className="flex space-x-4">
                 <a
                   href="https://twitter.com/kto_543"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-10 h-10 bg-gray-800 rounded-xl flex items-center justify-center hover:bg-gray-700 transition-colors"
+                  className="w-12 h-12 bg-gray-800 rounded-2xl flex items-center justify-center hover:bg-gray-700 transition-all hover:scale-105"
                 >
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                   </svg>
                 </a>
@@ -317,15 +317,17 @@ export default function Home() {
 
             {/* サービスセクション */}
             <div className="space-y-6">
-              <h3 className="text-lg font-semibold mb-4">サービス</h3>
-              <ul className="space-y-3 text-base">
+              <h3 className="text-xl font-bold mb-6 text-white">サービス</h3>
+              <ul className="space-y-4 text-lg">
                 <li>
-                  <Link href="/ideas" className="text-gray-300 hover:text-white transition-colors">
+                  <Link href="/ideas" className="text-gray-300 hover:text-white transition-colors flex items-center group">
+                    <span className="w-2 h-2 bg-blue-500 rounded-full mr-3 group-hover:scale-125 transition-transform"></span>
                     アイデア一覧
                   </Link>
                 </li>
                 <li>
-                  <Link href="/post/select" className="text-gray-300 hover:text-white transition-colors">
+                  <Link href="/post/select" className="text-gray-300 hover:text-white transition-colors flex items-center group">
+                    <span className="w-2 h-2 bg-green-500 rounded-full mr-3 group-hover:scale-125 transition-transform"></span>
                     投稿する
                   </Link>
                 </li>
@@ -334,20 +336,23 @@ export default function Home() {
 
             {/* サポートセクション */}
             <div className="space-y-6">
-              <h3 className="text-lg font-semibold mb-4">サポート</h3>
-              <ul className="space-y-3 text-base">
+              <h3 className="text-xl font-bold mb-6 text-white">サポート</h3>
+              <ul className="space-y-4 text-lg">
                 <li>
-                  <Link href="/login" className="text-gray-300 hover:text-white transition-colors">
+                  <Link href="/login" className="text-gray-300 hover:text-white transition-colors flex items-center group">
+                    <span className="w-2 h-2 bg-blue-500 rounded-full mr-3 group-hover:scale-125 transition-transform"></span>
                     ログイン
                   </Link>
                 </li>
                 <li>
-                  <Link href="/signup" className="text-gray-300 hover:text-white transition-colors">
+                  <Link href="/signup" className="text-gray-300 hover:text-white transition-colors flex items-center group">
+                    <span className="w-2 h-2 bg-green-500 rounded-full mr-3 group-hover:scale-125 transition-transform"></span>
                     アカウント作成
                   </Link>
                 </li>
                 <li>
-                  <Link href="/about" className="text-gray-300 hover:text-white transition-colors">
+                  <Link href="/about" className="text-gray-300 hover:text-white transition-colors flex items-center group">
+                    <span className="w-2 h-2 bg-purple-500 rounded-full mr-3 group-hover:scale-125 transition-transform"></span>
                     Buildeaについて
                   </Link>
                 </li>
@@ -356,47 +361,66 @@ export default function Home() {
 
             {/* お問い合わせセクション */}
             <div className="space-y-6">
-              <h3 className="text-lg font-semibold mb-4">お問い合わせ</h3>
-              <p className="text-gray-300 text-base mb-6">
+              <h3 className="text-xl font-bold mb-6 text-white">お問い合わせ</h3>
+              <p className="text-gray-300 text-lg mb-8 leading-relaxed">
                 ご質問やご要望がございましたら、お気軽にお問い合わせください。
               </p>
-              <div className="space-y-3">
+              <div className="space-y-4">
                 <Link
                   href="/contact"
-                  className="inline-flex items-center px-4 py-3 bg-gray-800 text-white rounded-xl hover:bg-gray-700 transition-colors w-full justify-center"
+                  className="group flex items-center px-6 py-4 bg-gray-800 text-white rounded-2xl hover:bg-blue-600 transition-all hover:scale-105 justify-center shadow-lg"
                 >
-                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                  </svg>
-                  技術的なお問い合わせ
+                  <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center mr-4 group-hover:bg-white transition-colors">
+                    <svg className="w-6 h-6 text-white group-hover:text-blue-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                  <div className="text-left">
+                    <div className="font-semibold text-lg mb-1">技術的なお問い合わせ</div>
+                    <div className="text-sm text-gray-300">技術的問題・利用方法など</div>
+                  </div>
                 </Link>
                 <Link
                   href="/business-contact"
-                  className="inline-flex items-center px-4 py-3 bg-gray-800 text-white rounded-xl hover:bg-gray-700 transition-colors w-full justify-center"
+                  className="group flex items-center px-6 py-4 bg-gray-800 text-white rounded-2xl hover:bg-green-600 transition-all hover:scale-105 justify-center shadow-lg"
                 >
-                  <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                  </svg>
-                  ビジネスに関するお問い合わせ
+                  <div className="w-10 h-10 bg-green-600 rounded-xl flex items-center justify-center mr-4 group-hover:bg-white transition-colors">
+                    <svg className="w-6 h-6 text-white group-hover:text-green-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                  </div>
+                  <div className="text-left">
+                    <div className="font-semibold text-lg mb-1">ビジネスに関するお問い合わせ</div>
+                    <div className="text-sm text-gray-300">提携・広告など</div>
+                  </div>
                 </Link>
               </div>
             </div>
           </div>
 
           {/* コピーライトセクション */}
-          <div className="mt-16 pt-8 border-t border-gray-800">
-            <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-              <p className="text-gray-400 text-base">
-                &copy; 2024 Buildea. All rights reserved.
-              </p>
-              <div className="flex space-x-8 text-base">
-                <Link href="/privacy" className="text-gray-400 hover:text-white transition-colors">
+          <div className="mt-20 pt-12 border-t border-gray-800">
+            <div className="flex flex-col lg:flex-row justify-between items-center space-y-8 lg:space-y-0">
+              <div className="flex items-center space-x-6">
+                <p className="text-gray-400 text-lg">
+                  &copy; 2024 Buildea. All rights reserved.
+                </p>
+                <div className="flex items-center space-x-2">
+                  <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                  <span className="text-gray-400 text-sm">System Online</span>
+                </div>
+              </div>
+              <div className="flex space-x-8 text-lg">
+                <Link href="/privacy" className="text-gray-400 hover:text-white transition-colors flex items-center group">
+                  <span className="w-2 h-2 bg-blue-500 rounded-full mr-3 group-hover:scale-125 transition-transform"></span>
                   プライバシーポリシー
                 </Link>
-                <Link href="/terms" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="/terms" className="text-gray-400 hover:text-white transition-colors flex items-center group">
+                  <span className="w-2 h-2 bg-blue-500 rounded-full mr-3 group-hover:scale-125 transition-transform"></span>
                   利用規約
                 </Link>
-                <Link href="/sitemap" className="text-gray-400 hover:text-white transition-colors">
+                <Link href="/sitemap" className="text-gray-400 hover:text-white transition-colors flex items-center group">
+                  <span className="w-2 h-2 bg-blue-500 rounded-full mr-3 group-hover:scale-125 transition-transform"></span>
                   サイトマップ
                 </Link>
               </div>
