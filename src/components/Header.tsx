@@ -278,34 +278,53 @@ export default function Header() {
 
             {/* ユーザー関連 */}
             {user ? (
-              <div className="flex items-center space-x-2">
-                <Link
-                  href="/user/mypage"
-                  className="px-3 py-2 text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors font-medium"
-                >
+              <div className="relative group">
+                <button className="px-4 py-2 text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors font-medium flex items-center">
                   マイページ
-                </Link>
-                <div className="relative group">
-                  <button className="px-3 py-2 text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors font-medium flex items-center">
-                    履歴
-                    <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </button>
-                  <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
-                    <div className="p-4">
-                      <h4 className="font-semibold text-gray-900 mb-3">最近の活動</h4>
-                      <div className="space-y-2 text-sm">
-                        <Link href="/ideas" className="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
-                          📋 投稿したアイデア
-                        </Link>
-                        <Link href="/ideas" className="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
-                          👍 共感したアイデア
-                        </Link>
-                        <Link href="/user/mypage" className="block px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
-                          ⚙️ 設定
-                        </Link>
+                  <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                <div className="absolute top-full right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+                  <div className="p-4">
+                    <div className="flex items-center space-x-3 pb-4 border-b border-gray-200 mb-4">
+                      <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center">
+                        <span className="text-white font-bold">U</span>
                       </div>
+                      <div>
+                        <h4 className="font-semibold text-gray-900">ユーザー</h4>
+                        <p className="text-sm text-gray-500">マイページ</p>
+                      </div>
+                    </div>
+                    <div className="space-y-2 text-sm">
+                      <Link href="/user/mypage" className="block px-3 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors flex items-center">
+                        <span className="text-lg mr-3">👤</span>
+                        <div>
+                          <div className="font-medium">プロフィール</div>
+                          <div className="text-xs text-gray-500">基本情報の設定</div>
+                        </div>
+                      </Link>
+                      <Link href="/ideas" className="block px-3 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors flex items-center">
+                        <span className="text-lg mr-3">📋</span>
+                        <div>
+                          <div className="font-medium">投稿したアイデア</div>
+                          <div className="text-xs text-gray-500">自分の投稿一覧</div>
+                        </div>
+                      </Link>
+                      <Link href="/ideas" className="block px-3 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors flex items-center">
+                        <span className="text-lg mr-3">👍</span>
+                        <div>
+                          <div className="font-medium">共感したアイデア</div>
+                          <div className="text-xs text-gray-500">いいねした投稿</div>
+                        </div>
+                      </Link>
+                      <Link href="/user/mypage" className="block px-3 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors flex items-center">
+                        <span className="text-lg mr-3">⚙️</span>
+                        <div>
+                          <div className="font-medium">設定</div>
+                          <div className="text-xs text-gray-500">アカウント設定</div>
+                        </div>
+                      </Link>
                     </div>
                   </div>
                 </div>
