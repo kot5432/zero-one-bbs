@@ -54,14 +54,14 @@ export default function Home() {
       <main className="max-w-7xl mx-auto px-6 py-16">
         
         {/* ヒーローセクション - 近接の原則 */}
-        <section className="text-center mb-24">
+        <section className="text-center mb-20">
           <div className="max-w-4xl mx-auto">
             {/* ブランド情報のグループ化 */}
-            <div className="mb-12">
-              <h1 className="text-7xl font-bold text-gray-900 mb-6 tracking-tight">
+            <div className="mb-10">
+              <h1 className="text-7xl font-bold text-gray-900 mb-5 tracking-tight">
                 Buildea
               </h1>
-              <div className="space-y-4">
+              <div className="space-y-3">
                 <p className="text-3xl text-gray-800 font-medium">
                   あなたのアイデアを、一緒に形に。
                 </p>
@@ -72,7 +72,7 @@ export default function Home() {
             </div>
 
             {/* 主要アクションのグループ化 - コントラストの原則 */}
-            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center max-w-lg mx-auto">
+            <div className="flex flex-col sm:flex-row gap-5 justify-center items-center max-w-lg mx-auto">
               <Link
                 href="/ideas"
                 className="flex-1 w-full sm:w-auto px-8 py-4 bg-blue-600 text-white rounded-xl font-semibold text-lg hover:bg-blue-700 transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
@@ -286,12 +286,12 @@ export default function Home() {
 
       {/* フッター */}
       <footer className="bg-gray-900 text-white">
-        <div className="max-w-7xl mx-auto px-6 py-16">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
+        <div className="max-w-6xl mx-auto px-6 py-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {/* ブランドセクション */}
             <div className="space-y-6">
               <div className="flex items-center space-x-4">
-                <div className="w-14 h-14 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
+                <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
                   <span className="text-white font-bold text-2xl">B</span>
                 </div>
                 <h3 className="text-2xl font-bold">
@@ -306,9 +306,9 @@ export default function Home() {
                   href="https://twitter.com/kto_543"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-12 h-12 bg-gray-800 rounded-2xl flex items-center justify-center hover:bg-gray-700 transition-all hover:scale-105"
+                  className="w-10 h-10 bg-gray-800 rounded-2xl flex items-center justify-center hover:bg-gray-700 transition-all hover:scale-105"
                 >
-                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                   </svg>
                 </a>
