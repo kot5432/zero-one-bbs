@@ -225,10 +225,13 @@ export async function updateUser(userId: string, updates: Partial<User>) {
 }
 
 export async function getUserIdeas(userId: string) {
-  // 一時的にorderByを削除してインデックスエラーを回避
-  const q = query(ideasCollection, where('userId', '==', userId));
-  const snapshot = await getDocs(q);
-  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Idea));
+  // インデックスエラーを回避するため、まずすべてのアイデアを取得してからフィルター
+  const allIdeasQ = query(ideasCollection, orderBy('createdAt', 'desc'));
+  const snapshot = await getDocs(allIdeasQ);
+  const allIdeas = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Idea));
+  
+  // クライアント側でフィルター
+  return allIdeas.filter(idea => idea.userId === userId);
 }
 
 // テーマを追加
@@ -386,10 +389,23 @@ export async function getUserLikedIdeas(userIp: string): Promise<Idea[]> {
     return [];
   }
 
-  // アイデア情報を取得
-  const ideasQ = query(collection(db, 'ideas'), where('id', 'in', likedIdeaIds));
-  const ideasSnapshot = await getDocs(ideasQ);
-  return ideasSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Idea));
+  // アイデア情報を取得 - インデックスエラーを回避するため分割して取得
+  const allIdeas: Idea[] = [];
+  
+  // Firebaseのinクエリは10個までなので分割処理
+  for (let i = 0; i < likedIdeaIds.length; i += 10) {
+    const batch = likedIdeaIds.slice(i, i + 10);
+    const ideasQ = query(collection(db, 'ideas'), where('id', 'in', batch));
+    const ideasSnapshot = await getDocs(ideasQ);
+    allIdeas.push(...ideasSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Idea)));
+  }
+
+  // 手動でソート（createdAtの降順）
+  return allIdeas.sort((a, b) => {
+    const aTime = a.createdAt?.toMillis?.() || 0;
+    const bTime = b.createdAt?.toMillis?.() || 0;
+    return bTime - aTime;
+  });
 }
 
 // 通知
