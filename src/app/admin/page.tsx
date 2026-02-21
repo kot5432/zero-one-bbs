@@ -394,11 +394,10 @@ export default function AdminPage() {
                 <li>
                   <button
                     onClick={() => setCurrentView('dashboard')}
-                    className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all flex items-center justify-between ${
-                      currentView === 'dashboard'
-                        ? 'bg-blue-600 text-white shadow-md'
-                        : 'hover:bg-gray-100 text-gray-700'
-                    }`}
+                    className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all flex items-center justify-between ${currentView === 'dashboard'
+                      ? 'bg-blue-600 text-white shadow-md'
+                      : 'hover:bg-gray-100 text-gray-700'
+                      }`}
                   >
                     <div className="flex items-center">
                       <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -411,11 +410,10 @@ export default function AdminPage() {
                 <li>
                   <button
                     onClick={() => setCurrentView('users')}
-                    className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all flex items-center justify-between ${
-                      currentView === 'users'
-                        ? 'bg-blue-600 text-white shadow-md'
-                        : 'hover:bg-gray-100 text-gray-700'
-                    }`}
+                    className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all flex items-center justify-between ${currentView === 'users'
+                      ? 'bg-blue-600 text-white shadow-md'
+                      : 'hover:bg-gray-100 text-gray-700'
+                      }`}
                   >
                     <div className="flex items-center">
                       <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -431,11 +429,10 @@ export default function AdminPage() {
                 <li>
                   <button
                     onClick={() => setCurrentView('posts')}
-                    className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all flex items-center justify-between ${
-                      currentView === 'posts'
-                        ? 'bg-blue-600 text-white shadow-md'
-                        : 'hover:bg-gray-100 text-gray-700'
-                    }`}
+                    className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all flex items-center justify-between ${currentView === 'posts'
+                      ? 'bg-blue-600 text-white shadow-md'
+                      : 'hover:bg-gray-100 text-gray-700'
+                      }`}
                   >
                     <div className="flex items-center">
                       <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -453,11 +450,10 @@ export default function AdminPage() {
                 <li>
                   <button
                     onClick={() => setCurrentView('themes')}
-                    className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all flex items-center justify-between ${
-                      currentView === 'themes'
-                        ? 'bg-blue-600 text-white shadow-md'
-                        : 'hover:bg-gray-100 text-gray-700'
-                    }`}
+                    className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all flex items-center justify-between ${currentView === 'themes'
+                      ? 'bg-blue-600 text-white shadow-md'
+                      : 'hover:bg-gray-100 text-gray-700'
+                      }`}
                   >
                     <div className="flex items-center">
                       <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -473,11 +469,10 @@ export default function AdminPage() {
                 <li>
                   <button
                     onClick={() => setCurrentView('contacts')}
-                    className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all flex items-center justify-between ${
-                      currentView === 'contacts'
-                        ? 'bg-blue-600 text-white shadow-md'
-                        : 'hover:bg-gray-100 text-gray-700'
-                    }`}
+                    className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all flex items-center justify-between ${currentView === 'contacts'
+                      ? 'bg-blue-600 text-white shadow-md'
+                      : 'hover:bg-gray-100 text-gray-700'
+                      }`}
                   >
                     <div className="flex items-center">
                       <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -495,11 +490,10 @@ export default function AdminPage() {
                 <li>
                   <button
                     onClick={() => setCurrentView('data')}
-                    className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all flex items-center ${
-                      currentView === 'data'
-                        ? 'bg-blue-600 text-white shadow-md'
-                        : 'hover:bg-gray-100 text-gray-700'
-                    }`}
+                    className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all flex items-center ${currentView === 'data'
+                      ? 'bg-blue-600 text-white shadow-md'
+                      : 'hover:bg-gray-100 text-gray-700'
+                      }`}
                   >
                     <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -510,11 +504,10 @@ export default function AdminPage() {
                 <li>
                   <button
                     onClick={() => setCurrentView('settings')}
-                    className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all flex items-center ${
-                      currentView === 'settings'
-                        ? 'bg-blue-600 text-white shadow-md'
-                        : 'hover:bg-gray-100 text-gray-700'
-                    }`}
+                    className={`w-full text-left px-4 py-3 rounded-xl font-medium transition-all flex items-center ${currentView === 'settings'
+                      ? 'bg-blue-600 text-white shadow-md'
+                      : 'hover:bg-gray-100 text-gray-700'
+                      }`}
                   >
                     <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
@@ -1010,8 +1003,8 @@ export default function AdminPage() {
                           </td>
                           <td className="px-4 py-3">
                             <span className={`px-2 py-1 text-xs rounded-full ${theme.visibility === 'public' ? 'bg-green-100 text-green-800' :
-                                theme.visibility === 'private' ? 'bg-yellow-100 text-yellow-800' :
-                                  'bg-gray-100 text-gray-800'
+                              theme.visibility === 'private' ? 'bg-yellow-100 text-yellow-800' :
+                                'bg-gray-100 text-gray-800'
                               }`}>
                               {theme.visibility === 'public' ? '公開' :
                                 theme.visibility === 'private' ? '非公開' : '下書き'}
@@ -1020,8 +1013,8 @@ export default function AdminPage() {
                           <td className="px-4 py-3">
                             <div className="flex gap-2">
                               <span className={`px-2 py-1 text-xs rounded-full ${theme.isActive
-                                  ? 'bg-blue-100 text-blue-800'
-                                  : 'bg-gray-100 text-gray-800'
+                                ? 'bg-blue-100 text-blue-800'
+                                : 'bg-gray-100 text-gray-800'
                                 }`}>
                                 {theme.isActive ? 'アクティブ' : '非アクティブ'}
                               </span>
@@ -1040,8 +1033,8 @@ export default function AdminPage() {
                               <button
                                 onClick={() => updateThemeStatus(theme.id!, !theme.isActive)}
                                 className={`text-sm font-medium ${theme.isActive
-                                    ? 'text-gray-600 hover:text-gray-700'
-                                    : 'text-green-600 hover:text-green-700'
+                                  ? 'text-gray-600 hover:text-gray-700'
+                                  : 'text-green-600 hover:text-green-700'
                                   }`}
                               >
                                 {theme.isActive ? '非公開にする' : '公開する'}
@@ -1144,10 +1137,10 @@ export default function AdminPage() {
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${contact.status === 'pending'
-                                ? 'bg-red-100 text-red-800'
-                                : contact.status === 'answered'
-                                  ? 'bg-yellow-100 text-yellow-800'
-                                  : 'bg-green-100 text-green-800'
+                              ? 'bg-red-100 text-red-800'
+                              : contact.status === 'answered'
+                                ? 'bg-yellow-100 text-yellow-800'
+                                : 'bg-green-100 text-green-800'
                               }`}>
                               {contact.status === 'pending' ? '未対応' :
                                 contact.status === 'answered' ? '対応中' : '対応完了'}
@@ -1225,7 +1218,7 @@ export default function AdminPage() {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">平均いいね数</span>
-                      <span className="font-bold">{ideas.length > 0 ? Math.round(ideas.reduce((sum, i) => sum + i.likes, 0) / ideas.length) : 0}</span>
+                      <span className="font-bold">{ideas.length > 0 ? Math.round(ideas.reduce((sum, i) => sum + i.likes, 0) / (ideas.length || 1)) : 0}</span>
                     </div>
                   </div>
                 </div>
@@ -1239,7 +1232,7 @@ export default function AdminPage() {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">イベント化率</span>
-                      <span className="font-bold">{ideas.length > 0 ? Math.round((ideas.filter(i => i.status === 'event_planned').length / ideas.length) * 100) : 0}%</span>
+                      <span className="font-bold">{ideas.length > 0 ? Math.round((ideas.filter(i => i.status === 'event_planned').length / (ideas.length || 1)) * 100) : 0}%</span>
                     </div>
                   </div>
                 </div>
@@ -1428,7 +1421,7 @@ export default function AdminPage() {
             </div>
           )}
         </main>
-      </Layout>
-    </div>
+      </div>
+    </Layout>
   );
 }
