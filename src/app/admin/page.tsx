@@ -12,6 +12,7 @@ export default function AdminPage() {
   const [deletionLogs, setDeletionLogs] = useState<any[]>([]);
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set());
+  const [selectedIdeas, setSelectedIdeas] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [currentView, setCurrentView] = useState<'dashboard' | 'users' | 'posts' | 'themes' | 'data' | 'settings' | 'contacts'>('dashboard');
   const [showThemeForm, setShowThemeForm] = useState(false);
@@ -20,6 +21,9 @@ export default function AdminPage() {
     description: '',
     targetMonth: new Date().toISOString().slice(0, 7), // YYYY-MM形式
   });
+  const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [filterTheme, setFilterTheme] = useState<string>('all');
+  const [searchTerm, setSearchTerm] = useState<string>('');
 
   // 統計データの計算
   const getStats = () => {
@@ -104,6 +108,82 @@ export default function AdminPage() {
       setSelectedUsers(new Set());
     } else {
       setSelectedUsers(new Set(users.map(user => user.id!)));
+    }
+  };
+
+  // アイデア複数選択用関数
+  const toggleIdeaSelection = (ideaId: string) => {
+    const newSelected = new Set(selectedIdeas);
+    if (newSelected.has(ideaId)) {
+      newSelected.delete(ideaId);
+    } else {
+      newSelected.add(ideaId);
+    }
+    setSelectedIdeas(newSelected);
+  };
+
+  const selectAllIdeas = () => {
+    const filteredIdeas = getFilteredIdeas();
+    if (selectedIdeas.size === filteredIdeas.length) {
+      setSelectedIdeas(new Set());
+    } else {
+      setSelectedIdeas(new Set(filteredIdeas.map(idea => idea.id!)));
+    }
+  };
+
+  // フィルターされたアイデアを取得
+  const getFilteredIdeas = () => {
+    return ideas.filter(idea => {
+      const statusMatch = filterStatus === 'all' || idea.status === filterStatus;
+      const themeMatch = filterTheme === 'all' || 
+        (filterTheme === 'theme' && idea.themeId) || 
+        (filterTheme === 'free' && !idea.themeId);
+      const searchMatch = searchTerm === '' || 
+        idea.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        idea.description.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      return statusMatch && themeMatch && searchMatch;
+    });
+  };
+
+  // バッチ確認処理
+  const batchCheckIdeas = async () => {
+    if (selectedIdeas.size === 0) {
+      alert('確認するアイデアを選択してください');
+      return;
+    }
+
+    if (!confirm(`${selectedIdeas.size}件のアイデアを確認済みにしますか？`)) {
+      return;
+    }
+
+    try {
+      for (const ideaId of selectedIdeas) {
+        await updateIdea(ideaId, { status: 'checked' });
+      }
+      
+      setIdeas(prev => prev.map(idea => 
+        selectedIdeas.has(idea.id!) ? { ...idea, status: 'checked' } : idea
+      ));
+      
+      setSelectedIdeas(new Set());
+      alert('選択したアイデアを確認済みにしました');
+    } catch (error) {
+      console.error('Error batch checking ideas:', error);
+      alert('一括確認に失敗しました');
+    }
+  };
+
+  // 個別確認処理
+  const checkIdea = async (ideaId: string) => {
+    try {
+      await updateIdea(ideaId, { status: 'checked' });
+      setIdeas(prev => prev.map(idea => 
+        idea.id === ideaId ? { ...idea, status: 'checked' } : idea
+      ));
+    } catch (error) {
+      console.error('Error checking idea:', error);
+      alert('確認済みに失敗しました');
     }
   };
 
@@ -301,7 +381,7 @@ export default function AdminPage() {
 
   // ステータス変更可能か判定
   const canChangeStatus = (currentStatus: string) => {
-    return currentStatus === 'idea' || currentStatus === 'preparing';
+    return currentStatus === 'idea' || currentStatus === 'checked' || currentStatus === 'preparing';
   };
 
   // 利用可能なステータスオプション
@@ -314,7 +394,9 @@ export default function AdminPage() {
         ];
       case 'checked':
         return [
-          { value: 'checked', label: '確認済み', disabled: true },
+          { value: 'checked', label: '確認済み', disabled: false },
+          { value: 'preparing', label: '検討中', disabled: false },
+          { value: 'rejected', label: '見送り', disabled: false },
         ];
       case 'preparing':
         return [
@@ -805,13 +887,117 @@ export default function AdminPage() {
           {/* 投稿管理 */}
           {currentView === 'posts' && (
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">投稿管理</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">📝 投稿管理</h2>
 
-              <div className="bg-white rounded-lg shadow p-6">
+              {/* フィルターと検索 */}
+              <div className="bg-white rounded-lg shadow p-6 mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      検索
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="タイトルや説明で検索..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      ステータス
+                    </label>
+                    <select
+                      value={filterStatus}
+                      onChange={(e) => setFilterStatus(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                      <option value="all">すべて</option>
+                      <option value="idea">未確認</option>
+                      <option value="checked">確認済み</option>
+                      <option value="preparing">検討中</option>
+                      <option value="event_planned">イベント化決定</option>
+                      <option value="rejected">見送り</option>
+                      <option value="completed">完了</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      投稿タイプ
+                    </label>
+                    <select
+                      value={filterTheme}
+                      onChange={(e) => setFilterTheme(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                      <option value="all">すべて</option>
+                      <option value="theme">テーマ投稿</option>
+                      <option value="free">自由投稿</option>
+                    </select>
+                  </div>
+                  
+                  <div className="flex items-end">
+                    <button
+                      onClick={() => {
+                        setFilterStatus('all');
+                        setFilterTheme('all');
+                        setSearchTerm('');
+                      }}
+                      className="w-full px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 transition-colors"
+                    >
+                      リセット
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* バッチ操作バー */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-4">
+                    <label className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        checked={selectedIdeas.size === getFilteredIdeas().length && getFilteredIdeas().length > 0}
+                        onChange={selectAllIdeas}
+                        className="rounded text-blue-600 focus:ring-blue-500"
+                      />
+                      <span className="text-sm font-medium text-gray-700">
+                        全選択 ({selectedIdeas.size}/{getFilteredIdeas().length})
+                      </span>
+                    </label>
+                    {selectedIdeas.size > 0 && (
+                      <>
+                        <button
+                          onClick={batchCheckIdeas}
+                          className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
+                        >
+                          選択した{selectedIdeas.size}件を確認済みにする
+                        </button>
+                        <span className="text-sm text-gray-600">
+                          未確認: {getFilteredIdeas().filter(i => i.status === 'idea').length}件
+                        </span>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* 投稿一覧 */}
+              <div className="bg-white rounded-lg shadow overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead className="bg-gray-50">
                       <tr>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          選択
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          確認
+                        </th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           タイトル
                         </th>
@@ -822,7 +1008,10 @@ export default function AdminPage() {
                           テーマ
                         </th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          状態
+                          ステータス
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          反応
                         </th>
                         <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           操作
@@ -830,29 +1019,91 @@ export default function AdminPage() {
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                      {ideas.map((idea) => (
-                        <tr key={idea.id}>
+                      {getFilteredIdeas().map((idea) => (
+                        <tr key={idea.id} className={selectedIdeas.has(idea.id!) ? 'bg-blue-50' : ''}>
                           <td className="px-4 py-3">
-                            <div className="text-sm font-medium text-gray-900">{idea.title}</div>
-                            <div className="text-sm text-gray-500">いいね {idea.likes} · 興味あり 0</div>
+                            <input
+                              type="checkbox"
+                              checked={selectedIdeas.has(idea.id!)}
+                              onChange={() => toggleIdeaSelection(idea.id!)}
+                              className="rounded text-blue-600 focus:ring-blue-500"
+                            />
+                          </td>
+                          <td className="px-4 py-3">
+                            <button
+                              onClick={() => checkIdea(idea.id!)}
+                              disabled={idea.status !== 'idea'}
+                              className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${
+                                idea.status === 'idea'
+                                  ? 'border-gray-300 hover:border-blue-500 hover:bg-blue-50'
+                                  : idea.status === 'checked'
+                                  ? 'bg-blue-100 border-blue-500'
+                                  : 'bg-gray-100 border-gray-300'
+                              }`}
+                              title={idea.status === 'idea' ? '確認済みにする' : '確認済み'}
+                            >
+                              {idea.status === 'checked' && (
+                                <svg className="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                </svg>
+                              )}
+                            </button>
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="max-w-xs">
+                              <div className="text-sm font-medium text-gray-900 truncate" title={idea.title}>
+                                {idea.title}
+                              </div>
+                              <div className="text-sm text-gray-500">
+                                {idea.createdAt?.toDate ? new Date(idea.createdAt.toDate()).toLocaleDateString('ja-JP') : '日付不明'}
+                              </div>
+                            </div>
                           </td>
                           <td className="px-4 py-3 text-sm text-gray-900">
                             {users.find(u => u.id === idea.userId)?.username || '不明'}
                           </td>
-                          <td className="px-4 py-3 text-sm text-gray-900">
-                            {idea.themeId ? `テーマ${idea.themeId.slice(0, 6)}` : '自由投稿'}
+                          <td className="px-4 py-3 text-sm">
+                            {idea.themeId ? (
+                              <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-800">
+                                テーマ投稿
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800">
+                                自由投稿
+                              </span>
+                            )}
                           </td>
                           <td className="px-4 py-3">
-                            <div className="flex items-center gap-2">
-                              {/* 確認済みチェックマーク */}
-                              {(idea.status === 'checked' || idea.status === 'preparing' || idea.status === 'event_planned' || idea.status === 'rejected') && (
-                                <span className="inline-flex items-center justify-center w-6 h-6 bg-blue-100 text-blue-600 rounded-full text-sm font-bold">
-                                  ✓
-                                </span>
-                              )}
-
-                              {/* 状態表示 */}
-                              {canChangeStatus(idea.status) ? (
+                            <span className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded-full ${getStatusDisplay(idea.status).color}`}>
+                              <span className="mr-1">{getStatusDisplay(idea.status).icon}</span>
+                              {getStatusDisplay(idea.status).text}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="flex items-center gap-3 text-sm text-gray-600">
+                              <div className="flex items-center gap-1">
+                                <svg className="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
+                                </svg>
+                                <span className="font-medium">{idea.likes}</span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <svg className="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                </svg>
+                                <span className="font-medium">{idea.eventFeasibility?.interestedPeople || 0}</span>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="flex gap-2">
+                              <Link
+                                href={`/ideas/${idea.id}`}
+                                className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                              >
+                                詳細
+                              </Link>
+                              {canChangeStatus(idea.status) && (
                                 <select
                                   value={idea.status}
                                   onChange={(e) => updateIdeaStatus(idea.id!, e.target.value)}
@@ -868,22 +1119,7 @@ export default function AdminPage() {
                                     </option>
                                   ))}
                                 </select>
-                              ) : (
-                                <span className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded-full ${getStatusDisplay(idea.status).color}`}>
-                                  <span className="mr-1">{getStatusDisplay(idea.status).icon}</span>
-                                  {getStatusDisplay(idea.status).text}
-                                </span>
                               )}
-                            </div>
-                          </td>
-                          <td className="px-4 py-3">
-                            <div className="flex gap-2">
-                              <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">
-                                編集
-                              </button>
-                              <button className="text-green-600 hover:text-green-700 text-sm font-medium">
-                                コメント
-                              </button>
                               <button
                                 onClick={() => deleteIdeaHandler(idea.id!, idea.title)}
                                 className="text-red-600 hover:text-red-700 text-sm font-medium"
@@ -897,6 +1133,16 @@ export default function AdminPage() {
                     </tbody>
                   </table>
                 </div>
+
+                {getFilteredIdeas().length === 0 && (
+                  <div className="text-center py-8 text-gray-500">
+                    <svg className="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <p>投稿が見つかりません</p>
+                    <p className="text-sm mt-2">検索条件を変更してください</p>
+                  </div>
+                )}
               </div>
             </div>
           )}
